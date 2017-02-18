@@ -12,7 +12,9 @@ public class helen_main {
 
 	
 	public static void main(String[] args) throws NickAlreadyInUseException, IOException, IrcException, InterruptedException {
-		System.out.println("Starting up HelenBot process at: " + new Date().toString());
-		HelenBot helen = new HelenBot();
+		HelenBot helen = null;
+			System.out.println("Starting up HelenBot process at: " + new Date().toString());
+			 helen = new HelenBot();
+		
 	}
 }
