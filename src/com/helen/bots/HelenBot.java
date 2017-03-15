@@ -2,23 +2,22 @@ package com.helen.bots;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
 import java.util.Properties;
 
 import org.jibble.pircbot.IrcException;
 import org.jibble.pircbot.NickAlreadyInUseException;
 import org.jibble.pircbot.PircBot;
 
+import com.helen.search.GoogleResults;
+import com.helen.search.WebSearch;
+
 public class HelenBot extends PircBot {
 
-	private static Boolean propsOpen = false;
+	private static Boolean MagnusMode = true;
 	private static InputStream propsIn;
-	private static OutputStream propsOut;
-
+	private static Boolean propsOpen = false;
 	private static Properties props = new Properties();
 
 	public HelenBot() throws NickAlreadyInUseException, IOException, IrcException, InterruptedException {
@@ -28,6 +27,8 @@ public class HelenBot extends PircBot {
 		joinChannels();
 
 	}
+	
+	
 
 	private void connect() throws NickAlreadyInUseException, IOException, IrcException, InterruptedException {
 		this.setLogin(getProperty("hostname"));
@@ -99,7 +100,21 @@ public class HelenBot extends PircBot {
 					targetMessage.append(" ");
 			}
 			sendMessage(target, targetMessage.toString());
-		} 
+		} else if (message.contains("already in use")){
+			
+		} else if(message.contains("toggleMagnusMode")){
+			if(verifyMagnus(sender)){
+				toggleMagnusMode();
+			}
+		}else if(message.contains("currentMode")){
+			this.sendMessage(channel, "I am currently in " + (MagnusMode? "Magnus Only" : "Any User") + " mode.");
+		} else if(message.substring(0, 3).equalsIgnoreCase(".g")){
+			try {
+				webSearch(message.split(".g")[1], channel, sender);
+			} catch (IOException e) {
+				sendMessage(channel, sender + ": There was some kind of error.  Please contact DrMagnus, and give him the following error code: IOEx_web_search_01");
+			}
+		}
 	}
 
 	private void enterChannel(String message) {
@@ -118,14 +133,30 @@ public class HelenBot extends PircBot {
 	}
 
 	private boolean verifyMagnus(String user) {
-		Boolean magnus = false;
-		for (String str : getPropertyList("registeredNicks")) {
-			if(!magnus)
-				magnus = str.trim().equalsIgnoreCase(user.trim());
+		if(!MagnusMode){
+			return true;
+		}else{
+			return restrictedAccess(user);
 		}
-		return magnus;
+		
+		
 	}
-
+	
+	private boolean restrictedAccess(String user){
+		for (String str : getPropertyList("registeredNicks")) {
+			
+			if(str.trim().equalsIgnoreCase(user.trim())){
+				return true;
+			}
+		}	
+		return false;
+	}
+	
+	
+	
+	private void toggleMagnusMode(){
+		MagnusMode = !MagnusMode;
+	}
 	
 	private String getProperty(String key) {
 		if (!propsOpen) {
@@ -187,6 +218,13 @@ public class HelenBot extends PircBot {
 			e.printStackTrace();
 		}
 		propsOpen = false;
+	}
+	
+	private void webSearch(String searchTerm, String channel, String sender) throws IOException{
+		GoogleResults results = WebSearch.search(searchTerm);
+		
+		this.sendMessage(channel, sender + ": " + results.getResponseData().getResults().get(0).getTitle() + results.getResponseData().getResults().get(0).getUrl());
+		
 	}
 
 }
