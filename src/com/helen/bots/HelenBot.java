@@ -12,13 +12,15 @@ import com.helen.search.GoogleResults;
 import com.helen.search.WebSearch;
 
 public class HelenBot extends PircBot {
+	
+	private static Command cmd = null;
 
 	public HelenBot() throws NickAlreadyInUseException, IOException, IrcException, InterruptedException {
 		System.out.println("Initializing HelenBot v" + PropertiesManager.getProperty("version"));
 		this.setVerbose(true);
 		connect();
 		joinChannels();
-
+		cmd = new Command(this);
 	}
 
 	private void connect() throws NickAlreadyInUseException, IOException, IrcException, InterruptedException {
@@ -59,7 +61,7 @@ public class HelenBot extends PircBot {
 	}
 
 	public void onMessage(String channel, String sender, String login, String hostname, String message) {
-		Command.dispatchTable(new CommandData(channel, sender, login, hostname, message));
+		cmd.dispatchTable(new CommandData(channel, sender, login, hostname, message));
 	}
 
 	public void onPrivateMessage(String sender, String login, String hostname, String message) {
@@ -67,7 +69,7 @@ public class HelenBot extends PircBot {
 	}
 
 	private void dispatchTable(String sender, String login, String hostname, String message) {
-		Command.dispatchTable(new CommandData("", sender, login, hostname, message));
+		cmd.dispatchTable(new CommandData("", sender, login, hostname, message));
 	}
 
 	private void webSearch(String searchTerm, String channel, String sender) throws IOException {

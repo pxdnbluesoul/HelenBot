@@ -14,7 +14,6 @@ public class Command {
 	private PircBot helen;
 
 	private boolean magnusMode = true;
-	private static Command cmd = null;
 
 	private static HashMap<IRCCommand, Method> commandList = new HashMap<IRCCommand, Method>();
 
@@ -23,8 +22,7 @@ public class Command {
 	}
 
 	public Command(PircBot ircBot) {
-		cmd = new Command();
-		cmd.helen = ircBot;
+		helen = ircBot;
 	}
 
 	static {
@@ -35,13 +33,13 @@ public class Command {
 		}
 	}
 
-	public static void dispatchTable(CommandData data) {
+	public void dispatchTable(CommandData data) {
 
 		for (IRCCommand a : commandList.keySet()) {
 			if (a.startOfLine()) {
 				if (a.command().equals(data.getCommand())) {
 					try {
-						commandList.get(a).invoke(cmd, data);
+						commandList.get(a).invoke(this, data);
 					} catch (IllegalAccessException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -56,7 +54,7 @@ public class Command {
 			} else {
 				if (data.getMessage().contains(a.command())) {
 					try {
-						commandList.get(a).invoke(cmd, data);
+						commandList.get(a).invoke(this, data);
 					} catch (IllegalAccessException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
