@@ -34,7 +34,7 @@ public class Command {
 	}
 
 	public void dispatchTable(CommandData data) {
-
+		logger.info("Entering dispatch table with command: " + data.getCommand());
 		for (IRCCommand a : commandList.keySet()) {
 			if (a.startOfLine()) {
 				if (a.command().equals(data.getCommand())) {
