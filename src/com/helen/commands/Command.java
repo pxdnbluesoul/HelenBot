@@ -27,6 +27,8 @@ public class Command {
 
 	static {
 		for (Method m : Command.class.getDeclaredMethods()) {
+			logger.info(m);
+			logger.info(m.isAnnotationPresent(IRCCommand.class));
 			if (m.isAnnotationPresent(IRCCommand.class)) {
 				commandList.put(m.getAnnotation(IRCCommand.class), m);
 				logger.info(((IRCCommand)m.getAnnotation(IRCCommand.class)).command());
