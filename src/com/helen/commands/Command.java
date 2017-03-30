@@ -1,15 +1,15 @@
 package com.helen.commands;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
+import org.apache.log4j.Logger;
 import org.jibble.pircbot.PircBot;
 
 import com.helen.bots.PropertiesManager;
 
 public class Command {
+	private static final Logger logger = Logger.getLogger(Command.class);
 
 	private PircBot helen;
 
@@ -40,30 +40,18 @@ public class Command {
 				if (a.command().equals(data.getCommand())) {
 					try {
 						commandList.get(a).invoke(this, data);
-					} catch (IllegalAccessException e) {
+					}  catch (Exception e) {
 						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IllegalArgumentException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (InvocationTargetException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						logger.error("Exception invoking start-of-line command: " + a.command(),e); 
 					}
 				}
 			} else {
 				if (data.getMessage().contains(a.command())) {
 					try {
 						commandList.get(a).invoke(this, data);
-					} catch (IllegalAccessException e) {
+					}catch (Exception e) {
 						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IllegalArgumentException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (InvocationTargetException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						logger.error("Exception invoking contains command: " + a.command(),e);
 					}
 				}
 			}

@@ -2,6 +2,7 @@ package com.helen.bots;
 
 import java.io.IOException;
 
+import org.apache.log4j.Logger;
 import org.jibble.pircbot.IrcException;
 import org.jibble.pircbot.NickAlreadyInUseException;
 import org.jibble.pircbot.PircBot;
@@ -14,9 +15,11 @@ import com.helen.search.WebSearch;
 public class HelenBot extends PircBot {
 	
 	private static Command cmd = null;
+	
+	private static final Logger logger = Logger.getLogger(HelenBot.class);
 
 	public HelenBot() throws NickAlreadyInUseException, IOException, IrcException, InterruptedException {
-		System.out.println("Initializing HelenBot v" + PropertiesManager.getProperty("version"));
+		logger.info("Initializing HelenBot v" + PropertiesManager.getProperty("version"));
 		this.setVerbose(true);
 		connect();
 		joinChannels();

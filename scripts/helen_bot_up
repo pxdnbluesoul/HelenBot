@@ -1,2 +1,12 @@
 #!/bin/bash
-java -cp /home/pi/magnus/HelenBot/target/helenbot-0.0.1-SNAPSHOT.jar com.irc.helen.helen_main & 
+
+HELEN_HOME="$HOME/HelenBot"
+LOG_CONFIG="$HELEN_HOME/resources/logconfig.xml"
+LOG_VAR="-Dlog4j.configuration=file:$LOG_CONFIG"
+
+JAR="$HOME/HelenBot/target/helenbot-0.0.1-SNAPSHOT.jar"
+LOG_HOME="-DLOG_HOME=$HELEN_HOME/logs"
+
+MAIN="com.irc.helen.helen_main"
+
+$JAVA_8 $LOG_VAR $LOG_HOME -cp $JAR $MAIN
