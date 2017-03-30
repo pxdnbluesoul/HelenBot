@@ -1,4 +1,5 @@
 package com.irc.helen;
+
 import java.io.IOException;
 import java.util.Date;
 
@@ -11,12 +12,13 @@ import com.helen.bots.HelenBot;
 public class helen_main {
 
 	final static Logger logger = Logger.getLogger(helen_main.class);
-	
-	public static void main(String[] args) throws NickAlreadyInUseException, IOException, IrcException, InterruptedException {
+
+	public static void main(String[] args)
+			throws NickAlreadyInUseException, IOException, IrcException, InterruptedException {
 		HelenBot helen = null;
-			logger.info("Starting up HelenBot process at: " + new Date().toString());
-			helen = new HelenBot();
-			logger.info("Shutting down HelenBot process at: " + new Date().toString());
-		
+		logger.info("Starting up HelenBot process at: " + new Date().toString());
+		helen = new HelenBot();
+		logger.info("Shutting down HelenBot process at: " + new Date().toString());
+
 	}
 }
