@@ -8,7 +8,7 @@ import org.jibble.pircbot.PircBot;
 
 import com.helen.bots.PropertiesManager;
 
-@Retention(value=RUNTIME)
+
 public class Command {
 	private static final Logger logger = Logger.getLogger(Command.class);
 
