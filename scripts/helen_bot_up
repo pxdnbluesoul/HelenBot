@@ -1,0 +1,2 @@
+#!/bin/bash
+java -cp /home/pi/magnus/HelenBot/target/helenbot-0.0.1-SNAPSHOT.jar com.irc.helen.helen_main & 
