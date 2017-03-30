@@ -41,7 +41,7 @@ public class RollData {
 	public String getRoll() {
 		if (dicetype == DICETYPE.d) {
 			StringBuilder str = new StringBuilder();
-			str.append(diceMessage);
+			str.append((diceMessage == null)? "" : diceMessage);
 			str.append(":");
 			str.append(diceThrows);
 			str.append(dicetype);

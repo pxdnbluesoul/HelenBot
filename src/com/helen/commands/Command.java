@@ -102,7 +102,7 @@ public class Command {
 	}
 	@IRCCommand(command = ".roll", startOfLine = true)
 	public void roll(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, false)) {
+		if (data.isAuthenticatedUser(magnusMode, true)) {
 			RollData roll = new RollData(data.getMessage());
 			if(roll.save()) {
 				RollDB.saveRoll(data.getSender(), roll);
@@ -113,7 +113,7 @@ public class Command {
 	
 	@IRCCommand(command = ".myRolls", startOfLine = true)
 	public void getRolls(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, false)) {
+		if (data.isAuthenticatedUser(magnusMode, true)) {
 			LinkedList<RollData> rolls = RollDB.getUserRolls(data.getSender());
 			for(RollData roll : rolls) {
 				helen.sendMessage(data.getChannel(), data.getSender() + " :" + roll.getRoll());
