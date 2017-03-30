@@ -29,12 +29,14 @@ public class Command {
 		for (Method m : Command.class.getDeclaredMethods()) {
 			if (m.isAnnotationPresent(IRCCommand.class)) {
 				commandList.put(m.getAnnotation(IRCCommand.class), m);
+				logger.info(((IRCCommand)m.getAnnotation(IRCCommand.class)).command());
 			}
 		}
+		logger.info("Finished Initializing commandList.");
 	}
 
 	public void dispatchTable(CommandData data) {
-		logger.info("Entering dispatch table with command: " + data.getCommand());
+		logger.info("Entering dispatch table with command: \"" + data.getCommand()+"\"");
 		for (IRCCommand a : commandList.keySet()) {
 			if (a.startOfLine()) {
 				if (a.command().equals(data.getCommand())) {
