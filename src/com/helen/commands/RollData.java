@@ -114,7 +114,7 @@ public class RollData {
 			}
 
 			if (expand && rolls.length() > 0) {
-				expanded = "[" + rolls.toString().substring(0, rolls.toString().length() - 1) + "]";
+				expanded = "[" + rolls.toString() + "]";
 			}
 
 			rollSum += bonus;

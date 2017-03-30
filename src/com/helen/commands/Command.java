@@ -104,11 +104,10 @@ public class Command {
 	public void roll(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, false)) {
 			RollData roll = new RollData(data.getMessage());
-			
 			if(roll.save()) {
 				RollDB.saveRoll(data.getSender(), roll);
 			}
-
+			helen.sendMessage(data.getChannel(), data.getSender() + ": " + roll.getRoll());
 		}
 	}
 	
