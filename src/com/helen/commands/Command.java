@@ -1,5 +1,6 @@
 package com.helen.commands;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Queue;
@@ -8,7 +9,7 @@ import org.apache.log4j.Logger;
 import org.jibble.pircbot.PircBot;
 
 import com.helen.bots.PropertiesManager;
-
+import com.helen.search.WebSearch;
 
 public class Command {
 	private static final Logger logger = Logger.getLogger(Command.class);
@@ -33,31 +34,31 @@ public class Command {
 			logger.info(m.isAnnotationPresent(IRCCommand.class));
 			if (m.isAnnotationPresent(IRCCommand.class)) {
 				commandList.put(m.getAnnotation(IRCCommand.class), m);
-				logger.info(((IRCCommand)m.getAnnotation(IRCCommand.class)).command());
+				logger.info(((IRCCommand) m.getAnnotation(IRCCommand.class)).command());
 			}
 		}
 		logger.info("Finished Initializing commandList.");
 	}
 
 	public void dispatchTable(CommandData data) {
-		logger.info("Entering dispatch table with command: \"" + data.getCommand()+"\"");
+		logger.info("Entering dispatch table with command: \"" + data.getCommand() + "\"");
 		for (IRCCommand a : commandList.keySet()) {
 			if (a.startOfLine()) {
 				if (a.command().equals(data.getCommand())) {
 					try {
 						commandList.get(a).invoke(this, data);
-					}  catch (Exception e) {
+					} catch (Exception e) {
 						// TODO Auto-generated catch block
-						logger.error("Exception invoking start-of-line command: " + a.command(),e); 
+						logger.error("Exception invoking start-of-line command: " + a.command(), e);
 					}
 				}
 			} else {
 				if (data.getMessage().contains(a.command())) {
 					try {
 						commandList.get(a).invoke(this, data);
-					}catch (Exception e) {
+					} catch (Exception e) {
 						// TODO Auto-generated catch block
-						logger.error("Exception invoking contains command: " + a.command(),e);
+						logger.error("Exception invoking contains command: " + a.command(), e);
 					}
 				}
 			}
@@ -100,31 +101,55 @@ public class Command {
 
 		}
 	}
+
 	@IRCCommand(command = ".roll", startOfLine = true)
 	public void roll(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
 			RollData roll = new RollData(data.getMessage());
-			if(roll.save()) {
+			if (roll.save()) {
 				RollDB.saveRoll(data.getSender(), roll);
 			}
 			helen.sendMessage(data.getChannel(), data.getSender() + ": " + roll.getRoll());
 		}
 	}
-	
+
 	@IRCCommand(command = ".myRolls", startOfLine = true)
 	public void getRolls(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
-			Queue<RollData> rolls = RollDB.getUserRolls(data.getSender());
-			for(RollData roll : rolls) {
-				if(roll != null){
-					helen.sendMessage(data.getChannel(), data.getSender() + ": " + roll.getRoll());
-				}
+			String rolls = RollDB.getUserRolls(data.getSender());
+			if (rolls != null) {
+				helen.sendMessage(data.getChannel(), data.getSender() + ": " + rolls);
+			} else {
+				helen.sendMessage(data.getChannel(),
+						data.getSender() + ": Apologies, I do not have any saved " + "rolls for you at this time.");
 			}
 
 		}
 	}
 	
-
+	@IRCCommand(command = ".g", startOfLine = true)
+	public void webSearch(CommandData data){
+		try {
+			WebSearch.search(data.getMessage());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			logger.error("Exception during web search",e);
+		}
+	}
+	
+	/*
+	 * UNIMPLEMENTED CODE
+	 * 
+	 * 
+	 * 
+	 * if (message.substring(0, 3).equalsIgnoreCase(".g")) { try {
+	 * webSearch(message.split(".g")[1], channel, sender); } catch (IOException
+	 * e) { sendMessage(channel, sender +
+	 * ": There was some kind of error.  Please contact DrMagnus, and give him the following error code: IOEx_web_search_01"
+	 * ); } }
+	 */
+	
+	
 	// Authentication Required Commands
 	@IRCCommand(command = ".join", startOfLine = true)
 	public void enterChannel(CommandData data) {
@@ -139,36 +164,25 @@ public class Command {
 			helen.partChannel(data.getTarget());
 
 	}
-	
+
 	@IRCCommand(command = ".exit", startOfLine = true)
-	public void exitBot(CommandData data){
-		if(data.isAuthenticatedUser(magnusMode, false)){
-			while(helen.getChannels().length > 0){
-				for(String channel : helen.getChannels()){
+	public void exitBot(CommandData data) {
+		if (data.isAuthenticatedUser(magnusMode, false)) {
+			while (helen.getChannels().length > 0) {
+				for (String channel : helen.getChannels()) {
 					helen.sendMessage(channel, "I have been instructed by my developer to exit.  Have a good day.");
 					helen.partChannel(channel);
 				}
 			}
 			helen.disconnect();
-			if(!helen.isConnected()){
+			if (!helen.isConnected()) {
 				logger.info("Shutting down HelenBot v" + PropertiesManager.getProperty("version"));
 			}
 		}
 	}
+
 	
-	/*
-	 * UNIMPLEMENTED CODE
-	 * 
-	 * 
-	 * 
-	 * if (message.substring(0, 3).equalsIgnoreCase(".g")) {
-			try {
-				webSearch(message.split(".g")[1], channel, sender);
-			} catch (IOException e) {
-				sendMessage(channel, sender
-						+ ": There was some kind of error.  Please contact DrMagnus, and give him the following error code: IOEx_web_search_01");
-			}
-		}
-	 */
+	
+	
 
 }
