@@ -143,10 +143,16 @@ public class Command {
 	@IRCCommand(command = ".exit", startOfLine = true)
 	public void exitBot(CommandData data){
 		if(data.isAuthenticatedUser(magnusMode, false)){
-			for(String channel : helen.getChannels()){
-				helen.sendMessage(channel, "I have been instructed by my owner to exit.  Have a good day.");
+			while(helen.getChannels().length > 0){
+				for(String channel : helen.getChannels()){
+					helen.sendMessage(channel, "I have been instructed by my developer to exit.  Have a good day.");
+					helen.partChannel(channel);
+				}
 			}
-			System.exit(0);
+			helen.disconnect();
+			if(!helen.isConnected()){
+				logger.info("Shutting down HelenBot v" + PropertiesManager.getProperty("version"));
+			}
 		}
 	}
 	

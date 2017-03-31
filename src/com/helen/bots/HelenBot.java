@@ -39,6 +39,7 @@ public class HelenBot extends PircBot {
 		Thread.sleep(2000l);
 	}
 
+	/*
 	public void onDisconnect() {
 		try {
 			connect();
@@ -56,7 +57,7 @@ public class HelenBot extends PircBot {
 			e.printStackTrace();
 		}
 	}
-
+*/
 	private void joinChannels() {
 		for (String channel : PropertiesManager.getPropertyList("prejoinChannels")) {
 			this.joinChannel(channel);
