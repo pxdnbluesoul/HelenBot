@@ -12,7 +12,7 @@ public class RollData {
 
 	private Integer diceThrows = 0;
 	private Integer diceSize = 0;
-	private Integer bonus = 0;
+	private Integer bonus = null;
 	private String diceMessage = null;
 
 	private Long computedRoll = null;
@@ -41,13 +41,17 @@ public class RollData {
 	public String getRoll() {
 		if (dicetype == DICETYPE.d) {
 			StringBuilder str = new StringBuilder();
-			str.append((diceMessage == null)? "" : diceMessage);
-			str.append(":");
+			if(diceMessage != null){
+				str.append(diceMessage);
+				str.append(": ");
+			}
 			str.append(diceThrows);
 			str.append(dicetype);
 			str.append(diceSize);
-			str.append(" ");
-			str.append(bonus > 0 ? "+" + bonus : bonus);
+			if(bonus != null){
+				str.append(" ");
+				str.append(bonus > 0 ? "+" + bonus : bonus);
+			}
 			str.append(", total: ");
 			str.append(computedRoll);
 			str.append(".");

@@ -2,7 +2,7 @@ package com.helen.commands;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.Queue;
 
 import org.apache.log4j.Logger;
 import org.jibble.pircbot.PircBot;
@@ -114,9 +114,11 @@ public class Command {
 	@IRCCommand(command = ".myRolls", startOfLine = true)
 	public void getRolls(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
-			LinkedList<RollData> rolls = RollDB.getUserRolls(data.getSender());
+			Queue<RollData> rolls = RollDB.getUserRolls(data.getSender());
 			for(RollData roll : rolls) {
-				helen.sendMessage(data.getChannel(), data.getSender() + " :" + roll.getRoll());
+				if(roll != null){
+					helen.sendMessage(data.getChannel(), data.getSender() + ": " + roll.getRoll());
+				}
 			}
 
 		}
