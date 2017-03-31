@@ -140,6 +140,16 @@ public class Command {
 
 	}
 	
+	@IRCCommand(command = ".exit", startOfLine = true)
+	public void exitBot(CommandData data){
+		if(data.isAuthenticatedUser(magnusMode, false)){
+			for(String channel : helen.getChannels()){
+				helen.sendMessage(channel, "I have been instructed by my owner to exit.  Have a good day.");
+			}
+			System.exit(0);
+		}
+	}
+	
 	/*
 	 * UNIMPLEMENTED CODE
 	 * 
