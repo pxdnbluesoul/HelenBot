@@ -25,7 +25,7 @@ public class GoogleResults {
     	displayLink = object.get("displayLink").toString();
     	snippet = object.get("snippet").toString();
     	htmlSnippet = object.get("htmlSnippet").toString();
-    	cached = object.get("cached").toString();
+    	cached = object.get("cacheId").toString();
     	formattedUrl = object.get("formattedUrl").toString();
     	htmlFormattedUrl = object.get("htmlFormattedUrl").toString();
     }

@@ -174,9 +174,7 @@ public class Command {
 			}
 
 			helen.disconnect();
-			if (!helen.isConnected()) {
-				logger.info("Shutting down HelenBot v" + PropertiesManager.getProperty("version"));
-			}
+			System.exit(0);
 		}
 	}
 
