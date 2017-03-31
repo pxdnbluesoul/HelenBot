@@ -23,7 +23,7 @@ public class GoogleResults {
     	title = object.get("title").toString().replace("\"","");
     	link = object.get("link").toString().replace("\"","");
     	displayLink = object.get("displayLink").toString().replace("\"","");
-    	snippet = object.get("snippet").toString().replace("\"","");
+    	snippet = object.get("snippet").toString().replace("\"","").replace("\\n","");
     	htmlSnippet = object.get("htmlSnippet").toString().replace("\"","");
     	cached = object.get("cacheId").toString().replace("\"","");
     	formattedUrl = object.get("formattedUrl").toString().replace("\"","");

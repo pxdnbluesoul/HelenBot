@@ -3,13 +3,13 @@ package com.helen.commands;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.Queue;
 
 import org.apache.log4j.Logger;
 import org.jibble.pircbot.PircBot;
 
 import com.helen.bots.PropertiesManager;
 import com.helen.search.WebSearch;
+import com.helen.search.YouTubeSearch;
 
 public class Command {
 	private static final Logger logger = Logger.getLogger(Command.class);
@@ -137,18 +137,12 @@ public class Command {
 			logger.error("Exception during web search", e);
 		}
 	}
-
-	/*
-	 * UNIMPLEMENTED CODE
-	 * 
-	 * 
-	 * 
-	 * if (message.substring(0, 3).equalsIgnoreCase(".g")) { try {
-	 * webSearch(message.split(".g")[1], channel, sender); } catch (IOException
-	 * e) { sendMessage(channel, sender +
-	 * ": There was some kind of error.  Please contact DrMagnus, and give him the following error code: IOEx_web_search_01"
-	 * ); } }
-	 */
+	
+	@IRCCommand(command = ".y", startOfLine = true)
+	public void youtubeSearch(CommandData data) {
+			helen.sendMessage(data.getChannel(), data.getSender() + ": "
+								+ YouTubeSearch.youtubeSearch(data.getMessage()).toString());
+	}
 
 	// Authentication Required Commands
 	@IRCCommand(command = ".join", startOfLine = true)
