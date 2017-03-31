@@ -126,17 +126,18 @@ public class Command {
 
 		}
 	}
-	
+
 	@IRCCommand(command = ".g", startOfLine = true)
-	public void webSearch(CommandData data){
+	public void webSearch(CommandData data) {
 		try {
-			WebSearch.search(data.getMessage());
+			helen.sendMessage(data.getChannel(), data.getSender() + ": "
+								+ WebSearch.search(data.getMessage()).toString());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			logger.error("Exception during web search",e);
+			logger.error("Exception during web search", e);
 		}
 	}
-	
+
 	/*
 	 * UNIMPLEMENTED CODE
 	 * 
@@ -148,8 +149,7 @@ public class Command {
 	 * ": There was some kind of error.  Please contact DrMagnus, and give him the following error code: IOEx_web_search_01"
 	 * ); } }
 	 */
-	
-	
+
 	// Authentication Required Commands
 	@IRCCommand(command = ".join", startOfLine = true)
 	public void enterChannel(CommandData data) {
@@ -168,20 +168,16 @@ public class Command {
 	@IRCCommand(command = ".exit", startOfLine = true)
 	public void exitBot(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, false)) {
-				for (String channel : helen.getChannels()) {
-					helen.sendMessage(channel, "I have been instructed by my developer to exit.  Have a good day.");
-					helen.partChannel(channel);
-				}
-			
+			for (String channel : helen.getChannels()) {
+				helen.sendMessage(channel, "I have been instructed by my developer to exit.  Have a good day.");
+				helen.partChannel(channel);
+			}
+
 			helen.disconnect();
 			if (!helen.isConnected()) {
 				logger.info("Shutting down HelenBot v" + PropertiesManager.getProperty("version"));
 			}
 		}
 	}
-
-	
-	
-	
 
 }

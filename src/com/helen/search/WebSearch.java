@@ -3,19 +3,22 @@ package com.helen.search;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 
 import org.apache.log4j.Logger;
 
-import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.helen.bots.PropertiesManager;
 
 public class WebSearch {
 
 	final static Logger logger = Logger.getLogger(WebSearch.class);
+	
+	
 	public static GoogleResults search(String searchTerm) throws IOException {
 		searchTerm = searchTerm.substring(3, searchTerm.length()).replace(" ", "+");
 		URL url = new URL(PropertiesManager.getProperty("googleurl")
@@ -30,10 +33,28 @@ public class WebSearch {
 		conn.setRequestProperty("Accept", "application/json");
 		BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
 
-		GoogleResults result = new Gson().fromJson(br, GoogleResults.class);
-		logger.info(result.toString());
+		GoogleResults searchResult = null;
+		JsonParser json = new JsonParser();
+		JsonElement jsonTree = json.parse(br);
+		if(jsonTree.isJsonObject()){
+			JsonObject jsonObject = jsonTree.getAsJsonObject();
+			
+			JsonElement items = jsonObject.get("items");
+			if(items.isJsonArray()){
+				JsonArray itemsArray = items.getAsJsonArray();
+				
+				JsonElement result = itemsArray.get(0);
+				if(result.isJsonObject()){
+					JsonObject resultMap = result.getAsJsonObject();
+					searchResult = new GoogleResults(resultMap);
+				}
+			}
+		}
+		
+		
+		
 		conn.disconnect();
 		
-		return result;
+		return searchResult;
 	}
 }

@@ -76,12 +76,4 @@ public class HelenBot extends PircBot {
 		cmd.dispatchTable(new CommandData("", sender, login, hostname, message));
 	}
 
-	private void webSearch(String searchTerm, String channel, String sender) throws IOException {
-		GoogleResults results = WebSearch.search(searchTerm);
-
-		this.sendMessage(channel, sender + ": " + results.getResponseData().getResults().get(0).getTitle()
-				+ results.getResponseData().getResults().get(0).getUrl());
-
-	}
-
 }
