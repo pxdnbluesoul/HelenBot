@@ -168,12 +168,11 @@ public class Command {
 	@IRCCommand(command = ".exit", startOfLine = true)
 	public void exitBot(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, false)) {
-			while (helen.getChannels().length > 0) {
 				for (String channel : helen.getChannels()) {
 					helen.sendMessage(channel, "I have been instructed by my developer to exit.  Have a good day.");
 					helen.partChannel(channel);
 				}
-			}
+			
 			helen.disconnect();
 			if (!helen.isConnected()) {
 				logger.info("Shutting down HelenBot v" + PropertiesManager.getProperty("version"));
