@@ -9,4 +9,4 @@ LOG_HOME="-DLOG_HOME=$HELEN_HOME/logs"
 
 MAIN="com.irc.helen.helen_main"
 
-$JAVA_8 $LOG_VAR $LOG_HOME -cp $JAR $MAIN
+$JAVA_8 $LOG_VAR $LOG_HOME -cp $JAR $MAIN > /var/log/helenbot/helenlog.log &
