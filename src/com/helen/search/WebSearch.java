@@ -17,7 +17,7 @@ public class WebSearch {
 
 	final static Logger logger = Logger.getLogger(WebSearch.class);
 	public static GoogleResults search(String searchTerm) throws IOException {
-
+		searchTerm = searchTerm.substring(3, searchTerm.length()).replace(" ", "+");
 		URL url = new URL(PropertiesManager.getProperty("googleurl")
 				+ PropertiesManager.getProperty("apiKey")
 				+ "&cx="
