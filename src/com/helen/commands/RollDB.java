@@ -27,7 +27,7 @@ public class RollDB {
 			for (RollData roll : usersRolls.get(user)) {
 				if (roll != null) {
 					str.append(roll.getRoll());
-					str.append(",");
+					str.append("|");
 				}
 			}
 			str.delete(str.length() - 1, str.length());

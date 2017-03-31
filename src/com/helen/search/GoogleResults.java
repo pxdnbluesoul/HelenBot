@@ -19,15 +19,15 @@ public class GoogleResults {
     
     
     public GoogleResults(JsonObject object){
-    	kind = object.get("kind").toString();
-    	title = object.get("title").toString();
-    	link = object.get("link").toString();
-    	displayLink = object.get("displayLink").toString();
-    	snippet = object.get("snippet").toString();
-    	htmlSnippet = object.get("htmlSnippet").toString();
-    	cached = object.get("cacheId").toString();
-    	formattedUrl = object.get("formattedUrl").toString();
-    	htmlFormattedUrl = object.get("htmlFormattedUrl").toString();
+    	kind = object.get("kind").toString().replace("\"","");
+    	title = object.get("title").toString().replace("\"","");
+    	link = object.get("link").toString().replace("\"","");
+    	displayLink = object.get("displayLink").toString().replace("\"","");
+    	snippet = object.get("snippet").toString().replace("\"","");
+    	htmlSnippet = object.get("htmlSnippet").toString().replace("\"","");
+    	cached = object.get("cacheId").toString().replace("\"","");
+    	formattedUrl = object.get("formattedUrl").toString().replace("\"","");
+    	htmlFormattedUrl = object.get("htmlFormattedUrl").toString().replace("\"","");
     }
     @Override
     public String toString(){
@@ -37,7 +37,7 @@ public class GoogleResults {
     	str.append(" - ");
     	str.append(link);
     	str.append(" :");
-    	str.append(htmlSnippet);
+    	str.append(snippet);
     	return str.toString();
     }
     
