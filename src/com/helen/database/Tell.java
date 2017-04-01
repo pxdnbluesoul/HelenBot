@@ -8,13 +8,15 @@ public class Tell {
 	private String target;
 	private java.sql.Timestamp tell_time;
 	private String message;
+	private boolean privateMessage = true;
 	
 	
-	public Tell(String sender, String target, java.sql.Timestamp tell_time, String message){
+	public Tell(String sender, String target, java.sql.Timestamp tell_time, String message, boolean privateMessage){
 		this.sender = sender;
 		this.target = target;
 		this.tell_time = tell_time;
 		this.message = message;
+		this.privateMessage = privateMessage;
 	}
 	
 	public String toString(){
@@ -41,5 +43,9 @@ public class Tell {
 
 	public String getMessage() {
 		return message;
+	}
+	
+	public boolean isPrivate(){
+		return privateMessage;
 	}
 }

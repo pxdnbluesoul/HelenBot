@@ -15,9 +15,9 @@ public class helen_main {
 
 	public static void main(String[] args)
 			throws NickAlreadyInUseException, IOException, IrcException, InterruptedException {
-		HelenBot helen = null;
 		logger.info("Starting up HelenBot process at: " + new Date().toString());
-		helen = new HelenBot();
+		HelenBot helen = new HelenBot();
+		logger.info("Initialized " + helen.toString());
 		logger.info("Shutting down HelenBot process at: " + new Date().toString());
 
 	}

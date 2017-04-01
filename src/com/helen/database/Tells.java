@@ -12,17 +12,17 @@ public class Tells {
 
 	private static final String insertTell = "insert into tells (username, sender, tell_time, message) values (?,?,(select localtimestamp),?);";
 	private static final String searchTells = "select * from tells where username like ? order by tell_time asc;";
-	private static final String clearTells = "delete from tells where username like ?;";
 
 	private final static Logger logger = Logger.getLogger(Tells.class);
 
-	public static String sendTell(String target, String sender, String message) {
+	public static String sendTell(String target, String sender, String message, boolean privateMessage) {
 		Connection conn = Connector.getConnection();
 		try {
 			PreparedStatement stmt = conn.prepareStatement(insertTell);
 			stmt.setString(1, target);
 			stmt.setString(2, sender);
 			stmt.setString(3, message);
+			stmt.setBoolean(4, privateMessage);
 
 			int rows = stmt.executeUpdate();
 			if (rows > 0) {
@@ -42,7 +42,8 @@ public class Tells {
 			stmt.setString(1, "%" + username + "%");
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
-				list.add(new Tell(rs.getString("sender"),rs.getString("username"),rs.getTimestamp("tell_time"),rs.getString("message")));
+				list.add(new Tell(rs.getString("sender"),rs.getString("username")
+						,rs.getTimestamp("tell_time"),rs.getString("message"), rs.getBoolean("privateMessage")));
 			}
 			
 			return list;

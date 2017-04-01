@@ -57,7 +57,8 @@ public class Command {
 		ArrayList<Tell> tells = Tells.getTells(data.getSender());
 		for (Tell tell : tells) {
 			Tells.clearTells(tell.getTarget());
-			helen.sendMessage(data.getChannel(), tell.toString());
+			helen.sendMessage(tell.isPrivate() ? data.getSender() : data.getChannel(),
+					tell.toString());
 			
 		}
 	}
@@ -195,7 +196,7 @@ public class Command {
 	public void tell(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
 			String str = Tells.sendTell(data.getTarget(), data.getSender(),
-					data.getTellMessage());
+					data.getTellMessage(), (data.getChannel().isEmpty() ? true : false));
 			helen.sendMessage(data.getChannel(), data.getSender() + ": " + str);
 		}
 	}

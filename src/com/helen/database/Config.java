@@ -27,6 +27,10 @@ public class Config {
 		return value;
 	}
 	
+	public String getUpdated(){
+		return lastUpdated;
+	}
+	
 	
 	public String toString(){
 		StringBuilder str = new StringBuilder();
