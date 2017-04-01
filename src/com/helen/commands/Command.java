@@ -18,7 +18,8 @@ public class Command {
 
 	private boolean magnusMode = true;
 
-	private static HashMap<IRCCommand, Method> commandList = new HashMap<IRCCommand, Method>();
+	private static HashMap<String, Method> hashableCommandList = new HashMap<String, Method>();
+	private static HashMap<String, Method> slowCommands = new HashMap<String, Method>();
 
 	public Command() {
 
@@ -33,7 +34,12 @@ public class Command {
 			logger.info(m);
 			logger.info(m.isAnnotationPresent(IRCCommand.class));
 			if (m.isAnnotationPresent(IRCCommand.class)) {
-				commandList.put(m.getAnnotation(IRCCommand.class), m);
+				if (m.getAnnotation(IRCCommand.class).startOfLine()) {
+					hashableCommandList.put(((IRCCommand) m.getAnnotation(IRCCommand.class)).command(), m);
+				} else {
+					slowCommands.put(((IRCCommand) m.getAnnotation(IRCCommand.class)).command(), m);
+				}
+
 				logger.info(((IRCCommand) m.getAnnotation(IRCCommand.class)).command());
 			}
 		}
@@ -42,24 +48,20 @@ public class Command {
 
 	public void dispatchTable(CommandData data) {
 		logger.info("Entering dispatch table with command: \"" + data.getCommand() + "\"");
-		for (IRCCommand a : commandList.keySet()) {
-			if (a.startOfLine()) {
-				if (a.command().equals(data.getCommand())) {
-					try {
-						commandList.get(a).invoke(this, data);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						logger.error("Exception invoking start-of-line command: " + a.command(), e);
-					}
-				}
-			} else {
-				if (data.getMessage().contains(a.command())) {
-					try {
-						commandList.get(a).invoke(this, data);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						logger.error("Exception invoking contains command: " + a.command(), e);
-					}
+		if (hashableCommandList.containsKey(data.getCommand())) {
+			try {
+				hashableCommandList.get(data.getCommand()).invoke(this, data);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				logger.error("Exception invoking start-of-line command: " + data.getCommand(), e);
+			}
+		} else {
+			if (data.getMessage().contains(data.getCommand())) {
+				try {
+					slowCommands.get(data.getCommand()).invoke(this, data);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					logger.error("Exception invoking contains command: " + data.getCommand(), e);
 				}
 			}
 		}
@@ -130,18 +132,18 @@ public class Command {
 	@IRCCommand(command = ".g", startOfLine = true)
 	public void webSearch(CommandData data) {
 		try {
-			helen.sendMessage(data.getChannel(), data.getSender() + ": "
-								+ WebSearch.search(data.getMessage()).toString());
+			helen.sendMessage(data.getChannel(),
+					data.getSender() + ": " + WebSearch.search(data.getMessage()).toString());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			logger.error("Exception during web search", e);
 		}
 	}
-	
+
 	@IRCCommand(command = ".y", startOfLine = true)
 	public void youtubeSearch(CommandData data) {
-			helen.sendMessage(data.getChannel(), data.getSender() + ": "
-								+ YouTubeSearch.youtubeSearch(data.getMessage()).toString());
+		helen.sendMessage(data.getChannel(),
+				data.getSender() + ": " + YouTubeSearch.youtubeSearch(data.getMessage()).toString());
 	}
 
 	// Authentication Required Commands
