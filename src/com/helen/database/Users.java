@@ -5,8 +5,11 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
+
 public class Users {
 
+	private static final Logger logger = Logger.getLogger(Users.class);
 	
 	public static void insertUser(String username, Date date, String hostmask){
 		Connection conn = Connector.getConnection();
@@ -25,9 +28,9 @@ public class Users {
 				hostStatement.executeUpdate();
 			}
 			
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} 
+		catch (SQLException e) {
+			logger.error("Insertion exception for " + username,e);
 		}
 	}
 }

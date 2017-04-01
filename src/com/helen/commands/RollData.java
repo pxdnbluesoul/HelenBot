@@ -10,8 +10,8 @@ public class RollData {
 
 	private String diceString = null;
 
-	private Integer diceThrows = 0;
-	private Integer diceSize = 0;
+	private Integer diceThrows = null;
+	private Integer diceSize = null;
 	private Integer bonus = null;
 	private String diceMessage = null;
 

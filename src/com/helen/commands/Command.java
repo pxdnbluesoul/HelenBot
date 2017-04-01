@@ -2,12 +2,14 @@ package com.helen.commands;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 import org.jibble.pircbot.PircBot;
 
 import com.helen.bots.PropertiesManager;
+import com.helen.database.Configs;
 import com.helen.search.WebSearch;
 import com.helen.search.YouTubeSearch;
 
@@ -56,14 +58,16 @@ public class Command {
 				logger.error("Exception invoking start-of-line command: " + data.getCommand(), e);
 			}
 		} else {
-			if (data.getMessage().contains(data.getCommand())) {
-				try {
-					slowCommands.get(data.getCommand()).invoke(this, data);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					logger.error("Exception invoking contains command: " + data.getCommand(), e);
+			for(String command : slowCommands.keySet()){
+				if(data.getMessage().contains(command)){
+					try {
+						slowCommands.get(command).invoke(this, data);
+					} catch (Exception e) {
+						logger.error("Exception invoking command: " + command,e);
+					}
 				}
 			}
+			
 		}
 	}
 
@@ -173,5 +177,34 @@ public class Command {
 			System.exit(0);
 		}
 	}
+	
+	@IRCCommand(command = ".allProperties", startOfLine = true)
+	public void getAllProperties(CommandData data) {
+		if (data.isAuthenticatedUser(magnusMode, true)) {
+			ArrayList<String> properties = Configs.getConfiguredProperties();
+			helen.sendMessage(data.getChannel(), data.getSender() + ": Configured properties: " + buildResponse(properties));
+		}
+	}
+	
+	@IRCCommand(command = ".property", startOfLine = true)
+	public void getProperty(CommandData data) {
+		if (data.isAuthenticatedUser(magnusMode, true)) {
+			ArrayList<String> properties = Configs.getProperty(data.getTarget());
+			helen.sendMessage(data.getChannel(), data.getSender() + ": Configured properties: " + buildResponse(properties));
+		}
+	}
 
+	
+	private String buildResponse(ArrayList<String> parts){
+		StringBuilder response = new StringBuilder();
+		response.append("{");
+		for(String str: parts){
+			response.append(str);
+			response.append("|");
+		}
+		response.delete(response.length() - 1, response.length());
+		response.append("}");
+		
+		return response.toString();
+	}
 }
