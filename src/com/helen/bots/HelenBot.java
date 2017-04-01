@@ -1,6 +1,7 @@
 package com.helen.bots;
 
 import java.io.IOException;
+import java.util.Date;
 
 import org.apache.log4j.Logger;
 import org.jibble.pircbot.IrcException;
@@ -9,8 +10,7 @@ import org.jibble.pircbot.PircBot;
 
 import com.helen.commands.Command;
 import com.helen.commands.CommandData;
-import com.helen.search.GoogleResults;
-import com.helen.search.WebSearch;
+import com.helen.database.Users;
 
 public class HelenBot extends PircBot {
 	
@@ -39,25 +39,7 @@ public class HelenBot extends PircBot {
 		Thread.sleep(2000l);
 	}
 
-	/*
-	public void onDisconnect() {
-		try {
-			connect();
-		} catch (NickAlreadyInUseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IrcException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-*/
+	
 	private void joinChannels() {
 		for (String channel : PropertiesManager.getPropertyList("prejoinChannels")) {
 			this.joinChannel(channel);
@@ -65,6 +47,12 @@ public class HelenBot extends PircBot {
 	}
 
 	public void onMessage(String channel, String sender, String login, String hostname, String message) {
+		new Thread(){
+			public void run(){
+				Users.insertUser(sender, new Date(), hostname);
+			}
+		}.start();
+		
 		cmd.dispatchTable(new CommandData(channel, sender, login, hostname, message));
 	}
 
