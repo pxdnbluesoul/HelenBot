@@ -1,6 +1,6 @@
 package com.helen.database;
 
-import java.sql.Date;
+import java.text.SimpleDateFormat;
 
 public class Tell {
 
@@ -21,7 +21,7 @@ public class Tell {
 		StringBuilder str = new StringBuilder();
 		str.append(sender);
 		str.append(" said at ");
-		str.append(tell_time.toString());
+		str.append(new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(tell_time));
 		str.append(": ");
 		str.append(message);
 		return str.toString();

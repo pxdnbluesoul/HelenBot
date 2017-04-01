@@ -56,8 +56,9 @@ public class Command {
 	private void checkTells(CommandData data) {
 		ArrayList<Tell> tells = Tells.getTells(data.getSender());
 		for (Tell tell : tells) {
-			helen.sendMessage(tell.getTarget(), tell.toString());
 			Tells.clearTells(tell.getTarget());
+			helen.sendMessage(data.getChannel(), tell.toString());
+			
 		}
 	}
 
