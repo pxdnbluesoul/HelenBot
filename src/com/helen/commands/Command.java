@@ -10,6 +10,8 @@ import org.jibble.pircbot.PircBot;
 
 import com.helen.database.Config;
 import com.helen.database.Configs;
+import com.helen.database.Tell;
+import com.helen.database.Tells;
 import com.helen.search.WebSearch;
 import com.helen.search.YouTubeSearch;
 
@@ -47,8 +49,18 @@ public class Command {
 		}
 		logger.info("Finished Initializing commandList.");
 	}
+	
+	private void checkTells(CommandData data){
+		ArrayList<Tell> tells = Tells.getTells(data.getSender());
+		for(Tell tell: tells){
+			helen.sendMessage(tell.getTarget(), tell.toString());
+		}
+	}
 
 	public void dispatchTable(CommandData data) {
+		
+		checkTells(data);
+		
 		logger.info("Entering dispatch table with command: \"" + data.getCommand() + "\"");
 		if (hashableCommandList.containsKey(data.getCommand())) {
 			try {
@@ -164,10 +176,17 @@ public class Command {
 			helen.partChannel(data.getTarget());
 
 	}
+	
+	@IRCCommand(command = ".tell", startOfLine = true)
+	public void tell(CommandData data) {
+		if (data.isAuthenticatedUser(magnusMode, true))
+			Tells.sendTell(data.getTarget(), data.getSender(), data.getTellMessage());
+
+	}
 
 	@IRCCommand(command = ".exit", startOfLine = true)
 	public void exitBot(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, false)) {
+		if (data.isAuthenticatedUser(magnusMode, true)) {
 			for (String channel : helen.getChannels()) {
 				helen.sendMessage(channel, "I have been instructed by my developer to exit.  Have a good day.");
 				helen.partChannel(channel);
@@ -180,7 +199,7 @@ public class Command {
 	
 	@IRCCommand(command = ".allProperties", startOfLine = true)
 	public void getAllProperties(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, true)) {
+		if (data.isAuthenticatedUser(magnusMode, false)) {
 			ArrayList<Config> properties = Configs.getConfiguredProperties();
 			helen.sendMessage(data.getChannel(), data.getSender() + ": Configured properties: " + buildConfigResponse(properties));
 		}
@@ -188,7 +207,7 @@ public class Command {
 	
 	@IRCCommand(command = ".property", startOfLine = true)
 	public void getProperty(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, true)) {
+		if (data.isAuthenticatedUser(magnusMode, false)) {
 			ArrayList<Config> properties = Configs.getProperty(data.getTarget());
 			helen.sendMessage(data.getChannel(), data.getSender() + ": Configured properties: " + buildConfigResponse(properties));
 		}

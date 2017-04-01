@@ -52,6 +52,10 @@ public class CommandData {
 		return message.split(" ")[1];
 	}
 	
+	public String getTellMessage() {
+		return message.substring((message.split(" ")[0].length() + message.split(" ")[1].length() + 2),message.length());
+	}
+	
 	public String getPayload() {
 		return message.substring(message.indexOf(getTarget()) + getTarget().length()).trim();
 	}
