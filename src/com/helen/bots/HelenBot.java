@@ -10,6 +10,8 @@ import org.jibble.pircbot.PircBot;
 
 import com.helen.commands.Command;
 import com.helen.commands.CommandData;
+import com.helen.database.Config;
+import com.helen.database.Configs;
 import com.helen.database.Users;
 
 public class HelenBot extends PircBot {
@@ -19,7 +21,7 @@ public class HelenBot extends PircBot {
 	private static final Logger logger = Logger.getLogger(HelenBot.class);
 
 	public HelenBot() throws NickAlreadyInUseException, IOException, IrcException, InterruptedException {
-		logger.info("Initializing HelenBot v" + PropertiesManager.getProperty("version"));
+		logger.info("Initializing HelenBot v" + Configs.getSingleProperty("version").getValue());
 		this.setVerbose(true);
 		connect();
 		joinChannels();
@@ -27,22 +29,23 @@ public class HelenBot extends PircBot {
 	}
 
 	private void connect() throws NickAlreadyInUseException, IOException, IrcException, InterruptedException {
-		this.setLogin(PropertiesManager.getProperty("hostname"));
-		this.setName(PropertiesManager.getProperty("bot_name"));
+		
+		this.setLogin(Configs.getSingleProperty("hostname").getValue());
+		this.setName(Configs.getSingleProperty("bot_name").getValue());
 		try {
-			this.connect(PropertiesManager.getProperty("server"));
+			this.connect(Configs.getSingleProperty("server").getValue());
 		} catch (NickAlreadyInUseException e) {
-			this.identify(PropertiesManager.getProperty("pass"));
+			this.identify(Configs.getSingleProperty("pass").getValue());
 		}
 		Thread.sleep(1000l);
-		this.identify(PropertiesManager.getProperty("pass"));
+		this.identify(Configs.getSingleProperty("pass").getValue());
 		Thread.sleep(2000l);
 	}
 
 	
 	private void joinChannels() {
-		for (String channel : PropertiesManager.getPropertyList("prejoinChannels")) {
-			this.joinChannel(channel);
+		for (Config channel : Configs.getProperty("autojoin")) {
+			this.joinChannel(channel.getValue());
 		}
 	}
 

@@ -12,7 +12,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.helen.bots.PropertiesManager;
+import com.helen.database.Configs;
 
 public class WebSearch {
 
@@ -21,10 +21,10 @@ public class WebSearch {
 	
 	public static GoogleResults search(String searchTerm) throws IOException {
 		searchTerm = searchTerm.substring(3, searchTerm.length()).replace(" ", "+");
-		URL url = new URL(PropertiesManager.getProperty("googleurl")
-				+ PropertiesManager.getProperty("apiKey")
+		URL url = new URL(Configs.getSingleProperty("googleurl").getValue()
+				+ Configs.getSingleProperty("apiKey").getValue()
 				+ "&cx="
-				+ PropertiesManager.getProperty("customEngine")
+				+ Configs.getSingleProperty("customEngine").getValue()
 				+ "&q="
 				+ searchTerm +
 				"&alt=json");

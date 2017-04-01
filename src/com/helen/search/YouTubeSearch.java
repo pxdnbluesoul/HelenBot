@@ -13,7 +13,7 @@ import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
 import com.google.api.services.youtube.model.Video;
 import com.google.api.services.youtube.model.VideoListResponse;
-import com.helen.bots.PropertiesManager;
+import com.helen.database.Configs;
 
 public class YouTubeSearch {
 
@@ -30,7 +30,7 @@ public class YouTubeSearch {
 		try {
 			search = youtube.search().list("id,snippet");
 
-			search.setKey(PropertiesManager.getProperty("apiKey"));
+			search.setKey(Configs.getSingleProperty("apiKey").getValue());
 			search.setQ(searchTerm.substring(3, searchTerm.length()));
 			search.setType("video");
 			search.setFields("items(id/kind,id/videoId,snippet/title,snippet/thumbnails/default/url)");
@@ -45,7 +45,7 @@ public class YouTubeSearch {
 
 				YouTube.Videos.List videoRequest = youtube.videos().list("snippet, statistics, contentDetails");
 				videoRequest.setId(video.getId().getVideoId());
-				videoRequest.setKey(PropertiesManager.getProperty("apiKey"));
+				videoRequest.setKey(Configs.getSingleProperty("apiKey").getValue());
 				VideoListResponse listResponse = videoRequest.execute();
 				List<Video> videoList = listResponse.getItems();
 

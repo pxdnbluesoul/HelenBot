@@ -1,6 +1,7 @@
 package com.helen.commands;
 
-import com.helen.bots.PropertiesManager;
+import com.helen.database.Config;
+import com.helen.database.Configs;
 
 public class CommandData {
 	private String channel;
@@ -59,7 +60,12 @@ public class CommandData {
 		if(!magnusMode && lowLevel) {
 			return true;
 		}else {
-			return PropertiesManager.getPropertyList("registeredNicks").contains(sender);
+			for(Config config : Configs.getProperty("registeredNicks")){
+				if(getSender().equals(config.getValue())){
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 	

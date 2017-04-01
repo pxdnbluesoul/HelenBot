@@ -8,7 +8,7 @@ import java.util.HashMap;
 import org.apache.log4j.Logger;
 import org.jibble.pircbot.PircBot;
 
-import com.helen.bots.PropertiesManager;
+import com.helen.database.Config;
 import com.helen.database.Configs;
 import com.helen.search.WebSearch;
 import com.helen.search.YouTubeSearch;
@@ -76,10 +76,10 @@ public class Command {
 	public void versionResponse(CommandData data) {
 		if (data.getChannel().isEmpty()) {
 			helen.sendMessage(data.getSender(),
-					data.getSender() + ": Greetings, I am HelenBot v" + PropertiesManager.getProperty("version"));
+					data.getSender() + ": Greetings, I am HelenBot v" + Configs.getSingleProperty("version").getValue());
 		}
 		helen.sendMessage(data.getChannel(),
-				data.getSender() + ": Greetings, I am HelenBot v" + PropertiesManager.getProperty("version"));
+				data.getSender() + ": Greetings, I am HelenBot v" + Configs.getSingleProperty("version").getValue());
 	}
 
 	@IRCCommand(command = ".modeToggle", startOfLine = true)
@@ -181,19 +181,28 @@ public class Command {
 	@IRCCommand(command = ".allProperties", startOfLine = true)
 	public void getAllProperties(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
-			ArrayList<String> properties = Configs.getConfiguredProperties();
-			helen.sendMessage(data.getChannel(), data.getSender() + ": Configured properties: " + buildResponse(properties));
+			ArrayList<Config> properties = Configs.getConfiguredProperties();
+			helen.sendMessage(data.getChannel(), data.getSender() + ": Configured properties: " + buildConfigResponse(properties));
 		}
 	}
 	
 	@IRCCommand(command = ".property", startOfLine = true)
 	public void getProperty(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
-			ArrayList<String> properties = Configs.getProperty(data.getTarget());
-			helen.sendMessage(data.getChannel(), data.getSender() + ": Configured properties: " + buildResponse(properties));
+			ArrayList<Config> properties = Configs.getProperty(data.getTarget());
+			helen.sendMessage(data.getChannel(), data.getSender() + ": Configured properties: " + buildConfigResponse(properties));
 		}
 	}
 
+	private String buildConfigResponse(ArrayList<Config> parts){
+		ArrayList<String> stringList = new ArrayList<String>();
+		for(Config part: parts){
+			if (part.isPublic()){
+				stringList.add(part.toString());
+			}
+		}
+		return buildResponse(stringList);
+	}
 	
 	private String buildResponse(ArrayList<String> parts){
 		StringBuilder response = new StringBuilder();
