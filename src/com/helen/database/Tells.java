@@ -10,7 +10,8 @@ import org.apache.log4j.Logger;
 public class Tells {
 
 	private static final String insertTell = "insert into tells (username, sender, tell_time, message) values (?,?,(select localtimestamp),?);";
-	private static final String searchTells = "select * from tells where username like ? order by tell_time desc;";
+	private static final String searchTells = "select * from tells where username like ? order by tell_time asc;";
+	private static final String clearTells = "delete from tells where username like ?;";
 
 	private final static Logger logger = Logger.getLogger(Tells.class);
 
@@ -48,6 +49,17 @@ public class Tells {
 			logger.error("Exception retreiving tells",e);
 		}
 		return list;
+	}
+	
+	public static void clearTells(String username){
+		Connection conn = Connector.getConnection();
+		try{
+			PreparedStatement stmt = conn.prepareStatement(clearTells);
+			stmt.setString(1, "'" + username + "'");
+			stmt.executeUpdate();
+		}catch (Exception e){
+			logger.error("Exception clearing tells",e);
+		}
 	}
 
 }

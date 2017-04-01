@@ -105,7 +105,6 @@ public class Configs {
 		}
 	}
 
-	@SuppressWarnings("static-access")
 	public static ArrayList<Config> getConfiguredProperties() {
 		ArrayList<Config> keyValues = new ArrayList<Config>();
 		if (!cacheValid) {

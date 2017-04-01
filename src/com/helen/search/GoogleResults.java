@@ -1,7 +1,5 @@
 package com.helen.search;
 
-import java.util.List;
-
 import com.google.gson.JsonObject;
 
 public class GoogleResults {
