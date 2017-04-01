@@ -3,6 +3,7 @@ package com.helen.database;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
@@ -54,9 +55,10 @@ public class Tells {
 	public static void clearTells(String username){
 		Connection conn = Connector.getConnection();
 		try{
-			PreparedStatement stmt = conn.prepareStatement(clearTells);
-			stmt.setString(1, "'" + username + "'");
-			stmt.executeUpdate();
+			Statement stmt = conn.createStatement();
+			stmt.execute("delete from tells where username like '" + username + "'");
+			
+			
 		}catch (Exception e){
 			logger.error("Exception clearing tells",e);
 		}
