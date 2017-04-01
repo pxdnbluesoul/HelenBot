@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 public class Tells {
 
 	private static final String insertTell = "insert into tells (username, sender, tell_time, message) values (?,?,(select localtimestamp),?);";
-	private static final String searchTells = "select * from tells where username like '?' order by tell_time desc";
+	private static final String searchTells = "select * from tells where username like ? order by tell_time desc;";
 
 	private final static Logger logger = Logger.getLogger(Tells.class);
 
@@ -37,10 +37,10 @@ public class Tells {
 		Connection conn = Connector.getConnection();
 		try{
 			PreparedStatement stmt = conn.prepareStatement(searchTells);
-			stmt.setString(1, username);
+			stmt.setString(1, "%" + username + "%");
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
-				list.add(new Tell(rs.getString("username"),rs.getString("sender"),rs.getDate("tell_time"),rs.getString("message")));
+				list.add(new Tell(rs.getString("sender"),rs.getString("username"),rs.getDate("tell_time"),rs.getString("message")));
 			}
 			
 			return list;

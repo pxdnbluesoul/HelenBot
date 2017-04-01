@@ -18,7 +18,7 @@ public class Configs {
 	private final static String kvQuery = "select * from properties";
 	private final static String keysQuery = "select distinct key from properties";
 	private final static String propertySet = "insert into properties (key, value, updated) values (?,?,?)";
-	private final static String getProperty = "select value from properties where key like '?'";
+	private final static String getProperty = "select value from properties where key like ?";
 
 	public static ArrayList<Config> getProperty(String key) {
 		if(!cacheValid){
