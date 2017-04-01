@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 
 public class Tells {
 
-	private static final String insertTell = "insert into tells (username, sender, tell_time, message) values (?,?,(select localtimestamp),?);";
+	private static final String insertTell = "insert into tells (username, sender, tell_time, message, privatemessage) values (?,?,(select localtimestamp),?,?);";
 	private static final String searchTells = "select * from tells where username like ? order by tell_time asc;";
 
 	private final static Logger logger = Logger.getLogger(Tells.class);

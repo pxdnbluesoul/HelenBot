@@ -19,6 +19,10 @@ public class CommandData {
 		this.message = message;
 	}
 
+	
+	public String getResponseTarget(){
+		return getChannel() == null ? getSender() : getChannel();
+	}
 
 	public String getChannel() {
 		return channel;

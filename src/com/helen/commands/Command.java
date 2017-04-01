@@ -73,7 +73,6 @@ public class Command {
 			try {
 				hashableCommandList.get(data.getCommand()).invoke(this, data);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				logger.error("Exception invoking start-of-line command: "
 						+ data.getCommand(), e);
 			}
@@ -96,7 +95,7 @@ public class Command {
 	@IRCCommand(command = ".HelenBot", startOfLine = false)
 	public void versionResponse(CommandData data) {
 		if (data.getChannel().isEmpty()) {
-			helen.sendMessage(data.getSender(), data.getSender()
+			helen.sendMessage(data.getResponseTarget(), data.getSender()
 					+ ": Greetings, I am HelenBot v"
 					+ Configs.getSingleProperty("version").getValue());
 		}
@@ -115,7 +114,7 @@ public class Command {
 	@IRCCommand(command = ".mode", startOfLine = true)
 	public void displayMode(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, false)) {
-			helen.sendMessage(data.getChannel(), data.getSender()
+			helen.sendMessage(data.getResponseTarget(), data.getSender()
 					+ ": I am currently in "
 					+ (magnusMode ? "Magnus Only" : " Any User") + " mode.");
 		}
@@ -149,10 +148,10 @@ public class Command {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
 			String rolls = RollDB.getUserRolls(data.getSender());
 			if (rolls != null) {
-				helen.sendMessage(data.getChannel(), data.getSender() + ": "
+				helen.sendMessage(data.getResponseTarget(), data.getSender() + ": "
 						+ rolls);
 			} else {
-				helen.sendMessage(data.getChannel(), data.getSender()
+				helen.sendMessage(data.getResponseTarget(), data.getSender()
 						+ ": Apologies, I do not have any saved "
 						+ "rolls for you at this time.");
 			}
@@ -163,17 +162,16 @@ public class Command {
 	@IRCCommand(command = ".g", startOfLine = true)
 	public void webSearch(CommandData data) {
 		try {
-			helen.sendMessage(data.getChannel(), data.getSender() + ": "
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": "
 					+ WebSearch.search(data.getMessage()).toString());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			logger.error("Exception during web search", e);
 		}
 	}
 
 	@IRCCommand(command = ".y", startOfLine = true)
 	public void youtubeSearch(CommandData data) {
-		helen.sendMessage(data.getChannel(), data.getSender() + ": "
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": "
 				+ YouTubeSearch.youtubeSearch(data.getMessage()).toString());
 	}
 
@@ -197,7 +195,7 @@ public class Command {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
 			String str = Tells.sendTell(data.getTarget(), data.getSender(),
 					data.getTellMessage(), (data.getChannel().isEmpty() ? true : false));
-			helen.sendMessage(data.getChannel(), data.getSender() + ": " + str);
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + str);
 		}
 	}
 
@@ -219,7 +217,7 @@ public class Command {
 	public void getAllProperties(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, false)) {
 			ArrayList<Config> properties = Configs.getConfiguredProperties();
-			helen.sendMessage(data.getChannel(), data.getSender()
+			helen.sendMessage(data.getResponseTarget(), data.getSender()
 					+ ": Configured properties: "
 					+ buildConfigResponse(properties));
 		}
@@ -230,7 +228,7 @@ public class Command {
 		if (data.isAuthenticatedUser(magnusMode, false)) {
 			ArrayList<Config> properties = Configs
 					.getProperty(data.getTarget());
-			helen.sendMessage(data.getChannel(), data.getSender()
+			helen.sendMessage(data.getResponseTarget(), data.getSender()
 					+ ": Configured properties: "
 					+ buildConfigResponse(properties));
 		}
