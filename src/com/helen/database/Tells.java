@@ -41,7 +41,7 @@ public class Tells {
 			stmt.setString(1, "%" + username + "%");
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
-				list.add(new Tell(rs.getString("sender"),rs.getString("username"),rs.getDate("tell_time"),rs.getString("message")));
+				list.add(new Tell(rs.getString("sender"),rs.getString("username"),rs.getTimestamp("tell_time"),rs.getString("message")));
 			}
 			
 			return list;

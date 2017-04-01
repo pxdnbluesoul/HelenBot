@@ -6,11 +6,11 @@ public class Tell {
 
 	private String sender;
 	private String target;
-	private Date tell_time;
+	private java.sql.Timestamp tell_time;
 	private String message;
 	
 	
-	public Tell(String sender, String target, Date tell_time, String message){
+	public Tell(String sender, String target, java.sql.Timestamp tell_time, String message){
 		this.sender = sender;
 		this.target = target;
 		this.tell_time = tell_time;
@@ -35,7 +35,7 @@ public class Tell {
 		return target;
 	}
 
-	public Date getTell_time() {
+	public java.sql.Timestamp getTell_time() {
 		return tell_time;
 	}
 
