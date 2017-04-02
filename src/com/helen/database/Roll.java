@@ -104,9 +104,9 @@ public class Roll {
 			str.append(diceThrows);
 			str.append(dicetype);
 			str.append(diceSize);
-			if (bonus != null) {
+			if (bonus != 0) {
 				str.append(" ");
-				str.append(bonus > 0 ? "+" + bonus : bonus);
+				str.append(bonus > 0 ? ("+" + bonus) : "");
 			}
 			str.append(", total: ");
 			str.append(computedRoll);
@@ -172,7 +172,7 @@ public class Roll {
 			}
 
 			if (rolls.length() > 0) {
-				expanded = "[" + diceThrows + dicetype + diceSize +"=" + rolls.toString() + "|" + bonus + "]";
+				expanded = "[" + diceThrows + dicetype + diceSize +"=" + rolls.toString() + "|Bonus=" + bonus + "]";
 			}
 
 			rollSum += bonus;

@@ -17,7 +17,7 @@ public class Configs {
 	private static Boolean cacheValid = false;
 	private final static String kvQuery = "select * from properties";
 	private final static String keysQuery = "select distinct key from properties";
-	private final static String propertySet = "insert into properties (key, value, updated) values (?,?,?)";
+	private final static String propertySet = "insert into properties (key, value, updated, public) values (?,?,?,?)";
 
 	public static ArrayList<Config> getProperty(String key) {
 		if(!cacheValid){
@@ -41,13 +41,14 @@ public class Configs {
 		}
 	}
 
-	public static String setProperty(String key, String value) {
+	public static String setProperty(String key, String value, String publicFlag) {
 		Connection conn = Connector.getConnection();
 		try {
 			PreparedStatement stmt = conn.prepareStatement(propertySet);
 			stmt.setString(1, key);
 			stmt.setString(2, value);
 			stmt.setDate(3, new java.sql.Date(System.currentTimeMillis()));
+			stmt.setBoolean(4, publicFlag.equals("t") ? true : false);
 			int updated = stmt.executeUpdate();
 			if (updated > 0) {
 				cacheValid = false;

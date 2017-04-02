@@ -243,7 +243,7 @@ public class Command {
 				stringList.add(part.toString());
 			}
 		}
-		return buildResponse(stringList);
+		return buildResponse(stringList," | ");
 	}
 	
 	private String buildRollsResponse(ArrayList<Roll> parts){
@@ -251,15 +251,15 @@ public class Command {
 		for (Roll part : parts) {
 			stringList.add(part.toString());
 		}
-		return buildResponse(stringList);
+		return buildResponse(stringList,"<|||>");
 	}
 
-	private String buildResponse(ArrayList<String> parts) {
+	private String buildResponse(ArrayList<String> parts, String delim) {
 		StringBuilder response = new StringBuilder();
 		response.append("{");
 		for (String str : parts) {
 			response.append(str);
-			response.append("|");
+			response.append(delim);
 		}
 		response.delete(response.length() - 1, response.length());
 		response.append("}");
