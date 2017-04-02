@@ -39,6 +39,7 @@ public class Roll {
 		this.computedRoll = computedRoll;
 		this.expanded = expanded;
 		this.username = username;
+		this.expand = true;
 	}
 
 	public static String getRegex() {
@@ -171,7 +172,7 @@ public class Roll {
 			}
 
 			if (rolls.length() > 0) {
-				expanded = "[" + diceThrows + dicetype + diceSize +"=" + rolls.toString() + "|" + bonus + "]";
+				expanded = "[" + diceThrows + dicetype + diceSize +"=" + rolls.toString() + "|" + (bonus == null ? "" : bonus) + "]";
 			}
 
 			rollSum += bonus;
