@@ -235,6 +235,16 @@ public class Command {
 					+ buildConfigResponse(properties));
 		}
 	}
+	
+	@IRCCommand(command = ".setProperty", startOfLine = true)
+	public void setProperty(CommandData data) {
+		if (data.isAuthenticatedUser(magnusMode, false)) {
+			String properties = Configs
+					.setProperty(data.getSplitMessage()[1],data.getSplitMessage()[2],data.getSplitMessage()[3]);
+			helen.sendMessage(data.getResponseTarget(), data.getSender()
+					+ ": " + properties);
+		}
+	}
 
 	private String buildConfigResponse(ArrayList<Config> parts) {
 		ArrayList<String> stringList = new ArrayList<String>();

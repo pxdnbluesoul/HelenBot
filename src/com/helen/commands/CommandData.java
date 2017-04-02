@@ -27,6 +27,10 @@ public class CommandData {
 	public String getChannel() {
 		return channel;
 	}
+	
+	public String[] getSplitMessage(){
+		return getMessage().split(" ");
+	}
 
 
 	public String getSender() {
