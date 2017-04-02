@@ -12,7 +12,7 @@ public class Roll {
 	private boolean expand = false;
 	private boolean save = false;
 	private Integer diceSize = null;
-	private Integer bonus = null;
+	private Integer bonus = 0;
 	private String diceMessage = null;
 	private String dicetype = "u";
 	private Integer computedRoll = null;
@@ -172,7 +172,7 @@ public class Roll {
 			}
 
 			if (rolls.length() > 0) {
-				expanded = "[" + diceThrows + dicetype + diceSize +"=" + rolls.toString() + "|" + (bonus == null ? "" : bonus) + "]";
+				expanded = "[" + diceThrows + dicetype + diceSize +"=" + rolls.toString() + "|" + bonus + "]";
 			}
 
 			rollSum += bonus;
