@@ -140,7 +140,7 @@ public class Command {
 			Roll roll = new Roll(data.getMessage(), data.getSender());
 			Rolls.insertRoll(roll);
 			helen.sendMessage(data.getChannel(),
-					data.getSender() + ": " + roll.getRoll());
+					data.getSender() + ": " + roll.toString());
 		}
 	}
 

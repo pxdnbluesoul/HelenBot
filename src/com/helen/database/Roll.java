@@ -93,7 +93,7 @@ public class Roll {
 		return expanded;
 	}
 
-	public String getRoll() {
+	public String toString() {
 		if (dicetype.equals("d")) {
 			StringBuilder str = new StringBuilder();
 			if (diceMessage != null) {
