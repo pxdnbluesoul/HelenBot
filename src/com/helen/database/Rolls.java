@@ -11,8 +11,8 @@ import org.apache.log4j.Logger;
 public class Rolls {
 
 	private static final String insertRoll = "insert into rolls "
-			+ "(throws, rolltype, size, username, bonus, roll, text, time, expanded_roll"
-			+ "values" + "(?,?,?,?,?,?,?,?,?)";
+			+ "(throws, rolltype, size, username, bonus, roll, text, time, expanded_roll) "
+			+ "values " + "(?,?,?,?,?,?,?,?,?);";
 
 	private static final String getRolls = "select * from rolls where username like ? limit 5";
 
