@@ -21,6 +21,8 @@ public class Tell {
 	
 	public String toString(){
 		StringBuilder str = new StringBuilder();
+		str.append(target);
+		str.append(": ");
 		str.append(sender);
 		str.append(" said at ");
 		str.append(new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(tell_time));

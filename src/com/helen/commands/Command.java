@@ -10,6 +10,8 @@ import org.jibble.pircbot.PircBot;
 
 import com.helen.database.Config;
 import com.helen.database.Configs;
+import com.helen.database.Roll;
+import com.helen.database.Rolls;
 import com.helen.database.Tell;
 import com.helen.database.Tells;
 import com.helen.search.WebSearch;
@@ -57,9 +59,10 @@ public class Command {
 		ArrayList<Tell> tells = Tells.getTells(data.getSender());
 		for (Tell tell : tells) {
 			Tells.clearTells(tell.getTarget());
-			helen.sendMessage(tell.isPrivate() ? data.getSender() : data.getChannel(),
+			helen.sendMessage(
+					tell.isPrivate() ? data.getSender() : data.getChannel(),
 					tell.toString());
-			
+
 		}
 	}
 
@@ -134,10 +137,8 @@ public class Command {
 	@IRCCommand(command = ".roll", startOfLine = true)
 	public void roll(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
-			RollData roll = new RollData(data.getMessage());
-			if (roll.save()) {
-				RollDB.saveRoll(data.getSender(), roll);
-			}
+			Roll roll = new Roll(data.getMessage(), data.getSender());
+			Rolls.insertRoll(roll);
 			helen.sendMessage(data.getChannel(),
 					data.getSender() + ": " + roll.getRoll());
 		}
@@ -146,10 +147,9 @@ public class Command {
 	@IRCCommand(command = ".myRolls", startOfLine = true)
 	public void getRolls(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
-			String rolls = RollDB.getUserRolls(data.getSender());
-			if (rolls != null) {
-				helen.sendMessage(data.getResponseTarget(), data.getSender() + ": "
-						+ rolls);
+			ArrayList<Roll> rolls = Rolls.getRolls(data.getSender());
+			if (rolls.size() > 0) {
+				helen.sendMessage(data.getResponseTarget(), buildRollsResponse(rolls));
 			} else {
 				helen.sendMessage(data.getResponseTarget(), data.getSender()
 						+ ": Apologies, I do not have any saved "
@@ -194,8 +194,10 @@ public class Command {
 	public void tell(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
 			String str = Tells.sendTell(data.getTarget(), data.getSender(),
-					data.getTellMessage(), (data.getChannel().isEmpty() ? true : false));
-			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + str);
+					data.getTellMessage(), (data.getChannel().isEmpty() ? true
+							: false));
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": "
+					+ str);
 		}
 	}
 
@@ -240,6 +242,14 @@ public class Command {
 			if (part.isPublic()) {
 				stringList.add(part.toString());
 			}
+		}
+		return buildResponse(stringList);
+	}
+	
+	private String buildRollsResponse(ArrayList<Roll> parts){
+		ArrayList<String> stringList = new ArrayList<String>();
+		for (Roll part : parts) {
+			stringList.add(part.toString());
 		}
 		return buildResponse(stringList);
 	}
