@@ -79,7 +79,7 @@ public class Users {
 				stmt.setString(1, "first_seen");
 				stmt.setString(2, "first_message");
 				stmt.setString(3, "'" + data.getSplitMessage()[2].toLowerCase() + "'");
-
+				logger.info(stmt.toString());
 				ResultSet rs = stmt.executeQuery();
 				if (rs.next()) {
 					return "I first met " + data.getSplitMessage()[2] + " on " + rs.getDate("first_seen").toString()
@@ -91,7 +91,7 @@ public class Users {
 				stmt.setString(1, "last_seen");
 				stmt.setString(2, "last_message");
 				stmt.setString(3, "'" + data.getSplitMessage()[1].toLowerCase() + "'");
-
+				logger.info(stmt.toString());
 				ResultSet rs = stmt.executeQuery();
 				if (rs.next()) {
 					return "I last saw " + data.getSplitMessage()[2] + " at "
