@@ -52,7 +52,6 @@ public class Users {
 		Connection conn = Connector.getConnection();
 
 		try {
-			PreparedStatement stmt = conn.prepareStatement(updateStatement);
 
 			PreparedStatement hostStatement = conn.prepareStatement(updateStatement);
 
@@ -91,7 +90,7 @@ public class Users {
 			} else {
 				stmt.setString(1, "last_seen");
 				stmt.setString(2, "last_message");
-				stmt.setString(3, "'" + data.getSplitMessage()[2].toLowerCase() + "'");
+				stmt.setString(3, "'" + data.getSplitMessage()[1].toLowerCase() + "'");
 
 				ResultSet rs = stmt.executeQuery();
 				if (rs.next()) {
