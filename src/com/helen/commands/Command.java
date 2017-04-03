@@ -247,6 +247,16 @@ public class Command {
 		}
 	}
 	
+	@IRCCommand(command = ".updateProperty", startOfLine = true)
+	public void updateProperty(CommandData data) {
+		if (data.isAuthenticatedUser(magnusMode, false)) {
+			String properties = Configs
+					.updateSingle(data.getSplitMessage()[1],data.getSplitMessage()[2],data.getSplitMessage()[3]);
+			helen.sendMessage(data.getResponseTarget(), data.getSender()
+					+ ": " + properties);
+		}
+	}
+	
 	private String buildResponse(ArrayList<? extends DatabaseObject> dbo){
 		StringBuilder str = new StringBuilder();
 		str.append("{");

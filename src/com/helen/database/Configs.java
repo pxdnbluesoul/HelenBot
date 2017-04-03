@@ -18,6 +18,8 @@ public class Configs {
 	private final static String kvQuery = "select * from properties";
 	private final static String keysQuery = "select distinct key from properties where public = true";
 	private final static String propertySet = "insert into properties (key, value, updated, public) values (?,?,?,?)";
+	private final static String updateCheck = "select count(*) as counted from properties where key like ?";
+	private final static String updatePush = "update properties set value = ?, public = ? where key like ?";
 
 	public static ArrayList<Config> getProperty(String key) {
 		if(!cacheValid){
@@ -55,6 +57,48 @@ public class Configs {
 				return "Property " + key + " has been set to " + value;
 			} else {
 				return "Failure to set new property, please check the logs.";
+			}
+		} catch (SQLException e) {
+			logger.error("Exception attempting to set property", e);
+		} finally {
+			try {
+				conn.close();
+			} catch (NullPointerException e) {
+				// nothing to do here!
+			} catch (Exception e) {
+				logger.error("There was an exception closing result set", e);
+			}
+		}
+
+		return "There was an error during the update process.  Please check the logs.";
+	}
+	public static String updateSingle(String key, String value, String publicFlag) {
+		Connection conn = Connector.getConnection();
+		try {
+			PreparedStatement stmt = conn.prepareStatement(updateCheck);
+			stmt.setString(1, key);
+			
+			ResultSet rs = stmt.executeQuery();
+			if(rs.next()){
+				if(rs.getInt("counted") > 1){
+					return "That property has multiple values.  Please contact Dr. Magnus to have it modified.";
+				}else if(rs.getInt("counted") < 1){
+					return "That property currently is not set.  This operation doesn't support insertion.";
+				}else{
+					PreparedStatement updatestmt = conn.prepareStatement(updatePush);
+					updatestmt.setString(1, value);
+					updatestmt.setBoolean(2, publicFlag.equals("t") ? true : false);
+					updatestmt.setString(3, key);
+					
+					int i = updatestmt.executeUpdate();
+					if(i > 0){
+						return "Updated " + key + " to value " + value;
+					}else{
+						return "I'm sorry, there was an error updating the key specified.";
+					}
+				}
+			}else{
+				logger.error("Exception attempting to set property.  The returned result set had no values.");
 			}
 		} catch (SQLException e) {
 			logger.error("Exception attempting to set property", e);
