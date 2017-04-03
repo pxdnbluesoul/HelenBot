@@ -163,10 +163,10 @@ public class Command {
 
 	@IRCCommand(command = ".y", startOfLine = true)
 	public void youtubeSearch(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, true))
+		if (data.isAuthenticatedUser(magnusMode, true)) {
 			helen.sendMessage(data.getResponseTarget(),
 					data.getSender() + ": " + YouTubeSearch.youtubeSearch(data.getMessage()).toString());
-	}
+		}
 
 	}
 
