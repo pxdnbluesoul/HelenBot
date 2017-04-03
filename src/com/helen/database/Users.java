@@ -17,7 +17,8 @@ public class Users {
 	private static String insertStatement = "Insert into users (username, first_seen, last_seen, first_message) values (?, ?, ?, ?)";
 	private static String updateStatement = "update users set last_seen = ?, last_message = ? where username = ?";
 	private static String hostmaskStatement = "Insert into hostmasks (username, hostmask, established) values (?,?,?);";
-	private static String seenQuery = "select ?, ? from users where username like ? ";
+	private static String seenFirstQuery = "select first_seen, first_message from users where username like ? ";
+	private static String seenQuery = "select last_seen, last_message from users where username like ? ";
 
 	public static void insertUser(String username, Date date, String hostmask, String message) {
 		Connection conn = Connector.getConnection();
@@ -74,11 +75,10 @@ public class Users {
 		Connection conn = Connector.getConnection();
 
 		try {
-			PreparedStatement stmt = conn.prepareStatement(seenQuery);
+			
 			if (data.getSplitMessage()[1].equals("-f")) {
-				stmt.setString(1, "first_seen");
-				stmt.setString(2, "first_message");
-				stmt.setString(3, "'" + data.getSplitMessage()[2].toLowerCase() + "'");
+				PreparedStatement stmt = conn.prepareStatement(seenFirstQuery);
+				stmt.setString(1,  data.getSplitMessage()[2].toLowerCase() );
 				logger.info(stmt.toString());
 				ResultSet rs = stmt.executeQuery();
 				if (rs.next()) {
@@ -88,9 +88,8 @@ public class Users {
 					return "I have never seen someone by that name";
 				}
 			} else {
-				stmt.setString(1, "last_seen");
-				stmt.setString(2, "last_message");
-				stmt.setString(3, "'" + data.getSplitMessage()[1].toLowerCase() + "'");
+				PreparedStatement stmt = conn.prepareStatement(seenQuery);
+				stmt.setString(1,  data.getSplitMessage()[1].toLowerCase() );
 				logger.info(stmt.toString());
 				ResultSet rs = stmt.executeQuery();
 				if (rs.next()) {
