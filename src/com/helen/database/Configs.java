@@ -92,6 +92,7 @@ public class Configs {
 					
 					int i = updatestmt.executeUpdate();
 					if(i > 0){
+						cacheValid = false;
 						return "Updated " + key + " to value " + value;
 					}else{
 						return "I'm sorry, there was an error updating the key specified.";
