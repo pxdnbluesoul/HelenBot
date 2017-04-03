@@ -19,7 +19,7 @@ public class Tells {
 		Connection conn = Connector.getConnection();
 		try {
 			PreparedStatement stmt = conn.prepareStatement(insertTell);
-			stmt.setString(1, target);
+			stmt.setString(1, target.toLowerCase());
 			stmt.setString(2, sender);
 			stmt.setString(3, message);
 			stmt.setBoolean(4, privateMessage);
@@ -39,7 +39,7 @@ public class Tells {
 		Connection conn = Connector.getConnection();
 		try{
 			PreparedStatement stmt = conn.prepareStatement(searchTells);
-			stmt.setString(1, "%" + username + "%");
+			stmt.setString(1, "%" + username.toLowerCase() + "%");
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
 				list.add(new Tell(rs.getString("sender"),rs.getString("username")
