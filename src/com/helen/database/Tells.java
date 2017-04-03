@@ -57,7 +57,7 @@ public class Tells {
 		Connection conn = Connector.getConnection();
 		try{
 			Statement stmt = conn.createStatement();
-			stmt.execute("delete from tells where username like '" + username + "'");
+			stmt.execute("delete from tells where username like '" + username.toLowerCase() + "'");
 			
 			
 		}catch (Exception e){

@@ -26,7 +26,7 @@ public class Rolls {
 			stmt.setInt(1, roll.getDiceThrows());
 			stmt.setString(2, roll.getDicetype());
 			stmt.setInt(3, roll.getDiceSize());
-			stmt.setString(4, roll.getUsername());
+			stmt.setString(4, roll.getUsername().toLowerCase());
 			stmt.setInt(5, roll.getBonus());
 			stmt.setInt(6, roll.getComputedRoll());
 			stmt.setString(7, roll.getDiceMessage());
@@ -47,7 +47,7 @@ public class Rolls {
 		try {
 			Statement stmt = conn.createStatement();
 			String query = "select * from rolls where username like '"
-					+ username + "' order by time desc limit 5";
+					+ username.toLowerCase() + "' order by time desc limit 5";
 			ResultSet rs = stmt.executeQuery(query);
 			while (rs.next()) {
 				rolls.add(new Roll(rs.getInt("throws"), rs
