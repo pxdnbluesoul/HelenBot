@@ -16,7 +16,7 @@ public class Configs {
 	private static HashMap<String, ArrayList<Config>> cachedProperties = new HashMap<String, ArrayList<Config>>();
 	private static Boolean cacheValid = false;
 	private final static String kvQuery = "select * from properties";
-	private final static String keysQuery = "select distinct key from properties";
+	private final static String keysQuery = "select distinct key from properties where public = true";
 	private final static String propertySet = "insert into properties (key, value, updated, public) values (?,?,?,?)";
 
 	public static ArrayList<Config> getProperty(String key) {
@@ -105,14 +105,16 @@ public class Configs {
 		}
 	}
 
-	public static ArrayList<Config> getConfiguredProperties() {
+	public static ArrayList<Config> getConfiguredProperties(boolean showPublic) {
 		ArrayList<Config> keyValues = new ArrayList<Config>();
 		if (!cacheValid) {
 			loadProperties();
 		} else {
 			for (String key : cachedProperties.keySet()) {
 				for (Config value : cachedProperties.get(key)) {
-					keyValues.add(value);
+					if(showPublic && value.isPublic()){
+						keyValues.add(value);
+					}
 				}
 			}
 
