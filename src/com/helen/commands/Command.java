@@ -257,6 +257,17 @@ public class Command {
 		}
 	}
 	
+	@IRCCommand(command = ".deleteProperty", startOfLine = true)
+	public void deleteProperty(CommandData data) {
+		if (data.isAuthenticatedUser(magnusMode, false)) {
+			String properties = Configs
+					.removeProperty(data.getSplitMessage()[1],data.getSplitMessage()[2]);
+			helen.sendMessage(data.getResponseTarget(), data.getSender()
+					+ ": " + properties);
+		}
+	}
+	
+	
 	private String buildResponse(ArrayList<? extends DatabaseObject> dbo){
 		StringBuilder str = new StringBuilder();
 		str.append("{");
