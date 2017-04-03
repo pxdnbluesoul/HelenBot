@@ -219,7 +219,7 @@ public class Command {
 	@IRCCommand(command = ".allProperties", startOfLine = true)
 	public void getAllProperties(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, false)) {
-			ArrayList<Config> properties = Configs.getConfiguredProperties(false);
+			ArrayList<Config> properties = Configs.getConfiguredProperties(true);
 			helen.sendMessage(data.getResponseTarget(), data.getSender()
 					+ ": Configured properties: "
 					+ buildResponse(properties));

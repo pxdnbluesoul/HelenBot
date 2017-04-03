@@ -112,7 +112,11 @@ public class Configs {
 		} else {
 			for (String key : cachedProperties.keySet()) {
 				for (Config value : cachedProperties.get(key)) {
-					if(showPublic && value.isPublic()){
+					if(showPublic){
+						if(value.isPublic()){
+							keyValues.add(value);
+						}
+					}else{
 						keyValues.add(value);
 					}
 				}
