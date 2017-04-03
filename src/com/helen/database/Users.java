@@ -93,7 +93,7 @@ public class Users {
 				logger.info(stmt.toString());
 				ResultSet rs = stmt.executeQuery();
 				if (rs.next()) {
-					return "I last saw " + data.getSplitMessage()[2] + " at "
+					return "I last saw " + data.getSplitMessage()[1] + " at "
 							+ new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(rs.getTimestamp("last_seen"))
 							+ " saying: " + rs.getString("last_message");
 				} else {
