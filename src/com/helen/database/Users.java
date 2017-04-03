@@ -30,7 +30,9 @@ public class Users {
 			
 		} 
 		catch (SQLException e) {
-			logger.error("Error code " + e.getErrorCode() + "Insertion exception for " + username,e);
+			
+			e.get
+			logger.error("Error code " + e.getErrorCode() + e.getMessage() + " Insertion exception for " + username,e);
 		}
 	}
 }
