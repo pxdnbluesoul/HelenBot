@@ -15,6 +15,7 @@ import com.helen.database.Roll;
 import com.helen.database.Rolls;
 import com.helen.database.Tell;
 import com.helen.database.Tells;
+import com.helen.database.Users;
 import com.helen.search.WebSearch;
 import com.helen.search.YouTubeSearch;
 
@@ -174,6 +175,12 @@ public class Command {
 	public void youtubeSearch(CommandData data) {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": "
 				+ YouTubeSearch.youtubeSearch(data.getMessage()).toString());
+	}
+	
+	@IRCCommand(command = ".seen", startOfLine = true)
+	public void seen(CommandData data) {
+		helen.sendMessage(data.getResponseTarget(),
+				Users.seen(data));
 	}
 
 	// Authentication Required Commands

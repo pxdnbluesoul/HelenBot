@@ -136,6 +136,7 @@ public class Configs {
 				stmt.setString(2, value);
 				int i = stmt.executeUpdate();
 				if (i > 0) {
+					cacheValid = false;
 					return "Successfully removed " + key + " with the value " + value + " from the properties table.";
 				} else {
 					return "There was an error removing the specified key/value pair.";
