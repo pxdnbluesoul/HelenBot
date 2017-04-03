@@ -10,6 +10,7 @@ import org.jibble.pircbot.PircBot;
 
 import com.helen.database.Config;
 import com.helen.database.Configs;
+import com.helen.database.DatabaseObject;
 import com.helen.database.Roll;
 import com.helen.database.Rolls;
 import com.helen.database.Tell;
@@ -149,7 +150,7 @@ public class Command {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
 			ArrayList<Roll> rolls = Rolls.getRolls(data.getSender());
 			if (rolls.size() > 0) {
-				helen.sendMessage(data.getResponseTarget(), buildRollsResponse(rolls));
+				helen.sendMessage(data.getResponseTarget(), buildResponse(rolls));
 			} else {
 				helen.sendMessage(data.getResponseTarget(), data.getSender()
 						+ ": Apologies, I do not have any saved "
@@ -221,7 +222,7 @@ public class Command {
 			ArrayList<Config> properties = Configs.getConfiguredProperties();
 			helen.sendMessage(data.getResponseTarget(), data.getSender()
 					+ ": Configured properties: "
-					+ buildConfigResponse(properties));
+					+ buildResponse(properties));
 		}
 	}
 
@@ -232,7 +233,7 @@ public class Command {
 					.getProperty(data.getTarget());
 			helen.sendMessage(data.getResponseTarget(), data.getSender()
 					+ ": Configured properties: "
-					+ buildConfigResponse(properties));
+					+ buildResponse(properties));
 		}
 	}
 	
@@ -245,35 +246,16 @@ public class Command {
 					+ ": " + properties);
 		}
 	}
-
-	private String buildConfigResponse(ArrayList<Config> parts) {
-		ArrayList<String> stringList = new ArrayList<String>();
-		for (Config part : parts) {
-			if (part.isPublic()) {
-				stringList.add(part.toString());
-			}
-		}
-		return buildResponse(stringList," | ");
-	}
 	
-	private String buildRollsResponse(ArrayList<Roll> parts){
-		ArrayList<String> stringList = new ArrayList<String>();
-		for (Roll part : parts) {
-			stringList.add(part.toString());
+	private String buildResponse(ArrayList<? extends DatabaseObject> dbo){
+		StringBuilder str = new StringBuilder();
+		str.append("{");
+		for(DatabaseObject o : dbo){
+			str.append(o.toString());
+			str.append(o.getDelimiter());
 		}
-		return buildResponse(stringList,"<|||>");
-	}
-
-	private String buildResponse(ArrayList<String> parts, String delim) {
-		StringBuilder response = new StringBuilder();
-		response.append("{");
-		for (String str : parts) {
-			response.append(str);
-			response.append(delim);
-		}
-		response.delete(response.length() - 1, response.length());
-		response.append("}");
-
-		return response.toString();
+		str.delete(str.length() -1, str.length());
+		str.append("}");
+		return str.toString();
 	}
 }

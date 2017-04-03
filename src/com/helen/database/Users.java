@@ -30,9 +30,7 @@ public class Users {
 			}
 
 		} catch (SQLException e) {
-			if (!e.getMessage().contains("user_unique"))
-				;
-			{
+			if (!e.getMessage().contains("user_unique")){
 				logger.error("Error code " + e.getErrorCode() + e.getMessage() + " Insertion exception for " + username,
 						e);
 			}

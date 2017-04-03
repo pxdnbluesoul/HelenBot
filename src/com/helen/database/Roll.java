@@ -3,7 +3,7 @@ package com.helen.database;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Roll {
+public class Roll implements DatabaseObject {
 
 	final static String regex = ".roll\\s([0-9]+)(d|f)([0-9]+)(\\s[+|-]?[0-9]+)?(\\s-e|-s)?\\s?(-e|-s)?\\s?(.+)?";
 	private final static Pattern r = Pattern.compile(regex);
@@ -92,6 +92,10 @@ public class Roll {
 
 	public String getExpanded() {
 		return expanded;
+	}
+	
+	public String getDelimiter(){
+		return Configs.getSingleProperty("dicedelim").getValue();
 	}
 
 	public String toString() {

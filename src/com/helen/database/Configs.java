@@ -57,7 +57,7 @@ public class Configs {
 				return "Failure to set new property, please check the logs.";
 			}
 		} catch (SQLException e) {
-			logger.error("Exception attempting to retreive properties list", e);
+			logger.error("Exception attempting to set property", e);
 		} finally {
 			try {
 				conn.close();
@@ -73,6 +73,7 @@ public class Configs {
 
 	private static void loadProperties() {
 		if (!cacheValid) {
+			cachedProperties = new HashMap<String, ArrayList<Config>>();
 			Connection conn = Connector.getConnection();
 			ResultSet rs = null;
 			try {

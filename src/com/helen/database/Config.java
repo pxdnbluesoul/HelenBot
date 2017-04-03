@@ -1,6 +1,6 @@
 package com.helen.database;
 
-public class Config {
+public class Config implements DatabaseObject {
 	
 	private String key = null;
 	private String value = null;
@@ -31,6 +31,9 @@ public class Config {
 		return lastUpdated;
 	}
 	
+	public String getDelimiter(){
+		return Configs.getSingleProperty("configDelim").getValue();
+	}
 	
 	public String toString(){
 		StringBuilder str = new StringBuilder();
