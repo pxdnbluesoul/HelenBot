@@ -43,15 +43,12 @@ public class Command {
 			logger.info(m.isAnnotationPresent(IRCCommand.class));
 			if (m.isAnnotationPresent(IRCCommand.class)) {
 				if (m.getAnnotation(IRCCommand.class).startOfLine()) {
-					hashableCommandList.put(((IRCCommand) m
-							.getAnnotation(IRCCommand.class)).command(), m);
+					hashableCommandList.put(((IRCCommand) m.getAnnotation(IRCCommand.class)).command(), m);
 				} else {
-					slowCommands.put(((IRCCommand) m
-							.getAnnotation(IRCCommand.class)).command(), m);
+					slowCommands.put(((IRCCommand) m.getAnnotation(IRCCommand.class)).command(), m);
 				}
 
-				logger.info(((IRCCommand) m.getAnnotation(IRCCommand.class))
-						.command());
+				logger.info(((IRCCommand) m.getAnnotation(IRCCommand.class)).command());
 			}
 		}
 		logger.info("Finished Initializing commandList.");
@@ -61,9 +58,7 @@ public class Command {
 		ArrayList<Tell> tells = Tells.getTells(data.getSender());
 		for (Tell tell : tells) {
 			Tells.clearTells(tell.getTarget());
-			helen.sendMessage(
-					tell.isPrivate() ? data.getSender() : data.getChannel(),
-					tell.toString());
+			helen.sendMessage(tell.isPrivate() ? data.getSender() : data.getChannel(), tell.toString());
 
 		}
 	}
@@ -72,14 +67,12 @@ public class Command {
 
 		checkTells(data);
 
-		logger.info("Entering dispatch table with command: \""
-				+ data.getCommand() + "\"");
+		logger.info("Entering dispatch table with command: \"" + data.getCommand() + "\"");
 		if (hashableCommandList.containsKey(data.getCommand())) {
 			try {
 				hashableCommandList.get(data.getCommand()).invoke(this, data);
 			} catch (Exception e) {
-				logger.error("Exception invoking start-of-line command: "
-						+ data.getCommand(), e);
+				logger.error("Exception invoking start-of-line command: " + data.getCommand(), e);
 			}
 		} else {
 			for (String command : slowCommands.keySet()) {
@@ -87,8 +80,7 @@ public class Command {
 					try {
 						slowCommands.get(command).invoke(this, data);
 					} catch (Exception e) {
-						logger.error("Exception invoking command: " + command,
-								e);
+						logger.error("Exception invoking command: " + command, e);
 					}
 				}
 			}
@@ -100,13 +92,11 @@ public class Command {
 	@IRCCommand(command = ".HelenBot", startOfLine = false)
 	public void versionResponse(CommandData data) {
 		if (data.getChannel().isEmpty()) {
-			helen.sendMessage(data.getResponseTarget(), data.getSender()
-					+ ": Greetings, I am HelenBot v"
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Greetings, I am HelenBot v"
 					+ Configs.getSingleProperty("version").getValue());
 		}
 		helen.sendMessage(data.getChannel(),
-				data.getSender() + ": Greetings, I am HelenBot v"
-						+ Configs.getSingleProperty("version").getValue());
+				data.getSender() + ": Greetings, I am HelenBot v" + Configs.getSingleProperty("version").getValue());
 	}
 
 	@IRCCommand(command = ".modeToggle", startOfLine = true)
@@ -119,9 +109,8 @@ public class Command {
 	@IRCCommand(command = ".mode", startOfLine = true)
 	public void displayMode(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, false)) {
-			helen.sendMessage(data.getResponseTarget(), data.getSender()
-					+ ": I am currently in "
-					+ (magnusMode ? "Magnus Only" : " Any User") + " mode.");
+			helen.sendMessage(data.getResponseTarget(),
+					data.getSender() + ": I am currently in " + (magnusMode ? "Magnus Only" : " Any User") + " mode.");
 		}
 	}
 
@@ -141,8 +130,7 @@ public class Command {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
 			Roll roll = new Roll(data.getMessage(), data.getSender());
 			Rolls.insertRoll(roll);
-			helen.sendMessage(data.getChannel(),
-					data.getSender() + ": " + roll.toString());
+			helen.sendMessage(data.getChannel(), data.getSender() + ": " + roll.toString());
 		}
 	}
 
@@ -153,9 +141,8 @@ public class Command {
 			if (rolls.size() > 0) {
 				helen.sendMessage(data.getResponseTarget(), buildResponse(rolls));
 			} else {
-				helen.sendMessage(data.getResponseTarget(), data.getSender()
-						+ ": Apologies, I do not have any saved "
-						+ "rolls for you at this time.");
+				helen.sendMessage(data.getResponseTarget(),
+						data.getSender() + ": Apologies, I do not have any saved " + "rolls for you at this time.");
 			}
 
 		}
@@ -163,24 +150,31 @@ public class Command {
 
 	@IRCCommand(command = ".g", startOfLine = true)
 	public void webSearch(CommandData data) {
-		try {
-			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": "
-					+ WebSearch.search(data.getMessage()).toString());
-		} catch (IOException e) {
-			logger.error("Exception during web search", e);
+		if (data.isAuthenticatedUser(magnusMode, true)) {
+			try {
+				helen.sendMessage(data.getResponseTarget(),
+						data.getSender() + ": " + WebSearch.search(data.getMessage()).toString());
+			} catch (IOException e) {
+				logger.error("Exception during web search", e);
+			}
 		}
+
 	}
 
 	@IRCCommand(command = ".y", startOfLine = true)
 	public void youtubeSearch(CommandData data) {
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": "
-				+ YouTubeSearch.youtubeSearch(data.getMessage()).toString());
+		if (data.isAuthenticatedUser(magnusMode, true))
+			helen.sendMessage(data.getResponseTarget(),
+					data.getSender() + ": " + YouTubeSearch.youtubeSearch(data.getMessage()).toString());
 	}
-	
+
+	}
+
 	@IRCCommand(command = ".seen", startOfLine = true)
 	public void seen(CommandData data) {
-		helen.sendMessage(data.getResponseTarget(),
-				Users.seen(data));
+		if (data.isAuthenticatedUser(magnusMode, true)) {
+			helen.sendMessage(data.getResponseTarget(), Users.seen(data));
+		}
 	}
 
 	// Authentication Required Commands
@@ -201,11 +195,9 @@ public class Command {
 	@IRCCommand(command = ".tell", startOfLine = true)
 	public void tell(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
-			String str = Tells.sendTell(data.getTarget(), data.getSender(),
-					data.getTellMessage(), (data.getChannel().isEmpty() ? true
-							: false));
-			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": "
-					+ str);
+			String str = Tells.sendTell(data.getTarget(), data.getSender(), data.getTellMessage(),
+					(data.getChannel().isEmpty() ? true : false));
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + str);
 		}
 	}
 
@@ -214,7 +206,7 @@ public class Command {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
 			helen.disconnect();
 			System.exit(0);
-			
+
 		}
 	}
 
@@ -222,62 +214,54 @@ public class Command {
 	public void getAllProperties(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, false)) {
 			ArrayList<Config> properties = Configs.getConfiguredProperties(true);
-			helen.sendMessage(data.getResponseTarget(), data.getSender()
-					+ ": Configured properties: "
-					+ buildResponse(properties));
+			helen.sendMessage(data.getResponseTarget(),
+					data.getSender() + ": Configured properties: " + buildResponse(properties));
 		}
 	}
 
 	@IRCCommand(command = ".property", startOfLine = true)
 	public void getProperty(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, false)) {
-			ArrayList<Config> properties = Configs
-					.getProperty(data.getTarget());
-			helen.sendMessage(data.getResponseTarget(), data.getSender()
-					+ ": Configured properties: "
-					+ buildResponse(properties));
+			ArrayList<Config> properties = Configs.getProperty(data.getTarget());
+			helen.sendMessage(data.getResponseTarget(),
+					data.getSender() + ": Configured properties: " + buildResponse(properties));
 		}
 	}
-	
+
 	@IRCCommand(command = ".setProperty", startOfLine = true)
 	public void setProperty(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, false)) {
-			String properties = Configs
-					.setProperty(data.getSplitMessage()[1],data.getSplitMessage()[2],data.getSplitMessage()[3]);
-			helen.sendMessage(data.getResponseTarget(), data.getSender()
-					+ ": " + properties);
+			String properties = Configs.setProperty(data.getSplitMessage()[1], data.getSplitMessage()[2],
+					data.getSplitMessage()[3]);
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + properties);
 		}
 	}
-	
+
 	@IRCCommand(command = ".updateProperty", startOfLine = true)
 	public void updateProperty(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, false)) {
-			String properties = Configs
-					.updateSingle(data.getSplitMessage()[1],data.getSplitMessage()[2],data.getSplitMessage()[3]);
-			helen.sendMessage(data.getResponseTarget(), data.getSender()
-					+ ": " + properties);
+			String properties = Configs.updateSingle(data.getSplitMessage()[1], data.getSplitMessage()[2],
+					data.getSplitMessage()[3]);
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + properties);
 		}
 	}
-	
+
 	@IRCCommand(command = ".deleteProperty", startOfLine = true)
 	public void deleteProperty(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, false)) {
-			String properties = Configs
-					.removeProperty(data.getSplitMessage()[1],data.getSplitMessage()[2]);
-			helen.sendMessage(data.getResponseTarget(), data.getSender()
-					+ ": " + properties);
+			String properties = Configs.removeProperty(data.getSplitMessage()[1], data.getSplitMessage()[2]);
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + properties);
 		}
 	}
-	
-	
-	private String buildResponse(ArrayList<? extends DatabaseObject> dbo){
+
+	private String buildResponse(ArrayList<? extends DatabaseObject> dbo) {
 		StringBuilder str = new StringBuilder();
 		str.append("{");
-		for(DatabaseObject o : dbo){
+		for (DatabaseObject o : dbo) {
 			str.append(o.toString());
 			str.append(o.getDelimiter());
 		}
-		str.delete(str.length() -1, str.length());
+		str.delete(str.length() - 1, str.length());
 		str.append("}");
 		return str.toString();
 	}

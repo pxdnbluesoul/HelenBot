@@ -14,7 +14,7 @@ import com.helen.commands.CommandData;
 public class Users {
 
 	private static final Logger logger = Logger.getLogger(Users.class);
-	private static String insertStatement = "Insert into users (username, first_seen, last_seen, first_message) values (?, ?, ?, ?)";
+	private static String insertStatement = "Insert into users (username, first_seen, last_seen, first_message, last_message) values (?, ?, ?, ?, ?)";
 	private static String updateStatement = "update users set last_seen = ?, last_message = ? where username = ?";
 	private static String hostmaskStatement = "Insert into hostmasks (username, hostmask, established) values (?,?,?);";
 	private static String seenFirstQuery = "select first_seen, first_message from users where username like ? ";
@@ -29,6 +29,7 @@ public class Users {
 			stmt.setDate(2, new java.sql.Date(date.getTime()));
 			stmt.setTimestamp(3, new java.sql.Timestamp(System.currentTimeMillis()));
 			stmt.setString(4, message);
+			stmt.setString(5, message);
 
 			int result = stmt.executeUpdate();
 			if (result > 0) {
@@ -95,7 +96,7 @@ public class Users {
 				if (rs.next()) {
 					return "I last saw " + data.getSplitMessage()[1] + " at "
 							+ new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(rs.getTimestamp("last_seen"))
-							+ " saying: " + rs.getString("last_message");
+							+ " EST saying: " + rs.getString("last_message");
 				} else {
 					return "I have never seen someone by that name";
 				}
