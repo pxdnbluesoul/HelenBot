@@ -54,6 +54,7 @@ public class Connector {
 					} else {
 						logger.error("Unknown object type");
 					}
+					i++;
 				}
 			}
 
