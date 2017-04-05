@@ -44,7 +44,7 @@ public class Connector {
 			}
 			logger.info(args.length);
 			int i = 1;
-			if (args.length > 1 && args[0] != null) {
+			if (!(args.length == 1 && args[0] != null)) {
 				for (int j = 0; j < args.length; j++) {
 					logger.info("checking " + args[j].toString());
 					if (args[j] instanceof String) {
