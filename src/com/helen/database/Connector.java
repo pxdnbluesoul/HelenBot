@@ -36,7 +36,7 @@ public class Connector {
 	public static CloseableStatement getStatement(String queryString,
 			Object... args) {
 		try {
-			logger.info("Entering connector");
+			logger.info("Entering connector for " + queryString);
 			Connection conn = getConnection();
 			PreparedStatement stmt = conn.prepareStatement(queryString);
 			for(Object o:args){
