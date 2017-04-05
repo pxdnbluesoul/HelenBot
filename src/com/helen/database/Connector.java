@@ -38,19 +38,22 @@ public class Connector {
 		try {
 			Connection conn = getConnection();
 			PreparedStatement stmt = conn.prepareStatement(queryString);
+			for(Object o:args){
+				logger.info(o.toString());
+			}
 			int i = 1;
 			if (args.length > 1 && args[0] != null) {
-				for (Object o : args) {
-					if (o instanceof String) {
-						stmt.setString(i, (String) o);
-					} else if (o instanceof Integer) {
-						stmt.setInt(i, (Integer) o);
-					} else if (o instanceof java.sql.Timestamp) {
-						stmt.setTimestamp(i, (java.sql.Timestamp) o);
-					} else if (o instanceof Boolean) {
-						stmt.setBoolean(i, (Boolean) o);
-					} else if (o instanceof Date) {
-						stmt.setDate(i, new java.sql.Date(((Date) o).getTime()));
+				for (int j = 0; j < args.length; j++) {
+					if (args[j] instanceof String) {
+						stmt.setString(i, (String) args[j]);
+					} else if (args[j] instanceof Integer) {
+						stmt.setInt(i, (Integer) args[j]);
+					} else if (args[j] instanceof java.sql.Timestamp) {
+						stmt.setTimestamp(i, (java.sql.Timestamp) args[j]);
+					} else if (args[j] instanceof Boolean) {
+						stmt.setBoolean(i, (Boolean) args[j]);
+					} else if (args[j] instanceof Date) {
+						stmt.setDate(i, new java.sql.Date(((Date) args[j]).getTime()));
 					} else {
 						logger.error("Unknown object type");
 					}
