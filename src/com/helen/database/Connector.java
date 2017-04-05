@@ -42,9 +42,11 @@ public class Connector {
 			for(Object o:args){
 				logger.info(o.toString());
 			}
+			logger.info(args.length);
 			int i = 1;
 			if (args.length > 1 && args[0] != null) {
 				for (int j = 0; j < args.length; j++) {
+					logger.info("checking " + args[j].toString());
 					if (args[j] instanceof String) {
 						stmt.setString(i, (String) args[j]);
 						logger.info("Setting param " + i + " to " + args[j].toString());
