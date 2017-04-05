@@ -36,6 +36,7 @@ public class Connector {
 	public static CloseableStatement getStatement(String queryString,
 			Object... args) {
 		try {
+			logger.info("Entering connector");
 			Connection conn = getConnection();
 			PreparedStatement stmt = conn.prepareStatement(queryString);
 			for(Object o:args){
@@ -46,14 +47,19 @@ public class Connector {
 				for (int j = 0; j < args.length; j++) {
 					if (args[j] instanceof String) {
 						stmt.setString(i, (String) args[j]);
+						logger.info("Setting param " + j + " to " + args[j].toString());
 					} else if (args[j] instanceof Integer) {
 						stmt.setInt(i, (Integer) args[j]);
+						logger.info("Setting param " + j + " to " + args[j].toString());
 					} else if (args[j] instanceof java.sql.Timestamp) {
 						stmt.setTimestamp(i, (java.sql.Timestamp) args[j]);
+						logger.info("Setting param " + j + " to " + args[j].toString());
 					} else if (args[j] instanceof Boolean) {
 						stmt.setBoolean(i, (Boolean) args[j]);
+						logger.info("Setting param " + j + " to " + args[j].toString());
 					} else if (args[j] instanceof Date) {
 						stmt.setDate(i, new java.sql.Date(((Date) args[j]).getTime()));
+						logger.info("Setting param " + j + " to " + args[j].toString());
 					} else {
 						logger.error("Unknown object type");
 					}
