@@ -36,32 +36,21 @@ public class Connector {
 	public static CloseableStatement getStatement(String queryString,
 			Object... args) {
 		try {
-			logger.info("Entering connector for " + queryString);
 			Connection conn = getConnection();
 			PreparedStatement stmt = conn.prepareStatement(queryString);
-			for(Object o:args){
-				logger.info(o.toString());
-			}
-			logger.info(args.length);
 			int i = 1;
 			if (!(args.length == 1 && args[0] == null)) {
-				for (int j = 0; j < args.length; j++) {
-					logger.info("checking " + args[j].toString());
-					if (args[j] instanceof String) {
-						stmt.setString(i, (String) args[j]);
-						logger.info("Setting param " + i + " to " + args[j].toString());
-					} else if (args[j] instanceof Integer) {
-						stmt.setInt(i, (Integer) args[j]);
-						logger.info("Setting param " + i + " to " + args[j].toString());
-					} else if (args[j] instanceof java.sql.Timestamp) {
-						stmt.setTimestamp(i, (java.sql.Timestamp) args[j]);
-						logger.info("Setting param " + i + " to " + args[j].toString());
-					} else if (args[j] instanceof Boolean) {
-						stmt.setBoolean(i, (Boolean) args[j]);
-						logger.info("Setting param " + i + " to " + args[j].toString());
-					} else if (args[j] instanceof Date) {
-						stmt.setDate(i, new java.sql.Date(((Date) args[j]).getTime()));
-						logger.info("Setting param " + i + " to " + args[j].toString());
+				for (Object o: args) {
+					if (o instanceof String) {
+						stmt.setString(i, (String) o);
+					} else if (o instanceof Integer) {
+						stmt.setInt(i, (Integer) o);
+					} else if (o instanceof java.sql.Timestamp) {
+						stmt.setTimestamp(i, (java.sql.Timestamp) o);
+					} else if (o instanceof Boolean) {
+						stmt.setBoolean(i, (Boolean) o);
+					} else if (o instanceof Date) {
+						stmt.setDate(i, new java.sql.Date(((Date) o).getTime()));
 					} else {
 						logger.error("Unknown object type");
 					}

@@ -12,9 +12,9 @@ public class Rolls {
 	public static void insertRoll(Roll roll) {
 		try {
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertRolls"),
-					"Insert Roll", roll.getDiceThrows(), roll.getDicetype(),
-					roll.getDiceSize(), roll.getUsername(), roll.getBonus(),
-					roll.getComputedRoll(), roll.getUsername(),
+					roll.getDiceThrows(), roll.getDicetype(),
+					roll.getDiceSize(), roll.getUsername().toLowerCase(), roll.getBonus(),
+					roll.getComputedRoll(), 
 					roll.getDiceMessage(),
 					new java.sql.Timestamp(System.currentTimeMillis()),
 					roll.getExpanded());
@@ -30,7 +30,7 @@ public class Rolls {
 		ArrayList<Roll> rolls = new ArrayList<Roll>();
 		try {
 			CloseableStatement stmt = Connector
-					.getStatement(Queries.getQuery("getRolls"), username);
+					.getStatement(Queries.getQuery("getRolls"), username.toLowerCase());
 			ResultSet rs = stmt.getResultSet();
 			while (rs.next()) {
 				rolls.add(new Roll(rs.getInt("throws"), rs
