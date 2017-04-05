@@ -1,7 +1,5 @@
 package com.helen.database;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -15,13 +13,7 @@ public class Configs {
 
 	private static HashMap<String, ArrayList<Config>> cachedProperties = new HashMap<String, ArrayList<Config>>();
 	private static Boolean cacheValid = false;
-	private final static String kvQuery = "select * from properties";
-	private final static String keysQuery = "select distinct key from properties where public = true";
-	private final static String propertySet = "insert into properties (key, value, updated, public) values (?,?,?,?)";
-	private final static String updateCheck = "select count(*) as counted from properties where key like ?";
-	private final static String updatePush = "update properties set value = ?, public = ? where key like ?";
-	private final static String deleteConfig = "delete from properties where key = ? and value = ?";
-
+	
 	public static ArrayList<Config> getProperty(String key) {
 		if (!cacheValid) {
 			loadProperties();
@@ -45,55 +37,42 @@ public class Configs {
 	}
 
 	public static String setProperty(String key, String value, String publicFlag) {
-		Connection conn = Connector.getConnection();
 		try {
-			PreparedStatement stmt = conn.prepareStatement(propertySet);
-			stmt.setString(1, key);
-			stmt.setString(2, value);
-			stmt.setDate(3, new java.sql.Date(System.currentTimeMillis()));
-			stmt.setBoolean(4, publicFlag.equals("t") ? true : false);
-			int updated = stmt.executeUpdate();
-			if (updated > 0) {
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("property_set"), key, value,
+					new java.sql.Date(System.currentTimeMillis()),
+					publicFlag.equals("t") ? true : false);
+
+			if (stmt.executeUpdate()) {
 				cacheValid = false;
 				return "Property " + key + " has been set to " + value;
 			} else {
 				return "Failure to set new property, please check the logs.";
 			}
+			
 		} catch (SQLException e) {
 			logger.error("Exception attempting to set property", e);
-		} finally {
-			try {
-				conn.close();
-			} catch (NullPointerException e) {
-				// nothing to do here!
-			} catch (Exception e) {
-				logger.error("There was an exception closing result set", e);
-			}
 		}
 
 		return "There was an error during the update process.  Please check the logs.";
 	}
 
-	public static String updateSingle(String key, String value, String publicFlag) {
-		Connection conn = Connector.getConnection();
+	public static String updateSingle(String key, String value,
+			String publicFlag) {
 		try {
-			PreparedStatement stmt = conn.prepareStatement(updateCheck);
-			stmt.setString(1, key);
-
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("updateCheck"), key);
 			ResultSet rs = stmt.executeQuery();
-			if (rs.next()) {
+			if (rs != null && rs.next()) {
 				if (rs.getInt("counted") > 1) {
 					return "That property has multiple values.  Please contact Dr. Magnus to have it modified.";
 				} else if (rs.getInt("counted") < 1) {
 					return "That property currently is not set.  This operation doesn't support insertion.";
 				} else {
-					PreparedStatement updatestmt = conn.prepareStatement(updatePush);
-					updatestmt.setString(1, value);
-					updatestmt.setBoolean(2, publicFlag.equals("t") ? true : false);
-					updatestmt.setString(3, key);
+					stmt.close();
+					CloseableStatement updateStatement = Connector
+							.getStatement(Queries.getQuery("updatePush"), value,
+									publicFlag.equals("t") ? true : false, key);
 
-					int i = updatestmt.executeUpdate();
-					if (i > 0) {
+					if (updateStatement.executeUpdate()) {
 						cacheValid = false;
 						return "Updated " + key + " to value " + value;
 					} else {
@@ -103,23 +82,17 @@ public class Configs {
 			} else {
 				logger.error("Exception attempting to set property.  The returned result set had no values.");
 			}
+
+			stmt.close();
 		} catch (SQLException e) {
 			logger.error("Exception attempting to set property", e);
-		} finally {
-			try {
-				conn.close();
-			} catch (NullPointerException e) {
-				// nothing to do here!
-			} catch (Exception e) {
-				logger.error("There was an exception closing result set", e);
-			}
+
 		}
 
 		return "There was an error during the update process.  Please check the logs.";
 	}
 
 	public static String removeProperty(String key, String value) {
-		Connection conn = Connector.getConnection();
 		boolean okayToDelete = false;
 		if (cachedProperties.containsKey(key)) {
 			ArrayList<Config> configs = cachedProperties.get(key);
@@ -131,23 +104,23 @@ public class Configs {
 		}
 		if (okayToDelete) {
 			try {
-				PreparedStatement stmt = conn.prepareStatement(deleteConfig);
-				stmt.setString(1, key);
-				stmt.setString(2, value);
-				int i = stmt.executeUpdate();
-				if (i > 0) {
+				CloseableStatement stmt = Connector.getStatement(Queries.getQuery("deleteConfig"),
+						key, value);
+				if (stmt.executeUpdate()) {
 					cacheValid = false;
-					return "Successfully removed " + key + " with the value " + value + " from the properties table.";
+					return "Successfully removed " + key + " with the value "
+							+ value + " from the properties table.";
 				} else {
 					return "There was an error removing the specified key/value pair.";
 				}
+
 			} catch (Exception e) {
 				logger.error("Exception deleting property.", e);
 			}
 		} else {
 			return "Apologies, this property is either not currently configured, or is not publically accessible.";
 		}
-		
+
 		return "There was an unexpected error attempting to delete property.";
 
 	}
@@ -155,30 +128,25 @@ public class Configs {
 	private static void loadProperties() {
 		if (!cacheValid) {
 			cachedProperties = new HashMap<String, ArrayList<Config>>();
-			Connection conn = Connector.getConnection();
-			ResultSet rs = null;
 			try {
-				PreparedStatement stmt = conn.prepareStatement(kvQuery);
-				rs = stmt.executeQuery();
-				while (rs.next()) {
+				CloseableStatement stmt = Connector.getStatement(Queries.getQuery("kvQuery"));
+				ResultSet rs = stmt.executeQuery();
+				while (rs != null && rs.next()) {
 					if (!cachedProperties.containsKey(rs.getString("key"))) {
-						cachedProperties.put(rs.getString("key"), new ArrayList<Config>());
+						cachedProperties.put(rs.getString("key"),
+								new ArrayList<Config>());
 					}
-					cachedProperties.get(rs.getString("key")).add(new Config(rs.getString("key"), rs.getString("value"),
-							rs.getString("updated"), rs.getBoolean("public")));
+					cachedProperties.get(rs.getString("key")).add(
+							new Config(rs.getString("key"), rs
+									.getString("value"), rs
+									.getString("updated"), rs
+									.getBoolean("public")));
 				}
 				cacheValid = true;
+				stmt.close();
 			} catch (SQLException e) {
-				logger.error("Exception attempting to retreive properties list", e);
-			} finally {
-				try {
-					rs.close();
-					conn.close();
-				} catch (NullPointerException e) {
-					// nothing to do here!
-				} catch (Exception e) {
-					logger.error("There was an exception closing result set", e);
-				}
+				logger.error(
+						"Exception attempting to retreive properties list", e);
 			}
 		}
 	}
@@ -207,28 +175,18 @@ public class Configs {
 	}
 
 	public static ArrayList<String> getPropertyTypes() {
-		Connection conn = Connector.getConnection();
 		ArrayList<String> keyValues = new ArrayList<String>();
-		ResultSet rs = null;
 		try {
-			PreparedStatement stmt = conn.prepareStatement(keysQuery);
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("keysQuery"));
 
-			rs = stmt.executeQuery();
-			while (rs.next()) {
+			ResultSet rs = stmt.executeQuery();
+			while (rs != null && rs.next()) {
 				keyValues.add(rs.getString("key"));
 			}
+			stmt.close();
 		} catch (SQLException e) {
 			logger.error("Exception attempting to retreive properties list", e);
-		} finally {
-			try {
-				rs.close();
-				conn.close();
-			} catch (NullPointerException e) {
-				// nothing to do here!
-			} catch (Exception e) {
-				logger.error("There was an exception closing result set", e);
-			}
-		}
+		} 
 
 		return keyValues;
 

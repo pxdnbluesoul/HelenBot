@@ -39,8 +39,6 @@ public class Command {
 
 	static {
 		for (Method m : Command.class.getDeclaredMethods()) {
-			logger.info(m);
-			logger.info(m.isAnnotationPresent(IRCCommand.class));
 			if (m.isAnnotationPresent(IRCCommand.class)) {
 				if (m.getAnnotation(IRCCommand.class).startOfLine()) {
 					hashableCommandList.put(((IRCCommand) m.getAnnotation(IRCCommand.class)).command(), m);
@@ -257,11 +255,12 @@ public class Command {
 	private String buildResponse(ArrayList<? extends DatabaseObject> dbo) {
 		StringBuilder str = new StringBuilder();
 		str.append("{");
-		for (DatabaseObject o : dbo) {
-			str.append(o.toString());
-			str.append(o.getDelimiter());
+		for(int i = 0; i < dbo.size(); i++){
+			if(i != 0){
+				str.append(dbo.get(i).getDelimiter());
+			}
+			str.append(dbo.get(i).toString());
 		}
-		str.delete(str.length() - 1, str.length());
 		str.append("}");
 		return str.toString();
 	}

@@ -1,7 +1,5 @@
 package com.helen.database;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -14,29 +12,20 @@ import com.helen.commands.CommandData;
 public class Users {
 
 	private static final Logger logger = Logger.getLogger(Users.class);
-	private static String insertStatement = "Insert into users (username, first_seen, last_seen, first_message, last_message) values (?, ?, ?, ?, ?)";
-	private static String updateStatement = "update users set last_seen = ?, last_message = ? where username = ?";
-	private static String hostmaskStatement = "Insert into hostmasks (username, hostmask, established) values (?,?,?);";
-	private static String seenFirstQuery = "select first_seen, first_message from users where username like ? ";
-	private static String seenQuery = "select last_seen, last_message from users where username like ? ";
 
 	public static void insertUser(String username, Date date, String hostmask, String message) {
-		Connection conn = Connector.getConnection();
-
 		try {
-			PreparedStatement stmt = conn.prepareStatement(insertStatement);
-			stmt.setString(1, username.toLowerCase());
-			stmt.setDate(2, new java.sql.Date(date.getTime()));
-			stmt.setTimestamp(3, new java.sql.Timestamp(System.currentTimeMillis()));
-			stmt.setString(4, message);
-			stmt.setString(5, message);
-
-			int result = stmt.executeUpdate();
-			if (result > 0) {
-				PreparedStatement hostStatement = conn.prepareStatement(hostmaskStatement);
-				hostStatement.setString(1, username.toLowerCase());
-				hostStatement.setString(2, hostmask);
-				hostStatement.setDate(3, new java.sql.Date(new Date().getTime()));
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertUser"),
+					username.toLowerCase(),
+					new java.sql.Date(date.getTime()),
+					new java.sql.Timestamp(System.currentTimeMillis()),
+					message,
+					message);
+			if (stmt.executeUpdate()) {
+				CloseableStatement hostStatement = Connector.getStatement(Queries.getQuery("insertHostmask"),
+						username.toLowerCase(),
+						hostmask,
+						new java.sql.Date(new Date().getTime()));
 				hostStatement.executeUpdate();
 			}
 
@@ -51,17 +40,12 @@ public class Users {
 	}
 
 	private static void updateUserSeen(String username, String message) {
-		Connection conn = Connector.getConnection();
-
 		try {
-
-			PreparedStatement hostStatement = conn.prepareStatement(updateStatement);
-
-			hostStatement.setTimestamp(1, new java.sql.Timestamp(System.currentTimeMillis()));
-			hostStatement.setString(2, message);
-			hostStatement.setString(3, username.toLowerCase());
-			hostStatement.executeUpdate();
-
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("updateUser"),
+					new java.sql.Timestamp(System.currentTimeMillis()),
+					message,
+					username.toLowerCase());
+			stmt.executeUpdate();
 		} catch (SQLException e) {
 			if (!e.getMessage().contains("user_unique")) {
 				logger.error("Error code " + e.getErrorCode() + e.getMessage() + " Insertion exception for " + username,
@@ -73,27 +57,22 @@ public class Users {
 	}
 
 	public static String seen(CommandData data) {
-		Connection conn = Connector.getConnection();
-
 		try {
-			
 			if (data.getSplitMessage()[1].equals("-f")) {
-				PreparedStatement stmt = conn.prepareStatement(seenFirstQuery);
-				stmt.setString(1,  data.getSplitMessage()[2].toLowerCase() );
-				logger.info(stmt.toString());
+				CloseableStatement stmt = Connector.getStatement(Queries.getQuery("seenFirst"),
+						data.getSplitMessage()[2].toLowerCase());
 				ResultSet rs = stmt.executeQuery();
-				if (rs.next()) {
+				if (rs != null && rs.next()) {
 					return "I first met " + data.getSplitMessage()[2] + " on " + rs.getDate("first_seen").toString()
 							+ " saying: " + rs.getString("first_message");
 				} else {
 					return "I have never seen someone by that name";
 				}
 			} else {
-				PreparedStatement stmt = conn.prepareStatement(seenQuery);
-				stmt.setString(1,  data.getSplitMessage()[1].toLowerCase() );
-				logger.info(stmt.toString());
+				CloseableStatement stmt = Connector.getStatement(Queries.getQuery("seen"),
+						data.getSplitMessage()[1].toLowerCase());
 				ResultSet rs = stmt.executeQuery();
-				if (rs.next()) {
+				if (rs != null && rs.next()) {
 					return "I last saw " + data.getSplitMessage()[1] + " at "
 							+ new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(rs.getTimestamp("last_seen"))
 							+ " EST saying: " + rs.getString("last_message");
@@ -104,6 +83,7 @@ public class Users {
 
 		} catch (Exception e) {
 			logger.error("There was an exception trying to look up seen.",e);
+
 		}
 		
 		return "There was some kind of error with looking up seen targets.";
