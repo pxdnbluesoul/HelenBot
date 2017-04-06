@@ -202,6 +202,12 @@ public class Command {
 	@IRCCommand(command = ".exit", startOfLine = true)
 	public void exitBot(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
+			helen.quitServer("Farewell, and stay out of the revolver's sights.");
+			try{
+				Thread.sleep(5000);
+			}catch(Exception e){
+				
+			}
 			helen.disconnect();
 			System.exit(0);
 

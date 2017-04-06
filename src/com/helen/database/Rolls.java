@@ -33,11 +33,14 @@ public class Rolls {
 					.getStatement(Queries.getQuery("getRolls"), username.toLowerCase());
 			ResultSet rs = stmt.getResultSet();
 			while (rs.next()) {
-				rolls.add(new Roll(rs.getInt("throws"), rs
-						.getString("rollType"), rs.getInt("size"), rs
-						.getInt("bonus"), rs.getString("text"), rs
-						.getInt("roll"), rs.getString("expanded_roll"), rs
-						.getString("username")));
+				rolls.add(new Roll(rs.getInt("throws"), 
+						 rs.getString("rollType"),
+						 rs.getInt("size"), 
+						 rs.getInt("bonus"), 
+						 rs.getString("text"), 
+						 rs.getInt("roll"), 
+						 rs.getString("expanded_roll"),
+						 rs.getString("username")));
 			}
 			stmt.close();
 		} catch (Exception e) {
