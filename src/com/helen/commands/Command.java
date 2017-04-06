@@ -203,7 +203,7 @@ public class Command {
 	public void exitBot(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
 			for(String channel : helen.getChannels()){
-				helen.partChannel("Stay out of the revolver's sights...");
+				helen.partChannel(channel,"Stay out of the revolver's sights...");
 			}
 			try{
 				Thread.sleep(5000);
