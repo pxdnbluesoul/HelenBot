@@ -10,15 +10,10 @@ public class Rolls {
 
 	private static final Logger logger = Logger.getLogger(Rolls.class);
 
-	private static final String insert = "insert into Rolls (rollID, time, username, bonus, text) values (DEFAULT,?,?,?,?) returning rollID";
-	private static final String rollS = "insert into roll (rollID, value, size) values (?,?,?)";
-	private static final String last5 = "select roller.rollID, username, text, bonus, value, size from roll, (select rollID, username,bonus, time, text from rolls order by time desc limit 5) as roller where roll.rollID = roller.rollID and roll.rollID in (select roller.rollID) and roller.username like ? order by roller.rollID";
-	private static final String avg = "select round(avg(value),2) as average from roll, rolls where size = ? and username = ? and roll.rollID = rolls.rollID";
-
 	public static void insertRoll(Roll roll) {
 		if (roll.getDiceType().equals("d")) {
 			try {
-				CloseableStatement stmt = Connector.getStatement(insert,
+				CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertRolls"),
 						new java.sql.Timestamp(System.currentTimeMillis()), roll.getUsername().toLowerCase(), roll.getBonus(),
 						roll.getDiceMessage());
 
@@ -28,7 +23,7 @@ public class Rolls {
 					Integer rollId = rs.getInt("rollID");
 					stmt.close();
 					for (Integer i : roll.getValues()) {
-						Connector.getStatement(rollS, rollId, i, roll.getDiceSize()).executeUpdate();
+						Connector.getStatement(Queries.getQuery("insertRoll"), rollId, i, roll.getDiceSize()).executeUpdate();
 					}
 				}
 				stmt.close();
@@ -47,7 +42,7 @@ public class Rolls {
 			return size + " is not a valid integer";
 		}
 		try {
-			CloseableStatement stmt = Connector.getStatement(avg, diceSize, username);
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("average"), diceSize, username);
 
 			ResultSet rs = stmt.getResultSet();
 
@@ -66,7 +61,7 @@ public class Rolls {
 	public static ArrayList<Roll> getRolls(String username) {
 		ArrayList<Roll> rolls = new ArrayList<Roll>();
 		try {
-			CloseableStatement stmt = Connector.getStatement(last5, username);
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getRolls"), username);
 			ResultSet rs = stmt.getResultSet();
 
 			if (rs != null) {

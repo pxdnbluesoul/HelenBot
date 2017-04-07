@@ -170,7 +170,7 @@ public class Roll implements DatabaseObject {
 		if (rollString.length() > 0) {
 
 			expandedString.append("[");
-			expandedString.append(diceThrows);
+			expandedString.append(getDiceThrows());
 			expandedString.append(dicetype);
 			expandedString.append(diceSize);
 			expandedString.append("=");
