@@ -14,13 +14,12 @@ public class Rolls {
 	private static final String rollS = "insert into roll (rollID, value, size) values (?,?,?)";
 	private static final String last5 = "select roller.rollID, username, text, bonus, value, size from roll, (select rollID, username,bonus, time, text from rolls order by time desc limit 5) as roller where roll.rollID = roller.rollID and roll.rollID in (select roller.rollID) and roller.username like ? order by roller.rollID";
 	private static final String avg = "select round(avg(value),2) as average from roll, rolls where size = ? and username = ? and roll.rollID = rolls.rollID";
+
 	public static void insertRoll(Roll roll) {
 		if (roll.getDiceType().equals("d")) {
 			try {
 				CloseableStatement stmt = Connector.getStatement(insert,
-						new java.sql.Timestamp(System.currentTimeMillis()),
-						roll.getUsername(),
-						roll.getBonus(),
+						new java.sql.Timestamp(System.currentTimeMillis()), roll.getUsername(), roll.getBonus(),
 						roll.getDiceMessage());
 
 				ResultSet rs = stmt.execute();
@@ -34,39 +33,35 @@ public class Rolls {
 				}
 				stmt.close();
 			} catch (Exception e) {
-				logger.error("Exception inserting dice roll",e);
+				logger.error("Exception inserting dice roll", e);
 			}
 		}
 	}
-	
-	public static String getAverage(String size, String username){
+
+	public static String getAverage(String size, String username) {
 		String average = null;
 		Integer diceSize = 0;
-		try{
+		try {
 			diceSize = Integer.parseInt(size);
-		}catch(Exception e){
+		} catch (Exception e) {
 			return size + " is not a valid integer";
 		}
 		try {
-			CloseableStatement stmt = Connector.getStatement(avg,
-					diceSize,
-					username);
-			
+			CloseableStatement stmt = Connector.getStatement(avg, diceSize, username);
+
 			ResultSet rs = stmt.getResultSet();
-			
-			if(rs != null && rs.next()){
-				average = "The average for " + diceSize + " is: " + rs.getString("average");
+
+			if (rs != null && rs.next()) {
+				average = "The average roll for a d" + diceSize + " for you is: " + rs.getString("average") + ".";
 			}
 			stmt.close();
-		}catch(Exception e){
-			logger.error("There was an exception retreiving average",e);
+		} catch (Exception e) {
+			logger.error("There was an exception retreiving average", e);
 		}
-		
-		return average;
-		
-	}
 
-	
+		return average;
+
+	}
 
 	public static ArrayList<Roll> getRolls(String username) {
 		ArrayList<Roll> rolls = new ArrayList<Roll>();
@@ -77,12 +72,11 @@ public class Rolls {
 			if (rs != null) {
 				HashMap<Integer, Roll> rollMap = new HashMap<Integer, Roll>();
 				while (rs.next()) {
-					if (rollMap.containsKey(rs.getInt("rollId"))) {
-						rollMap.get(rs.getInt("roll.Id")).addRoll(rs.getInt("value"));
-					} else {
+					if (!rollMap.containsKey(rs.getInt("rollId"))) {
 						rollMap.put(rs.getInt("rollId"), new Roll("d", rs.getInt("size"), rs.getInt("bonus"),
 								rs.getString("text"), rs.getString("username")));
 					}
+					rollMap.get(rs.getInt("roll.Id")).addRoll(rs.getInt("value"));
 				}
 				for (Integer i : rollMap.keySet()) {
 					rolls.add(rollMap.get(i));
@@ -91,7 +85,7 @@ public class Rolls {
 			}
 			return rolls;
 		} catch (Exception e) {
-			logger.error("There was an exception getting rolls",e);
+			logger.error("There was an exception getting rolls", e);
 		}
 		return null;
 	}

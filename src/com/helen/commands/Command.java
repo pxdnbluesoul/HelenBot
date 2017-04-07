@@ -151,7 +151,7 @@ public class Command {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
 			String average = Rolls.getAverage(data.getSplitMessage()[1], data.getSender());
 			if(average != null){
-				helen.sendMessage(data.getResponseTarget(), data.getSender() +  average);
+				helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " +  average);
 			}
 
 		}
