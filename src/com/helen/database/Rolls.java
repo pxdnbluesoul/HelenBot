@@ -18,7 +18,9 @@ public class Rolls {
 		if (roll.getDiceType().equals("d")) {
 			try {
 				CloseableStatement stmt = Connector.getStatement(insert,
-						new java.sql.Timestamp(System.currentTimeMillis()), roll.getUsername(), roll.getBonus(),
+						new java.sql.Timestamp(System.currentTimeMillis()),
+						roll.getUsername(),
+						roll.getBonus(),
 						roll.getDiceMessage());
 
 				ResultSet rs = stmt.execute();
