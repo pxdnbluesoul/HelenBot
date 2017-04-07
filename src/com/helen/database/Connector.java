@@ -52,7 +52,7 @@ public class Connector {
 					} else if (o instanceof Date) {
 						stmt.setDate(i, new java.sql.Date(((Date) o).getTime()));
 					} else {
-						logger.error("Unknown object type");
+						logger.error("Unknown object type: " + o.toString() + o.getClass().toGenericString());
 					}
 					i++;
 				}
