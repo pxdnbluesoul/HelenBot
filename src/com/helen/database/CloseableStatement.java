@@ -54,6 +54,14 @@ public class CloseableStatement {
 	public ResultSet getResultSet() throws SQLException {
 		return executeQuery();
 	}
+	
+	public ResultSet execute() throws SQLException {
+		if(stmt != null){
+			stmt.execute();
+			return stmt.getResultSet();
+		}
+		return null;
+	}
 
 	public ResultSet executeQuery() throws SQLException {
 		if (rs == null) {

@@ -1,5 +1,6 @@
 package com.helen.database;
 
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -8,18 +9,14 @@ public class Roll implements DatabaseObject {
 	final static String regex = ".roll\\s([0-9]+)(d|f)([0-9]+)(\\s[+|-]?[0-9]+)?(\\s-e|-s)?\\s?(-e|-s)?\\s?(.+)?";
 	private final static Pattern r = Pattern.compile(regex);
 	private String diceString = null;
-	private Integer diceThrows = null;
 	private boolean expand = false;
-	private boolean save = false;
 	private Integer diceSize = null;
 	private Integer bonus = 0;
 	private String diceMessage = null;
 	private String dicetype = "u";
-	private Integer computedRoll = null;
-	private String expanded = null;
-
+	private ArrayList<Integer> values = new ArrayList<Integer>();
+	private Integer diceThrows = null;
 	private String username = null;
-
 
 	public Roll(String diceCommand, String username) {
 		diceString = diceCommand;
@@ -27,27 +24,14 @@ public class Roll implements DatabaseObject {
 		computeRoll();
 		this.username = username;
 	}
-	
-	public Roll(Integer diceThrows,String diceType, Integer diceSize,
-			Integer bonus, String diceMessage, Integer computedRoll,
-			String expanded, String username){
-		this.diceThrows = diceThrows;
+
+	public Roll(String diceType, Integer diceSize, Integer bonus, String diceMessage, String username) {
 		this.dicetype = diceType;
 		this.diceSize = diceSize;
 		this.bonus = bonus;
 		this.diceMessage = diceMessage;
-		this.computedRoll = computedRoll;
-		this.expanded = expanded;
 		this.username = username;
 		this.expand = true;
-	}
-
-	public static String getRegex() {
-		return regex;
-	}
-
-	public static Pattern getR() {
-		return r;
 	}
 
 	public String getDiceString() {
@@ -55,15 +39,11 @@ public class Roll implements DatabaseObject {
 	}
 
 	public Integer getDiceThrows() {
-		return diceThrows;
+		return values.size();
 	}
 
 	public boolean isExpand() {
 		return expand;
-	}
-
-	public boolean isSave() {
-		return save;
 	}
 
 	public Integer getDiceSize() {
@@ -78,7 +58,7 @@ public class Roll implements DatabaseObject {
 		return diceMessage;
 	}
 
-	public String getDicetype() {
+	public String getDiceType() {
 		return dicetype;
 	}
 
@@ -87,14 +67,14 @@ public class Roll implements DatabaseObject {
 	}
 
 	public Integer getComputedRoll() {
-		return computedRoll;
+		Integer sum = 0;
+		for (Integer i : values) {
+			sum += i;
+		}
+		return sum;
 	}
 
-	public String getExpanded() {
-		return expanded;
-	}
-	
-	public String getDelimiter(){
+	public String getDelimiter() {
 		return Configs.getSingleProperty("dicedelim").getValue();
 	}
 
@@ -105,7 +85,7 @@ public class Roll implements DatabaseObject {
 				str.append(diceMessage);
 				str.append(": ");
 			}
-			str.append(diceThrows);
+			str.append(getDiceThrows());
 			str.append(dicetype);
 			str.append(diceSize);
 			if (bonus != 0) {
@@ -113,17 +93,25 @@ public class Roll implements DatabaseObject {
 				str.append(bonus > 0 ? ("+" + bonus) : "");
 			}
 			str.append(", total: ");
-			str.append(computedRoll);
+			str.append(getComputedRoll());
 			str.append(".");
 			if (expand) {
 				str.append(" Expanded:");
-				str.append(expanded);
+				str.append(getExpanded());
 			}
 
 			return str.toString();
 		} else {
 			return "Fudge dice are currently under development";
 		}
+	}
+
+	public ArrayList<Integer> getValues() {
+		return values;
+	}
+
+	public void addRoll(Integer i) {
+		values.add(i);
 	}
 
 	private void parse() {
@@ -141,16 +129,12 @@ public class Roll implements DatabaseObject {
 			if (m.group(5) != null) {
 				if (m.group(5).trim().equals("-e")) {
 					expand = true;
-				} else if (m.group(5).trim().equals("-s")) {
-					save = true;
 				}
 			}
 
 			if (m.group(6) != null) {
 				if (m.group(6).trim().equals("-e")) {
 					expand = true;
-				} else if (m.group(6).trim().equals("-s")) {
-					save = true;
 				}
 			}
 			if (m.group(7) != null) {
@@ -161,28 +145,41 @@ public class Roll implements DatabaseObject {
 	}
 
 	private Integer computeRoll() {
-		if (computedRoll == null) {
-			StringBuilder rolls = new StringBuilder();
-			Integer rollSum = 0;
-
-			for (int i = 0; i < diceThrows; i++) {
-				int roll = (int) (Math.random() * (diceSize - 1)) + 1;
-				if (i < 20) {
-					rolls.append((rolls.length() == 0) ? roll : "," + roll);
-				} else {
-					rolls.append("...truncated to 20 rolls.");
-				}
-				rollSum += roll;
-			}
-
-			if (rolls.length() > 0) {
-				expanded = "[" + diceThrows + dicetype + diceSize +"=" + rolls.toString() + "|Bonus=" + bonus + "]";
-			}
-
-			rollSum += bonus;
-			computedRoll = rollSum;
+		Integer rollSum = 0;
+		for (int i = 0; i < diceThrows; i++) {
+			int roll = (int) (Math.random() * (diceSize - 1)) + 1;
+			values.add(roll);
+			rollSum += roll;
 		}
-		return computedRoll;
+		rollSum += bonus;
+		return rollSum;
+
+	}
+
+	public String getExpanded() {
+		StringBuilder rollString = new StringBuilder();
+		int count = 0;
+		for (Integer i : values) {
+			if (count++ < 20) {
+				rollString.append((rollString.length() == 0) ? i : "," + i);
+			} else {
+				rollString.append("...truncated to 20 rolls.");
+			}
+		}
+		StringBuilder expandedString = new StringBuilder();
+		if (rollString.length() > 0) {
+
+			expandedString.append("[");
+			expandedString.append(diceThrows);
+			expandedString.append(dicetype);
+			expandedString.append(diceSize);
+			expandedString.append("=");
+			expandedString.append(rollString.toString());
+			expandedString.append("|Bonus=");
+			expandedString.append(bonus);
+			expandedString.append("]");
+		}
+		return expandedString.toString();
 	}
 
 }

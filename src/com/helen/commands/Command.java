@@ -140,7 +140,7 @@ public class Command {
 				helen.sendMessage(data.getResponseTarget(), buildResponse(rolls));
 			} else {
 				helen.sendMessage(data.getResponseTarget(),
-						data.getSender() + ": Apologies, I do not have any saved " + "rolls for you at this time.");
+						data.getSender() + ": Apologies, I do not have any saved rolls for you at this time.");
 			}
 
 		}
