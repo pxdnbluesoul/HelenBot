@@ -38,7 +38,7 @@ public class Configs {
 
 	public static String setProperty(String key, String value, String publicFlag) {
 		try {
-			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("property_set"), key, value,
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("propertySet"), key, value,
 					new java.sql.Date(System.currentTimeMillis()),
 					publicFlag.equals("t") ? true : false);
 
