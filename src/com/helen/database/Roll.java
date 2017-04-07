@@ -12,7 +12,7 @@ public class Roll implements DatabaseObject {
 	private boolean expand = false;
 	private Integer diceSize = null;
 	private Integer bonus = 0;
-	private String diceMessage = null;
+	private String diceMessage = "";
 	private String dicetype = "u";
 	private ArrayList<Integer> values = new ArrayList<Integer>();
 	private Integer diceThrows = null;
@@ -81,7 +81,7 @@ public class Roll implements DatabaseObject {
 	public String toString() {
 		if (dicetype.equals("d")) {
 			StringBuilder str = new StringBuilder();
-			if (diceMessage != null) {
+			if (diceMessage != null && diceMessage.length() > 0) {
 				str.append(diceMessage);
 				str.append(": ");
 			}
