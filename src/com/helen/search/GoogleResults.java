@@ -1,5 +1,7 @@
 package com.helen.search;
 
+import org.jibble.pircbot.Colors;
+
 import com.google.gson.JsonObject;
 
 public class GoogleResults {
@@ -18,8 +20,9 @@ public class GoogleResults {
     @Override
     public String toString(){
     	StringBuilder str = new StringBuilder();
-    	
+    	str.append(Colors.BOLD);
     	str.append(title);
+    	str.append(Colors.NORMAL);
     	str.append(" - ");
     	str.append(link);
     	str.append(" :");

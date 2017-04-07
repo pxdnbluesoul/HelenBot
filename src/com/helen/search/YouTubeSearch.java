@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.jibble.pircbot.Colors;
 
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
@@ -57,19 +58,27 @@ public class YouTubeSearch {
 				BigInteger dislikes = targetVideo.getStatistics().getDislikeCount();
 				String uploader = targetVideo.getSnippet().getChannelTitle();
 
+				str.append(Colors.BOLD);
 				str.append(video.getSnippet().getTitle());
+				str.append(Colors.NORMAL);
 				str.append(" -  length ");
+				str.append(Colors.BOLD);
 				str.append(time);
+				str.append(Colors.NORMAL);
 				str.append(" - ");
 				str.append(rating);
 				str.append("↑");
 				str.append(dislikes);
 				str.append("↓");
 				str.append(" - ");
+				str.append(Colors.BOLD);
 				str.append(views);
+				str.append(Colors.NORMAL);
 				str.append(" views");
 				str.append(" - ");
+				str.append(Colors.BOLD);
 				str.append(uploader);
+				str.append(Colors.NORMAL);
 				str.append(" - ");
 				str.append("https://www.youtube.com/watch?v=" + video.getId().getVideoId());
 				
