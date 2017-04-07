@@ -145,6 +145,17 @@ public class Command {
 
 		}
 	}
+	
+	@IRCCommand(command = ".average", startOfLine = true)
+	public void getAverage(CommandData data) {
+		if (data.isAuthenticatedUser(magnusMode, true)) {
+			String average = Rolls.getAverage(data.getSplitMessage()[1], data.getSender());
+			if(average != null){
+				helen.sendMessage(data.getResponseTarget(), data.getSender() +  average);
+			}
+
+		}
+	}
 
 	@IRCCommand(command = ".g", startOfLine = true)
 	public void webSearch(CommandData data) {
