@@ -42,7 +42,7 @@ public class Rolls {
 			return size + " is not a valid integer";
 		}
 		try {
-			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("average"), diceSize, username);
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("average"), diceSize, username.toLowerCase());
 
 			ResultSet rs = stmt.getResultSet();
 
@@ -61,7 +61,7 @@ public class Rolls {
 	public static ArrayList<Roll> getRolls(String username) {
 		ArrayList<Roll> rolls = new ArrayList<Roll>();
 		try {
-			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getRolls"), username);
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getRolls"), username.toLowerCase());
 			ResultSet rs = stmt.getResultSet();
 
 			if (rs != null) {
