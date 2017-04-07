@@ -57,7 +57,6 @@ public class Connector {
 					i++;
 				}
 			}
-			logger.info(stmt.toString());
 			return new CloseableStatement(stmt, conn);
 		} catch (Exception e) {
 			logger.error("Error constructing statement.", e);

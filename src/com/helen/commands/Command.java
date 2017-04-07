@@ -54,9 +54,13 @@ public class Command {
 
 	private void checkTells(CommandData data) {
 		ArrayList<Tell> tells = Tells.getTells(data.getSender());
+		
+		if(tells.size() > 0){
+			helen.sendNotice(data.getSender(), "You have " + tells.size() + " pending tell(s).");
+		}
 		for (Tell tell : tells) {
 			Tells.clearTells(tell.getTarget());
-			helen.sendMessage(tell.isPrivate() ? data.getSender() : data.getChannel(), tell.toString());
+			helen.sendMessage(tell.getTarget(), tell.toString());
 
 		}
 	}
