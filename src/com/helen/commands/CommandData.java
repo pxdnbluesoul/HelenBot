@@ -21,7 +21,7 @@ public class CommandData {
 
 	
 	public String getResponseTarget(){
-		return getChannel() == null ? getSender() : getChannel();
+		return (getChannel() == null || getChannel().isEmpty()) ? getSender() : getChannel();
 	}
 
 	public String getChannel() {
