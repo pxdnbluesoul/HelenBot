@@ -162,9 +162,10 @@ public class Roll implements DatabaseObject {
 		for (Integer i : values) {
 			if (count++ < 20) {
 				rollString.append((rollString.length() == 0) ? i : "," + i);
-			} else {
-				rollString.append("...truncated to 20 rolls.");
-			}
+			} 
+		}
+		if(count >= 20){
+			rollString.append("...truncated to 20 rolls.");
 		}
 		StringBuilder expandedString = new StringBuilder();
 		if (rollString.length() > 0) {
