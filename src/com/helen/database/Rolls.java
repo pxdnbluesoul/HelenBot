@@ -19,7 +19,7 @@ public class Rolls {
 		if (roll.getDiceType().equals("d")) {
 			try {
 				CloseableStatement stmt = Connector.getStatement(insert,
-						new java.sql.Timestamp(System.currentTimeMillis()), roll.getUsername(), roll.getBonus(),
+						new java.sql.Timestamp(System.currentTimeMillis()), roll.getUsername().toLowerCase(), roll.getBonus(),
 						roll.getDiceMessage());
 
 				ResultSet rs = stmt.execute();
@@ -76,7 +76,7 @@ public class Rolls {
 						rollMap.put(rs.getInt("rollId"), new Roll("d", rs.getInt("size"), rs.getInt("bonus"),
 								rs.getString("text"), rs.getString("username")));
 					}
-					rollMap.get(rs.getInt("roll.Id")).addRoll(rs.getInt("value"));
+					rollMap.get(rs.getInt("rollId")).addRoll(rs.getInt("value"));
 				}
 				for (Integer i : rollMap.keySet()) {
 					rolls.add(rollMap.get(i));
