@@ -81,6 +81,7 @@ public class WikidotSearch {
 					pageList[i] = (String) result[i];
 				}
 				int i = 0;
+				logger.info(pageList.length);
 				for(String str: pageList){
 					if(i++ > 100){
 						break;
