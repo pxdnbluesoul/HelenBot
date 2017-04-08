@@ -24,6 +24,11 @@ public class Configs {
 			return null;
 		}
 	}
+	
+	public static void clear(){
+		cacheValid = false;
+		loadProperties();
+	}
 
 	public static Config getSingleProperty(String key) {
 		if (!cacheValid) {

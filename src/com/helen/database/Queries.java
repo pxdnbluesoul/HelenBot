@@ -14,6 +14,11 @@ public class Queries {
 	private static Boolean valid = false;
 	private static final Logger logger = Logger.getLogger(Queries.class);
 
+	public static void clear(){
+		valid = false;
+		loadQueries();
+	}
+	
 	public static String getQuery(String query_name) {
 		if (!valid) {
 			loadQueries();

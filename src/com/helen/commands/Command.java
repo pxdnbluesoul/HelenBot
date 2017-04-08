@@ -11,6 +11,7 @@ import org.jibble.pircbot.PircBot;
 import com.helen.database.Config;
 import com.helen.database.Configs;
 import com.helen.database.DatabaseObject;
+import com.helen.database.Queries;
 import com.helen.database.Roll;
 import com.helen.database.Rolls;
 import com.helen.database.Tell;
@@ -285,6 +286,14 @@ public class Command {
 		if (data.isAuthenticatedUser(magnusMode, false)) {
 			String properties = Configs.removeProperty(data.getSplitMessage()[1], data.getSplitMessage()[2]);
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + properties);
+		}
+	}
+	
+	@IRCCommand(command = ".clearCache", startOfLine = true)
+	public void clearCache(CommandData data){
+		if(data.isAuthenticatedUser(magnusMode, false)){
+			Queries.clear();
+			Configs.clear();
 		}
 	}
 

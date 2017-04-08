@@ -61,7 +61,7 @@ public class Rolls {
 	public static ArrayList<Roll> getRolls(String username) {
 		ArrayList<Roll> rolls = new ArrayList<Roll>();
 		try {
-			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getRolls"), username.toLowerCase());
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getRolls"),username.toLowerCase(), username.toLowerCase());
 			ResultSet rs = stmt.getResultSet();
 
 			if (rs != null) {
