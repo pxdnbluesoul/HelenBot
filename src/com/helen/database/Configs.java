@@ -131,7 +131,6 @@ public class Configs {
 	}
 
 	private static void loadProperties() {
-		if (!cacheValid) {
 			cachedProperties = new HashMap<String, ArrayList<Config>>();
 			try {
 				CloseableStatement stmt = Connector.getStatement(Queries.getQuery("kvQuery"));
@@ -153,7 +152,7 @@ public class Configs {
 				logger.error(
 						"Exception attempting to retreive properties list", e);
 			}
-		}
+		
 	}
 
 	public static ArrayList<Config> getConfiguredProperties(boolean showPublic) {

@@ -18,6 +18,7 @@ import com.helen.database.Tell;
 import com.helen.database.Tells;
 import com.helen.database.Users;
 import com.helen.search.WebSearch;
+import com.helen.search.WikidotSearch;
 import com.helen.search.YouTubeSearch;
 
 public class Command {
@@ -294,6 +295,12 @@ public class Command {
 		if(data.isAuthenticatedUser(magnusMode, false)){
 			Queries.clear();
 			Configs.clear();
+		}
+	}
+	@IRCCommand(command = ".searchTest", startOfLine = true)
+	public void search(CommandData data){
+		if(data.isAuthenticatedUser(magnusMode, false)){
+			WikidotSearch.getMethodList();
 		}
 	}
 
