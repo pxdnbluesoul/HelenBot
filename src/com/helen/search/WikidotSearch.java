@@ -45,7 +45,7 @@ public class WikidotSearch {
 		return (Object) client.execute(method, params);
 	}
 
-	public static void getMethodList() throws XmlRpcException {
+	public static void getMethodList()  {
 		try {
 			Object[] result = (Object[]) pushToAPI("system.listMethods",
 					(Object[]) null);
