@@ -155,7 +155,8 @@ public class Configs {
 		ArrayList<Config> keyValues = new ArrayList<Config>();
 		if (!cacheValid) {
 			loadProperties();
-		} else {
+		} 
+
 			for (String key : cachedProperties.keySet()) {
 				for (Config value : cachedProperties.get(key)) {
 					if (showPublic) {
@@ -169,12 +170,12 @@ public class Configs {
 			}
 
 			return keyValues;
-		}
-
-		return keyValues;
 	}
 
 	public static ArrayList<String> getPropertyTypes() {
+		if(!cacheValid){
+			loadProperties();
+		}
 		ArrayList<String> keyValues = new ArrayList<String>();
 		try {
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("keysQuery"));

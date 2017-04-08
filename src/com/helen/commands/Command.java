@@ -24,7 +24,7 @@ public class Command {
 
 	private PircBot helen;
 
-	private boolean magnusMode = true;
+	private boolean magnusMode = false;
 
 	private static HashMap<String, Method> hashableCommandList = new HashMap<String, Method>();
 	private static HashMap<String, Method> slowCommands = new HashMap<String, Method>();
