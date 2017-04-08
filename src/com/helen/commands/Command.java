@@ -302,6 +302,7 @@ public class Command {
 		if(data.isAuthenticatedUser(magnusMode, false)){
 			WikidotSearch.getMethodList();
 			WikidotSearch.listPagetest();
+			WikidotSearch.getTags();
 		}
 	}
 

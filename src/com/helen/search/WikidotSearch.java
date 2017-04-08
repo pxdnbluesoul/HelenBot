@@ -92,5 +92,29 @@ public class WikidotSearch {
 			logger.error("There was an exception",e);
 		}
 	}
+	
+	public static void getTags(){
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("site",Configs.getSingleProperty("site").getValue());
+		
+		try{
+		
+				Object[] result = (Object[]) pushToAPI("tags.select", params);
+				
+				// Convert result to a String[]
+				String[] pageList = new String[result.length];
+				for (int i=0; i<result.length; i++)
+				{
+					pageList[i] = (String) result[i];
+				}
+				int i = 0;
+				logger.info(pageList.length);
+				for(String str: pageList){
+					logger.info(str);
+				}
+		}catch(Exception e){
+			logger.error("There was an exception",e);
+		}
+	}
 
 }
