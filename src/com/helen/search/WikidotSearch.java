@@ -72,7 +72,7 @@ public class WikidotSearch {
 		
 		try{
 		
-				Object[] result = (Object[]) pushToAPI("pages.get_meta", params);
+				Object[] result = (Object[]) pushToAPI("pages.select", params);
 				
 				// Convert result to a String[]
 				String[] pageList = new String[result.length];
