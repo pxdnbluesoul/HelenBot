@@ -41,9 +41,13 @@ public class Command {
 		for (Method m : Command.class.getDeclaredMethods()) {
 			if (m.isAnnotationPresent(IRCCommand.class)) {
 				if (m.getAnnotation(IRCCommand.class).startOfLine()) {
-					hashableCommandList.put(((IRCCommand) m.getAnnotation(IRCCommand.class)).command(), m);
+					for(String s: ((IRCCommand) m.getAnnotation(IRCCommand.class)).command()){
+						hashableCommandList.put(s, m);
+					}
 				} else {
-					slowCommands.put(((IRCCommand) m.getAnnotation(IRCCommand.class)).command(), m);
+					for(String s: ((IRCCommand) m.getAnnotation(IRCCommand.class)).command()){
+						slowCommands.put(s, m);
+					}
 				}
 
 				logger.info(((IRCCommand) m.getAnnotation(IRCCommand.class)).command());
@@ -91,7 +95,7 @@ public class Command {
 	}
 
 	// Relateively unregulated commands (anyone can try these)
-	@IRCCommand(command = ".HelenBot", startOfLine = false)
+	@IRCCommand(command = {".HelenBot"}, startOfLine = false)
 	public void versionResponse(CommandData data) {
 		if (data.getChannel().isEmpty()) {
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Greetings, I am HelenBot v"
@@ -101,14 +105,23 @@ public class Command {
 				data.getSender() + ": Greetings, I am HelenBot v" + Configs.getSingleProperty("version").getValue());
 	}
 
-	@IRCCommand(command = ".modeToggle", startOfLine = true)
+	@IRCCommand(command = {".modeToggle"}, startOfLine = true)
 	public void toggleMode(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
 			magnusMode = !magnusMode;
 		}
 	}
+	
+	@IRCCommand(command = {".ch",".choose"}, startOfLine = true)
+	public void choose(CommandData data){
+		if(data.isAuthenticatedUser(magnusMode, true)){
+			String[] choices = data.getMessage().substring(data.getMessage().indexOf(" ")).split(",");
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " 
+						+ choices[((int) (Math.random() * (choices.length - 1)) + 1)]);
+		}
+	}
 
-	@IRCCommand(command = ".mode", startOfLine = true)
+	@IRCCommand(command = {".mode"}, startOfLine = true)
 	public void displayMode(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, false)) {
 			helen.sendMessage(data.getResponseTarget(),
@@ -116,7 +129,7 @@ public class Command {
 		}
 	}
 
-	@IRCCommand(command = ".msg", startOfLine = true)
+	@IRCCommand(command = {".msg"}, startOfLine = true)
 	public void sendMessage(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, false)) {
 			String target = data.getTarget();
@@ -127,7 +140,7 @@ public class Command {
 		}
 	}
 
-	@IRCCommand(command = ".roll", startOfLine = true)
+	@IRCCommand(command = {".roll"}, startOfLine = true)
 	public void roll(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
 			Roll roll = new Roll(data.getMessage(), data.getSender());
@@ -136,7 +149,7 @@ public class Command {
 		}
 	}
 
-	@IRCCommand(command = ".myRolls", startOfLine = true)
+	@IRCCommand(command = {".myRolls", ".myrolls"}, startOfLine = true)
 	public void getRolls(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
 			ArrayList<Roll> rolls = Rolls.getRolls(data.getSender());
@@ -150,7 +163,7 @@ public class Command {
 		}
 	}
 	
-	@IRCCommand(command = ".average", startOfLine = true)
+	@IRCCommand(command = {".average",".avg"}, startOfLine = true)
 	public void getAverage(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
 			String average = Rolls.getAverage(data.getSplitMessage()[1], data.getSender());
@@ -161,7 +174,7 @@ public class Command {
 		}
 	}
 
-	@IRCCommand(command = ".g", startOfLine = true)
+	@IRCCommand(command = {".g",".google"}, startOfLine = true)
 	public void webSearch(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
 			try {
@@ -174,7 +187,7 @@ public class Command {
 
 	}
 
-	@IRCCommand(command = ".y", startOfLine = true)
+	@IRCCommand(command = {".y",".yt",".youtube"}, startOfLine = true)
 	public void youtubeSearch(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
 			helen.sendMessage(data.getResponseTarget(),

@@ -6,6 +6,6 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface IRCCommand {
 
-	String command();
+	String[] command();
 	boolean startOfLine();
 }
