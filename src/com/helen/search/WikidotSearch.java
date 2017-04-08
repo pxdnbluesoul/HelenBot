@@ -36,7 +36,7 @@ public class WikidotSearch {
 			client.setConfig(config);
 
 		} catch (Exception e) {
-			// TODO exception
+			logger.error("There was an exception",e);
 		}
 	}
 
