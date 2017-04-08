@@ -301,7 +301,7 @@ public class Command {
 	public void search(CommandData data){
 		if(data.isAuthenticatedUser(magnusMode, false)){
 			WikidotSearch.getMethodList();
-			WikidotSearch.listPagetest()
+			WikidotSearch.listPagetest();
 		}
 	}
 
