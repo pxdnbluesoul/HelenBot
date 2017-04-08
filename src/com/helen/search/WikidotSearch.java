@@ -1,6 +1,8 @@
 package com.helen.search;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcException;
@@ -56,11 +58,37 @@ public class WikidotSearch {
 			}
 
 			for (String str : methodList) {
-				logger.info("str");
+				logger.info(str);
 			}
 			// return methodList;
 		} catch (Exception e) {
 			logger.error("There was an exception", e);
+		}
+	}
+	
+	public static void listPagetest(){
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("site",Configs.getSingleProperty("site").getValue());
+		
+		try{
+		
+				Object[] result = (Object[]) pushToAPI("pages.select", params);
+				
+				// Convert result to a String[]
+				String[] pageList = new String[result.length];
+				for (int i=0; i<result.length; i++)
+				{
+					pageList[i] = (String) result[i];
+				}
+				int i = 0;
+				for(String str: pageList){
+					if(i++ > 100){
+						break;
+					}
+					logger.info(str);
+				}
+		}catch(Exception e){
+			logger.error("There was an exception",e);
 		}
 	}
 
