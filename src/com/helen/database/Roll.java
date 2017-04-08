@@ -71,7 +71,7 @@ public class Roll implements DatabaseObject {
 		for (Integer i : values) {
 			sum += i;
 		}
-		return sum;
+		return sum + bonus;
 	}
 
 	public String getDelimiter() {
