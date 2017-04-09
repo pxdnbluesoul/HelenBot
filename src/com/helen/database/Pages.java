@@ -14,6 +14,7 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.apache.xmlrpc.client.XmlRpcSun15HttpTransportFactory;
+import org.jsoup.Jsoup;
 
 public class Pages {
 
@@ -58,7 +59,7 @@ public class Pages {
 		String regex = "(?m)<li><a href=\"\\/(.+)\">(.+)<\\/a> - (.+)<\\/li>";
 		Pattern r = Pattern.compile(regex);
 
-		String[] pages = new String[] { "scp-series-1", "scp-series-2",
+		String[] pages = new String[] { "scp-series	", "scp-series-2",
 				"scp-series-3" };
 
 		for (String page : pages) {
@@ -77,7 +78,7 @@ public class Pages {
 					Matcher m = r.matcher(s);
 					if (m.find()) {
 						pagelist.add(new String[] { m.group(1), m.group(2),
-								m.group(3) });
+								Jsoup.parse(m.group(3)).text() });
 					}
 				}
 
