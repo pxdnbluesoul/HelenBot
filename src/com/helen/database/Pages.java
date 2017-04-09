@@ -158,7 +158,7 @@ public class Pages {
 	private static String getTitle(String pagename){
 		String pageName = null;
 		try{
-			CloseableStatement stmt = Connector.getStatement("getPageByName",pagename);
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getPageByName"),pagename);
 			ResultSet rs = stmt.getResultSet();
 			if(rs != null && rs.next()){
 				pageName = rs.getString("pagename");
@@ -193,10 +193,12 @@ public class Pages {
 			returnString.append(result.get(targetName).get("title_shown"));
 			returnString.append(": ");
 			returnString.append(getTitle(targetName));
+			returnString.append(Colors.NORMAL);
 			returnString.append("(Rating: ");
 			returnString.append(result.get(targetName).get("rating"));
-			returnString.append(". By: )");
+			returnString.append(". By: ");
 			returnString.append(result.get(targetName).get("created_by"));
+			returnString.append(")");
 			returnString.append(" - ");
 			returnString.append("http://www.scp-wiki.net/");
 			returnString.append(targetName);
