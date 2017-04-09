@@ -1,9 +1,12 @@
 package com.helen.commands;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.jibble.pircbot.PircBot;
@@ -19,7 +22,6 @@ import com.helen.database.Tell;
 import com.helen.database.Tells;
 import com.helen.database.Users;
 import com.helen.search.WebSearch;
-import com.helen.search.WikidotSearch;
 import com.helen.search.YouTubeSearch;
 
 public class Command {
@@ -31,7 +33,7 @@ public class Command {
 
 	private static HashMap<String, Method> hashableCommandList = new HashMap<String, Method>();
 	private static HashMap<String, Method> slowCommands = new HashMap<String, Method>();
-
+	private static HashMap<String, Method> regexCommands = new HashMap<String, Method>();
 	public Command() {
 
 	}
@@ -43,13 +45,17 @@ public class Command {
 	static {
 		for (Method m : Command.class.getDeclaredMethods()) {
 			if (m.isAnnotationPresent(IRCCommand.class)) {
-				if (m.getAnnotation(IRCCommand.class).startOfLine()) {
+				if (m.getAnnotation(IRCCommand.class).startOfLine() && !m.getAnnotation(IRCCommand.class).reg()) {
 					for(String s: ((IRCCommand) m.getAnnotation(IRCCommand.class)).command()){
 						hashableCommandList.put(s, m);
 					}
-				} else {
+				} else if (!m.getAnnotation(IRCCommand.class).reg()) {
 					for(String s: ((IRCCommand) m.getAnnotation(IRCCommand.class)).command()){
 						slowCommands.put(s, m);
+					}
+				} else {
+					for(String s: ((IRCCommand) m.getAnnotation(IRCCommand.class)).regex()){
+						regexCommands.put(s, m);
 					}
 				}
 
@@ -101,7 +107,20 @@ public class Command {
 					}
 				}
 			}
-
+			for (String regex : regexCommands.keySet()){
+				Pattern r = Pattern.compile(regex);
+				
+				if(!(data.getSplitMessage().length > 1)){
+					Matcher m = r.matcher(data.getSplitMessage()[0]);
+					if(m.matches()){
+						try {
+							regexCommands.get(regex).invoke(this,data);
+						} catch (Exception e) {
+							logger.error("Exception invoking command: " + regexCommands.get(regex).getAnnotation(IRCCommand.class).command(), e);
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -310,6 +329,13 @@ public class Command {
 	public void search(CommandData data){
 		if(data.isAuthenticatedUser(magnusMode, false)){
 			Pages.uploadSeries();
+		}
+	}
+	
+	@IRCCommand(command = "SCP", startOfLine = true, reg = true, regex = {"(scp|SCP)-([0-9]+)"})
+	public void scpSearch(CommandData data){
+		if(data.isAuthenticatedUser(magnusMode, true)){
+			
 		}
 	}
 

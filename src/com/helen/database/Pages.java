@@ -1,7 +1,9 @@
 package com.helen.database;
 
+import java.awt.Color;
 import java.net.URL;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +16,7 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.apache.xmlrpc.client.XmlRpcSun15HttpTransportFactory;
+import org.jibble.pircbot.Colors;
 import org.jsoup.Jsoup;
 
 public class Pages {
@@ -150,6 +153,59 @@ public class Pages {
 		} catch (Exception e) {
 			logger.error("There was an exception", e);
 		}
+	}
+	
+	private static String getTitle(String pagename){
+		String pageName = null;
+		try{
+			CloseableStatement stmt = Connector.getStatement("getPageByName",pagename);
+			ResultSet rs = stmt.getResultSet();
+			if(rs != null && rs.next()){
+				pageName = rs.getString("pagename");
+			}
+		}catch(Exception e){
+			logger.error("Exception getting title",e);
+		}
+		return pageName;
+
+	}
+	
+	public static String getPageInfo(String pagename){
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("site", Configs.getSingleProperty("site").getValue());
+		params.put("page",pagename.toLowerCase());
+		ArrayList<String> keyswewant = new ArrayList<String>();
+		keyswewant.add("title_shown");
+		keyswewant.add("rating");
+		keyswewant.add("created_at");
+		keyswewant.add("title");
+		keyswewant.add("created_by");
+		keyswewant.add("tags");
+		try {
+			HashMap<String, HashMap<String, Object>> result = (HashMap<String, HashMap<String, Object>>) pushToAPI(
+					"pages.get_meta", params);
+			
+			
+			StringBuilder returnString = new StringBuilder();
+			returnString.append(Colors.BOLD);
+			returnString.append(result.get(pagename).get("title_shown"));
+			returnString.append(": ");
+			returnString.append(getTitle(pagename));
+			returnString.append("(Rating: ");
+			returnString.append(result.get(pagename).get("rating"));
+			returnString.append(". By: )");
+			returnString.append(result.get(pagename).get("created_by"));
+			returnString.append(" - ");
+			returnString.append("http://www.scp-wiki.net/");
+			returnString.append(pagename.toLowerCase());
+			
+			return returnString.toString();
+			
+		}catch(Exception e){
+			logger.error("There was an exception retreiving metadata",e);
+		}
+		
+		return null;
 	}
 
 	public static void getTags() {

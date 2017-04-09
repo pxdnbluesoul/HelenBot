@@ -8,4 +8,6 @@ public @interface IRCCommand {
 
 	String[] command();
 	boolean startOfLine();
+	boolean reg() default false;
+	String[] regex() default "";
 }
