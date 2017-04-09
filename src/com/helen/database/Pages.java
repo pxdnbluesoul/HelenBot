@@ -161,7 +161,7 @@ public class Pages {
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getPageByName"),pagename);
 			ResultSet rs = stmt.getResultSet();
 			if(rs != null && rs.next()){
-				pageName = rs.getString("pagename");
+				pageName = rs.getString("title");
 			}
 		}catch(Exception e){
 			logger.error("Exception getting title",e);
@@ -194,8 +194,12 @@ public class Pages {
 			returnString.append(": ");
 			returnString.append(getTitle(targetName));
 			returnString.append(Colors.NORMAL);
-			returnString.append("(Rating: ");
-			returnString.append(result.get(targetName).get("rating"));
+			returnString.append(" (Rating: ");
+			Integer rating = (Integer) result.get(targetName).get("rating");
+			if(rating > 0){
+				returnString.append("+");
+			}
+			returnString.append(rating);
 			returnString.append(". By: ");
 			returnString.append(result.get(targetName).get("created_by"));
 			returnString.append(")");
