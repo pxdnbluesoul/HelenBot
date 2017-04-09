@@ -219,7 +219,22 @@ public class Pages {
 	public static void getTags() {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("site", Configs.getSingleProperty("site").getValue());
-
+		ArrayList<String> tags = new ArrayList<String>();
+		
+		try{
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getTags"));
+			ResultSet rs = stmt.getResultSet();
+			if(rs != null){
+				while(rs.next()){
+					tags.add(rs.getString("tag"));
+				}
+			}
+			stmt.close();
+		}catch(Exception e){
+			logger.error("Exception getting tags",e);
+		}
+		
+		
 		try {
 
 			Object[] result = (Object[]) pushToAPI("tags.select", params);
@@ -229,10 +244,13 @@ public class Pages {
 			for (int i = 0; i < result.length; i++) {
 				pageList[i] = (String) result[i];
 			}
-			int i = 0;
+			
 			logger.info(pageList.length);
 			for (String str : pageList) {
-				logger.info(str);
+				if(!tags.contains(str)){
+					CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertTag"),str);
+					stmt.executeUpdate();
+				}
 			}
 		} catch (Exception e) {
 			logger.error("There was an exception", e);

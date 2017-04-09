@@ -232,6 +232,21 @@ public class Command {
 			helen.sendMessage(data.getResponseTarget(), Users.seen(data));
 		}
 	}
+	
+	@IRCCommand(command = "SCP", startOfLine = true, reg = true, regex = {"(scp|SCP)-([0-9]+)"})
+	public void scpSearch(CommandData data){
+		if(data.isAuthenticatedUser(magnusMode, true)){
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getCommand()));
+		}
+	}
+	
+	@IRCCommand(command = ".tagLoad", startOfLine = true)
+	public void updateTags(CommandData data){
+		if(data.isAuthenticatedUser(magnusMode, false)){
+			Pages.getTags();
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Tags have been updated in my database." );
+		}
+	}
 
 	// Authentication Required Commands
 	@IRCCommand(command = ".join", startOfLine = true)
@@ -339,12 +354,7 @@ public class Command {
 			}
 	 */
 	
-	@IRCCommand(command = "SCP", startOfLine = true, reg = true, regex = {"(scp|SCP)-([0-9]+)"})
-	public void scpSearch(CommandData data){
-		if(data.isAuthenticatedUser(magnusMode, true)){
-			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getCommand()));
-		}
-	}
+	
 
 	private String buildResponse(ArrayList<? extends DatabaseObject> dbo) {
 		StringBuilder str = new StringBuilder();
