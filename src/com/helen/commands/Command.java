@@ -11,6 +11,7 @@ import org.jibble.pircbot.PircBot;
 import com.helen.database.Config;
 import com.helen.database.Configs;
 import com.helen.database.DatabaseObject;
+import com.helen.database.Pages;
 import com.helen.database.Queries;
 import com.helen.database.Roll;
 import com.helen.database.Rolls;
@@ -72,7 +73,15 @@ public class Command {
 	}
 
 	public void dispatchTable(CommandData data) {
-
+		/*
+		new Thread() {
+	        public void run() {
+	                     //do something here....
+	        }
+	    }.start();
+		 */
+		
+		
 		checkTells(data);
 
 		logger.info("Entering dispatch table with command: \"" + data.getCommand() + "\"");
@@ -300,9 +309,7 @@ public class Command {
 	@IRCCommand(command = ".searchTest", startOfLine = true)
 	public void search(CommandData data){
 		if(data.isAuthenticatedUser(magnusMode, false)){
-			WikidotSearch.getMethodList();
-			WikidotSearch.listPage();
-			WikidotSearch.getTags();
+			Pages.uploadSeries();
 		}
 	}
 
