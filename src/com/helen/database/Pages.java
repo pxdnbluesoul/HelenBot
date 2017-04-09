@@ -173,7 +173,8 @@ public class Pages {
 	public static String getPageInfo(String pagename){
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("site", Configs.getSingleProperty("site").getValue());
-		params.put("pages",pagename.toLowerCase());
+		String[] target = new String[]{pagename.toLowerCase()};
+		params.put("pages",target);
 		ArrayList<String> keyswewant = new ArrayList<String>();
 		keyswewant.add("title_shown");
 		keyswewant.add("rating");
