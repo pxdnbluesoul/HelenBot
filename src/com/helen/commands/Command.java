@@ -332,10 +332,17 @@ public class Command {
 		}
 	}
 	
+	/*
+	 * 
+	 * if(data.getCommand().toLowerCase().contains("scp") && data.getSplitMessage().length == 1){
+				scpSearch(data);
+			}
+	 */
+	
 	@IRCCommand(command = "SCP", startOfLine = true, reg = true, regex = {"(scp|SCP)-([0-9]+)"})
 	public void scpSearch(CommandData data){
 		if(data.isAuthenticatedUser(magnusMode, true)){
-			
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getCommand()));
 		}
 	}
 
