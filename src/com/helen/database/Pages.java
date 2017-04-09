@@ -171,9 +171,10 @@ public class Pages {
 	}
 	
 	public static String getPageInfo(String pagename){
+		String targetName = pagename.toLowerCase();
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("site", Configs.getSingleProperty("site").getValue());
-		String[] target = new String[]{pagename.toLowerCase()};
+		String[] target = new String[]{targetName.toLowerCase()};
 		params.put("pages",target);
 		ArrayList<String> keyswewant = new ArrayList<String>();
 		keyswewant.add("title_shown");
@@ -189,16 +190,16 @@ public class Pages {
 			
 			StringBuilder returnString = new StringBuilder();
 			returnString.append(Colors.BOLD);
-			returnString.append(result.get(pagename).get("title_shown"));
+			returnString.append(result.get(targetName).get("title_shown"));
 			returnString.append(": ");
-			returnString.append(getTitle(pagename));
+			returnString.append(getTitle(targetName));
 			returnString.append("(Rating: ");
-			returnString.append(result.get(pagename).get("rating"));
+			returnString.append(result.get(targetName).get("rating"));
 			returnString.append(". By: )");
-			returnString.append(result.get(pagename).get("created_by"));
+			returnString.append(result.get(targetName).get("created_by"));
 			returnString.append(" - ");
 			returnString.append("http://www.scp-wiki.net/");
-			returnString.append(pagename.toLowerCase());
+			returnString.append(targetName);
 			
 			return returnString.toString();
 			
