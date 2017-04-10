@@ -10,4 +10,5 @@ public @interface IRCCommand {
 	boolean startOfLine();
 	boolean reg() default false;
 	String[] regex() default "";
+	boolean coexistWithJarvis() default false;
 }

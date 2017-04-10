@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.jibble.pircbot.PircBot;
+import org.jibble.pircbot.User;
 
 import com.helen.database.Config;
 import com.helen.database.Configs;
@@ -80,21 +81,28 @@ public class Command {
 	}
 
 	public void dispatchTable(CommandData data) {
-		/*
-		new Thread() {
-	        public void run() {
-	                     //do something here....
-	        }
-	    }.start();
-		 */
-		
-		
+			
 		checkTells(data);
 
+		boolean jarvisInChannel = false;
+		if(!(data.getChannel() == null || data.getChannel().isEmpty())){
+			User[] list = helen.getUsers(data.getChannel());
+			for(User u: list){
+				if(u.getNick().equalsIgnoreCase("jarvis")){
+					jarvisInChannel = true;
+				}
+			}
+		}
+		
 		logger.info("Entering dispatch table with command: \"" + data.getCommand() + "\"");
 		if (hashableCommandList.containsKey(data.getCommand().toLowerCase())) {
 			try {
-				hashableCommandList.get(data.getCommand().toLowerCase()).invoke(this, data);
+				
+				Method m = hashableCommandList.get(data.getCommand().toLowerCase());
+				if(m.getAnnotation(IRCCommand.class).coexistWithJarvis() && jarvisInChannel){
+					m.invoke(this, data);
+				}
+				
 			} catch (Exception e) {
 				logger.error("Exception invoking start-of-line command: " + data.getCommand(), e);
 			}
@@ -102,7 +110,10 @@ public class Command {
 			for (String command : slowCommands.keySet()) {
 				if (data.getMessage().toLowerCase().contains(command.toLowerCase())) {
 					try {
-						slowCommands.get(command).invoke(this, data);
+						Method m = slowCommands.get(command);
+						if(m.getAnnotation(IRCCommand.class).coexistWithJarvis() && jarvisInChannel){
+							m.invoke(this, data);
+						}
 					} catch (Exception e) {
 						logger.error("Exception invoking command: " + command, e);
 					}
@@ -112,10 +123,13 @@ public class Command {
 				Pattern r = Pattern.compile(regex);
 				
 				if(!(data.getSplitMessage().length > 1)){
-					Matcher m = r.matcher(data.getSplitMessage()[0]);
-					if(m.matches()){
+					Matcher match = r.matcher(data.getSplitMessage()[0]);
+					if(match.matches()){
 						try {
-							regexCommands.get(regex).invoke(this,data);
+							Method m = regexCommands.get(regex);
+							if(m.getAnnotation(IRCCommand.class).coexistWithJarvis() && jarvisInChannel){
+								m.invoke(this,data);
+							}
 						} catch (Exception e) {
 							logger.error("Exception invoking command: " + regexCommands.get(regex).getAnnotation(IRCCommand.class).command(), e);
 						}
@@ -126,7 +140,7 @@ public class Command {
 	}
 
 	// Relateively unregulated commands (anyone can try these)
-	@IRCCommand(command = {".HelenBot"}, startOfLine = false)
+	@IRCCommand(command = {".HelenBot"}, startOfLine = false, coexistWithJarvis = true)
 	public void versionResponse(CommandData data) {
 		if (data.getChannel().isEmpty()) {
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Greetings, I am HelenBot v"
@@ -136,7 +150,7 @@ public class Command {
 				data.getSender() + ": Greetings, I am HelenBot v" + Configs.getSingleProperty("version").getValue());
 	}
 
-	@IRCCommand(command = {".modeToggle"}, startOfLine = true)
+	@IRCCommand(command = {".modeToggle"}, startOfLine = true, coexistWithJarvis = true)
 	public void toggleMode(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
 			magnusMode = !magnusMode;
@@ -152,7 +166,7 @@ public class Command {
 		}
 	}
 
-	@IRCCommand(command = {".mode"}, startOfLine = true)
+	@IRCCommand(command = {".mode"}, startOfLine = true, coexistWithJarvis = true)
 	public void displayMode(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, false)) {
 			helen.sendMessage(data.getResponseTarget(),
@@ -241,7 +255,7 @@ public class Command {
 		}
 	}
 	
-	@IRCCommand(command = ".tagLoad", startOfLine = true)
+	@IRCCommand(command = ".tagLoad", startOfLine = true, coexistWithJarvis = true)
 	public void updateTags(CommandData data){
 		if(data.isAuthenticatedUser(magnusMode, false)){
 			Pages.getTags();
@@ -249,28 +263,28 @@ public class Command {
 		}
 	}
 	
-	@IRCCommand(command = {".pronouns",".pronoun"}, startOfLine = true)
+	@IRCCommand(command = {".pronouns",".pronoun"}, startOfLine = true, coexistWithJarvis = true)
 	public void getPronouns(CommandData data){
 		if(data.isAuthenticatedUser(magnusMode, true)){
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.otherPronouns(data.getTarget()));
 		}
 	}
 	
-	@IRCCommand(command = ".myPronouns", startOfLine = true)
+	@IRCCommand(command = ".myPronouns", startOfLine = true, coexistWithJarvis = true)
 	public void myPronouns(CommandData data){
 		if(data.isAuthenticatedUser(magnusMode, true)){
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.myPronouns(data.getSender()));
 		}
 	}
 	
-	@IRCCommand(command = ".setPronouns", startOfLine = true)
+	@IRCCommand(command = ".setPronouns", startOfLine = true, coexistWithJarvis = true)
 	public void setPronouns(CommandData data){
 		if(data.isAuthenticatedUser(magnusMode, true)){
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.insertPronouns(data));
 		}
 	}
 	
-	@IRCCommand(command = ".clearPronouns", startOfLine = true)
+	@IRCCommand(command = ".clearPronouns", startOfLine = true, coexistWithJarvis = true)
 	public void clearPronouns(CommandData data){
 		if(data.isAuthenticatedUser(magnusMode, true)){
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.clearPronouns(data.getSender()));
@@ -278,14 +292,14 @@ public class Command {
 	}
 
 	// Authentication Required Commands
-	@IRCCommand(command = ".join", startOfLine = true)
+	@IRCCommand(command = ".join", startOfLine = true, coexistWithJarvis = true)
 	public void enterChannel(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true))
 			helen.joinChannel(data.getTarget());
 
 	}
 
-	@IRCCommand(command = ".leave", startOfLine = true)
+	@IRCCommand(command = ".leave", startOfLine = true, coexistWithJarvis = true)
 	public void leaveChannel(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true))
 			helen.partChannel(data.getTarget());
@@ -301,7 +315,7 @@ public class Command {
 		}
 	}
 
-	@IRCCommand(command = ".exit", startOfLine = true)
+	@IRCCommand(command = ".exit", startOfLine = true, coexistWithJarvis = true)
 	public void exitBot(CommandData data) {
 		if (data.isAuthenticatedUser(magnusMode, true)) {
 			for(String channel : helen.getChannels()){
@@ -369,6 +383,7 @@ public class Command {
 			Configs.clear();
 		}
 	}
+	/*
 	@IRCCommand(command = ".searchTest", startOfLine = true)
 	public void search(CommandData data){
 		if(data.isAuthenticatedUser(magnusMode, false)){
