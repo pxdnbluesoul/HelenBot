@@ -15,6 +15,7 @@ import com.helen.database.Config;
 import com.helen.database.Configs;
 import com.helen.database.DatabaseObject;
 import com.helen.database.Pages;
+import com.helen.database.Pronouns;
 import com.helen.database.Queries;
 import com.helen.database.Roll;
 import com.helen.database.Rolls;
@@ -245,6 +246,34 @@ public class Command {
 		if(data.isAuthenticatedUser(magnusMode, false)){
 			Pages.getTags();
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Tags have been updated in my database." );
+		}
+	}
+	
+	@IRCCommand(command = ".pronoun", startOfLine = true)
+	public void getPronouns(CommandData data){
+		if(data.isAuthenticatedUser(magnusMode, true)){
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.otherPronouns(data.getTarget()));
+		}
+	}
+	
+	@IRCCommand(command = ".myPronouns", startOfLine = true)
+	public void myPronouns(CommandData data){
+		if(data.isAuthenticatedUser(magnusMode, true)){
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.myPronouns(data.getSender()));
+		}
+	}
+	
+	@IRCCommand(command = ".setPronouns", startOfLine = true)
+	public void setPronouns(CommandData data){
+		if(data.isAuthenticatedUser(magnusMode, true)){
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.insertPronouns(data));
+		}
+	}
+	
+	@IRCCommand(command = ".clearPronouns", startOfLine = true)
+	public void clearPronouns(CommandData data){
+		if(data.isAuthenticatedUser(magnusMode, true)){
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.clearPronouns(data.getSender()));
 		}
 	}
 
