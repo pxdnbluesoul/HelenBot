@@ -94,7 +94,7 @@ public class Command {
 		logger.info("Entering dispatch table with command: \"" + data.getCommand() + "\"");
 		if (hashableCommandList.containsKey(data.getCommand().toLowerCase())) {
 			try {
-				hashableCommandList.get(data.getCommand()).invoke(this, data);
+				hashableCommandList.get(data.getCommand().toLowerCase()).invoke(this, data);
 			} catch (Exception e) {
 				logger.error("Exception invoking start-of-line command: " + data.getCommand(), e);
 			}
@@ -249,7 +249,7 @@ public class Command {
 		}
 	}
 	
-	@IRCCommand(command = ".pronoun", startOfLine = true)
+	@IRCCommand(command = {".pronouns",".pronoun"}, startOfLine = true)
 	public void getPronouns(CommandData data){
 		if(data.isAuthenticatedUser(magnusMode, true)){
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.otherPronouns(data.getTarget()));
