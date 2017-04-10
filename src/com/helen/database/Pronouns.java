@@ -1,6 +1,7 @@
 package com.helen.database;
 
 import java.sql.ResultSet;
+import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
@@ -10,6 +11,12 @@ public class Pronouns {
 	
 	private static final Logger logger = Logger.getLogger(Pronouns.class);
 
+	private static ArrayList<String> bannedNouns = new ArrayList<String>();
+	
+	static{
+		bannedNouns.add("apache");
+		bannedNouns.add("helicopter");
+	}
 	
 	public static String getPronouns(String user, String message){
 		try{
@@ -76,6 +83,13 @@ public class Pronouns {
 				}
 				
 				for(;i < data.getSplitMessage().length; i++){
+					if(bannedNouns.contains(data.getSplitMessage()[i].trim().toLowerCase())){
+						return "Your noun list contains a banned term: " + data.getSplitMessage()[i];
+					}
+				}
+				
+				for(;i < data.getSplitMessage().length; i++){
+					
 					CloseableStatement insertStatement = Connector.getStatement(Queries.getQuery("insertPronoun"),pronounID, data.getSplitMessage()[i]);
 					insertStatement.executeUpdate();
 					if(str.length() > 0){

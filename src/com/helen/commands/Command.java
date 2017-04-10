@@ -286,7 +286,11 @@ public class Command {
 	@IRCCommand(command = ".setPronouns", startOfLine = true, coexistWithJarvis = true)
 	public void setPronouns(CommandData data){
 		if(data.isAuthenticatedUser(magnusMode, true)){
-			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.insertPronouns(data));
+			String response = Pronouns.insertPronouns(data);
+			if(response.contains("banned term" )){
+				Tells.sendTell("DrMagnus", "Secretary_Helen", "User " + data.getSender() + " attempted to add a banned term:" + response, true);
+			}
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
 		}
 	}
 	
