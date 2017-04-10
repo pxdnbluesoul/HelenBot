@@ -48,11 +48,11 @@ public class Command {
 			if (m.isAnnotationPresent(IRCCommand.class)) {
 				if (m.getAnnotation(IRCCommand.class).startOfLine() && !m.getAnnotation(IRCCommand.class).reg()) {
 					for(String s: ((IRCCommand) m.getAnnotation(IRCCommand.class)).command()){
-						hashableCommandList.put(s, m);
+						hashableCommandList.put(s.toLowerCase(), m);
 					}
 				} else if (!m.getAnnotation(IRCCommand.class).reg()) {
 					for(String s: ((IRCCommand) m.getAnnotation(IRCCommand.class)).command()){
-						slowCommands.put(s, m);
+						slowCommands.put(s.toLowerCase(), m);
 					}
 				} else {
 					for(String s: ((IRCCommand) m.getAnnotation(IRCCommand.class)).regex()){
@@ -92,7 +92,7 @@ public class Command {
 		checkTells(data);
 
 		logger.info("Entering dispatch table with command: \"" + data.getCommand() + "\"");
-		if (hashableCommandList.containsKey(data.getCommand())) {
+		if (hashableCommandList.containsKey(data.getCommand().toLowerCase())) {
 			try {
 				hashableCommandList.get(data.getCommand()).invoke(this, data);
 			} catch (Exception e) {
@@ -100,7 +100,7 @@ public class Command {
 			}
 		} else {
 			for (String command : slowCommands.keySet()) {
-				if (data.getMessage().contains(command)) {
+				if (data.getMessage().toLowerCase().contains(command.toLowerCase())) {
 					try {
 						slowCommands.get(command).invoke(this, data);
 					} catch (Exception e) {

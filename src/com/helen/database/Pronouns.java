@@ -37,6 +37,7 @@ public class Pronouns {
 					if(pronouns.length() > 0){
 						str.append("use the following pronouns : ");
 						str.append(pronouns.toString());
+						str.append(";");
 					}else{
 						str.append(" I have no record of pronouns;");
 					}
@@ -46,6 +47,7 @@ public class Pronouns {
 					}else{
 						str.append(" I have no record of accepted pronouns");
 					}
+					str.append(".");
 				}else{
 					str.append("I'm sorry, I don't have any record of pronouns for " + user);
 				}
