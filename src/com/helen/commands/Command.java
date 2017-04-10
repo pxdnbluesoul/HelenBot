@@ -88,10 +88,13 @@ public class Command {
 		if(!(data.getChannel() == null || data.getChannel().isEmpty())){
 			User[] list = helen.getUsers(data.getChannel());
 			for(User u: list){
+				logger.info(u.getNick());
 				if(u.getNick().equalsIgnoreCase("jarvis")){
 					jarvisInChannel = true;
 				}
 			}
+		}else{
+			logger.info("Channel was empty");
 		}
 		
 		logger.info("Entering dispatch table with command: \"" + data.getCommand() + "\"");
@@ -99,9 +102,12 @@ public class Command {
 			try {
 				
 				Method m = hashableCommandList.get(data.getCommand().toLowerCase());
-				if(m.getAnnotation(IRCCommand.class).coexistWithJarvis() && jarvisInChannel){
+				if(m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !jarvisInChannel){
 					m.invoke(this, data);
 				}
+				
+				
+				
 				
 			} catch (Exception e) {
 				logger.error("Exception invoking start-of-line command: " + data.getCommand(), e);
@@ -111,7 +117,7 @@ public class Command {
 				if (data.getMessage().toLowerCase().contains(command.toLowerCase())) {
 					try {
 						Method m = slowCommands.get(command);
-						if(m.getAnnotation(IRCCommand.class).coexistWithJarvis() && jarvisInChannel){
+						if(m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !jarvisInChannel){
 							m.invoke(this, data);
 						}
 					} catch (Exception e) {
@@ -127,7 +133,7 @@ public class Command {
 					if(match.matches()){
 						try {
 							Method m = regexCommands.get(regex);
-							if(m.getAnnotation(IRCCommand.class).coexistWithJarvis() && jarvisInChannel){
+							if(m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !jarvisInChannel){
 								m.invoke(this,data);
 							}
 						} catch (Exception e) {
