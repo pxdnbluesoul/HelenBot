@@ -32,8 +32,20 @@ public class Pronouns {
 						pronouns.append(rs.getString("pronoun"));
 					}
 				}
-				if(accepted.length() > 0 && pronouns.length() > 0){
-					str.append(message + "use the following pronouns : " + pronouns.toString() + " accept the following pronouns: " + accepted.toString());
+				if(accepted.length() > 0 || pronouns.length() > 0){
+					str.append(message);
+					if(pronouns.length() > 0){
+						str.append("use the following pronouns : ");
+						str.append(pronouns.toString());
+					}else{
+						str.append(" I have no record of pronouns;");
+					}
+					if(accepted.length() > 0){
+						str.append(" and accept the following pronouns: ");
+						str.append(accepted.toString());
+					}else{
+						str.append(" I have no record of accepted pronouns");
+					}
 				}else{
 					str.append("I'm sorry, I don't have any record of pronouns for " + user);
 				}
@@ -70,7 +82,7 @@ public class Pronouns {
 					str.append(data.getSplitMessage()[i]);
 				}
 			}
-			return "Inserted the following pronouns: " + str.toString() + " as " + (data.getSplitMessage()[1].equalsIgnoreCase("accepted") ? " accepted pronouns." : " pronouns");
+			return "Inserted the following pronouns: " + str.toString() + " as " + (data.getSplitMessage()[1].equalsIgnoreCase("accepted") ? "accepted pronouns." : "pronouns");
 		}catch (Exception e){
 			logger.error("Error retreiving pronouns",e);
 		}
