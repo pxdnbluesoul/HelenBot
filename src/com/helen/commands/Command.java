@@ -272,14 +272,14 @@ public class Command {
 	@IRCCommand(command = {".pronouns",".pronoun"}, startOfLine = true, coexistWithJarvis = true)
 	public void getPronouns(CommandData data){
 		if(data.isAuthenticatedUser(magnusMode, true)){
-			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.otherPronouns(data.getTarget()));
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.getPronouns(data.getTarget()));
 		}
 	}
 	
 	@IRCCommand(command = ".myPronouns", startOfLine = true, coexistWithJarvis = true)
 	public void myPronouns(CommandData data){
 		if(data.isAuthenticatedUser(magnusMode, true)){
-			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.myPronouns(data.getSender()));
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.getPronouns(data.getSender()));
 		}
 	}
 	

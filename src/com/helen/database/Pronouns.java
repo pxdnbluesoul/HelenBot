@@ -18,7 +18,7 @@ public class Pronouns {
 		bannedNouns.add("helicopter");
 	}
 	
-	public static String getPronouns(String user, String message){
+	public static String getPronouns(String user){
 		try{
 			StringBuilder str = new StringBuilder();
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getPronouns"),user.toLowerCase());
@@ -40,16 +40,20 @@ public class Pronouns {
 					}
 				}
 				if(accepted.length() > 0 || pronouns.length() > 0){
-					str.append(message);
+					str.append("My record of pronouns for ");
+					str.append(user);
+					str.append(" are as follows:");
 					if(pronouns.length() > 0){
-						str.append("use the following pronouns : ");
+						str.append(user);
+						str.append(" uses the following pronouns : ");
 						str.append(pronouns.toString());
 						str.append(";");
 					}else{
 						str.append(" I have no record of pronouns;");
 					}
 					if(accepted.length() > 0){
-						str.append(" and accept the following pronouns: ");
+						str.append(user);
+						str.append(" accepts the following pronouns: ");
 						str.append(accepted.toString());
 					}else{
 						str.append(" I have no record of accepted pronouns");
@@ -122,13 +126,6 @@ public class Pronouns {
 		return "I'm sorry there was an error.  Please inform Dr Magnus.";
 	}
 	
-	public static String myPronouns(String username){
-		return getPronouns(username, "You ");
-	}
 	
-	public static String otherPronouns(String username){
-		return getPronouns(username, "The user " + username + " ");
-		
-	}
 	
 }

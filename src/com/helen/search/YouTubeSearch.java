@@ -53,9 +53,9 @@ public class YouTubeSearch {
 				Video targetVideo = videoList.get(0);
 
 				String time = targetVideo.getContentDetails().getDuration().split("PT")[1].toLowerCase();
-				BigInteger views = targetVideo.getStatistics().getViewCount();
-				BigInteger rating = targetVideo.getStatistics().getLikeCount();
-				BigInteger dislikes = targetVideo.getStatistics().getDislikeCount();
+				BigInteger views = targetVideo.getStatistics().getViewCount() == null ? BigInteger.valueOf(0l) : targetVideo.getStatistics().getViewCount();
+				BigInteger rating = targetVideo.getStatistics().getLikeCount() == null ? BigInteger.valueOf(0l) : targetVideo.getStatistics().getLikeCount();
+				BigInteger dislikes = targetVideo.getStatistics().getDislikeCount() == null ? BigInteger.valueOf(0l) : targetVideo.getStatistics().getDislikeCount();
 				String uploader = targetVideo.getSnippet().getChannelTitle();
 
 				str.append(Colors.BOLD);
