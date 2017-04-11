@@ -77,18 +77,18 @@ public class Pronouns {
 			
 			if(rs != null && rs.next()){
 				int pronounID = rs.getInt("pronounID");
-				int i = 1;
+				int j = 1;
 				if(data.getSplitMessage()[1].equalsIgnoreCase("accepted")){
-					i = 2;
+					j = 2;
 				}
 				
-				for(;i < data.getSplitMessage().length; i++){
+				for(int i = j;i < data.getSplitMessage().length; i++){
 					if(bannedNouns.contains(data.getSplitMessage()[i].trim().toLowerCase())){
 						return "Your noun list contains a banned term: " + data.getSplitMessage()[i];
 					}
 				}
 				
-				for(;i < data.getSplitMessage().length; i++){
+				for(int i = j;i < data.getSplitMessage().length; i++){
 					
 					CloseableStatement insertStatement = Connector.getStatement(Queries.getQuery("insertPronoun"),pronounID, data.getSplitMessage()[i]);
 					insertStatement.executeUpdate();
