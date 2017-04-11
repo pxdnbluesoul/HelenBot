@@ -31,7 +31,7 @@ public class Command {
 
 	private PircBot helen;
 
-	private boolean magnusMode = false;
+	private boolean adminMode = false;
 
 	private static HashMap<String, Method> hashableCommandList = new HashMap<String, Method>();
 	private static HashMap<String, Method> slowCommands = new HashMap<String, Method>();
@@ -158,14 +158,14 @@ public class Command {
 
 	@IRCCommand(command = {".modeToggle"}, startOfLine = true, coexistWithJarvis = true)
 	public void toggleMode(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, true)) {
-			magnusMode = !magnusMode;
+		if (data.isAuthenticatedUser(adminMode, true)) {
+			adminMode = !adminMode;
 		}
 	}
 	
 	@IRCCommand(command = {".ch",".choose"}, startOfLine = true)
 	public void choose(CommandData data){
-		if(data.isAuthenticatedUser(magnusMode, true)){
+		if(data.isAuthenticatedUser(adminMode, true)){
 			String[] choices = data.getMessage().substring(data.getMessage().indexOf(" ")).split(",");
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " 
 						+ choices[((int) (Math.random() * (choices.length - 1)) + 1)]);
@@ -174,15 +174,15 @@ public class Command {
 
 	@IRCCommand(command = {".mode"}, startOfLine = true, coexistWithJarvis = true)
 	public void displayMode(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, false)) {
+		if (data.isAuthenticatedUser(adminMode, false)) {
 			helen.sendMessage(data.getResponseTarget(),
-					data.getSender() + ": I am currently in " + (magnusMode ? "Magnus Only" : " Any User") + " mode.");
+					data.getSender() + ": I am currently in " + (adminMode ? "Admin" : "Any User") + " mode.");
 		}
 	}
 
 	@IRCCommand(command = {".msg"}, startOfLine = true)
 	public void sendMessage(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, false)) {
+		if (data.isAuthenticatedUser(adminMode, false)) {
 			String target = data.getTarget();
 			String payload = data.getPayload();
 
@@ -193,7 +193,7 @@ public class Command {
 
 	@IRCCommand(command = {".roll"}, startOfLine = true)
 	public void roll(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, true)) {
+		if (data.isAuthenticatedUser(adminMode, true)) {
 			Roll roll = new Roll(data.getMessage(), data.getSender());
 			Rolls.insertRoll(roll);
 			helen.sendMessage(data.getChannel(), data.getSender() + ": " + roll.toString());
@@ -202,7 +202,7 @@ public class Command {
 
 	@IRCCommand(command = {".myRolls", ".myrolls"}, startOfLine = true)
 	public void getRolls(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, true)) {
+		if (data.isAuthenticatedUser(adminMode, true)) {
 			ArrayList<Roll> rolls = Rolls.getRolls(data.getSender());
 			if (rolls.size() > 0) {
 				helen.sendMessage(data.getResponseTarget(), buildResponse(rolls));
@@ -216,7 +216,7 @@ public class Command {
 	
 	@IRCCommand(command = {".average",".avg"}, startOfLine = true)
 	public void getAverage(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, true)) {
+		if (data.isAuthenticatedUser(adminMode, true)) {
 			String average = Rolls.getAverage(data.getSplitMessage()[1], data.getSender());
 			if(average != null){
 				helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " +  average);
@@ -227,7 +227,7 @@ public class Command {
 
 	@IRCCommand(command = {".g",".google"}, startOfLine = true)
 	public void webSearch(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, true)) {
+		if (data.isAuthenticatedUser(adminMode, true)) {
 			try {
 				helen.sendMessage(data.getResponseTarget(),
 						data.getSender() + ": " + WebSearch.search(data.getMessage()).toString());
@@ -240,7 +240,7 @@ public class Command {
 
 	@IRCCommand(command = {".y",".yt",".youtube"}, startOfLine = true)
 	public void youtubeSearch(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, true)) {
+		if (data.isAuthenticatedUser(adminMode, true)) {
 			helen.sendMessage(data.getResponseTarget(),
 					data.getSender() + ": " + YouTubeSearch.youtubeSearch(data.getMessage()).toString());
 		}
@@ -249,21 +249,21 @@ public class Command {
 
 	@IRCCommand(command = ".seen", startOfLine = true)
 	public void seen(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, true)) {
+		if (data.isAuthenticatedUser(adminMode, true)) {
 			helen.sendMessage(data.getResponseTarget(), Users.seen(data));
 		}
 	}
 	
 	@IRCCommand(command = "SCP", startOfLine = true, reg = true, regex = {"(scp|SCP)-([0-9]+)"})
 	public void scpSearch(CommandData data){
-		if(data.isAuthenticatedUser(magnusMode, true)){
+		if(data.isAuthenticatedUser(adminMode, true)){
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getCommand()));
 		}
 	}
 	
 	@IRCCommand(command = ".tagLoad", startOfLine = true, coexistWithJarvis = true)
 	public void updateTags(CommandData data){
-		if(data.isAuthenticatedUser(magnusMode, false)){
+		if(data.isAuthenticatedUser(adminMode, false)){
 			Pages.getTags();
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Tags have been updated in my database." );
 		}
@@ -271,21 +271,21 @@ public class Command {
 	
 	@IRCCommand(command = {".pronouns",".pronoun"}, startOfLine = true, coexistWithJarvis = true)
 	public void getPronouns(CommandData data){
-		if(data.isAuthenticatedUser(magnusMode, true)){
+		if(data.isAuthenticatedUser(adminMode, true)){
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.getPronouns(data.getTarget()));
 		}
 	}
 	
 	@IRCCommand(command = ".myPronouns", startOfLine = true, coexistWithJarvis = true)
 	public void myPronouns(CommandData data){
-		if(data.isAuthenticatedUser(magnusMode, true)){
+		if(data.isAuthenticatedUser(adminMode, true)){
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.getPronouns(data.getSender()));
 		}
 	}
 	
 	@IRCCommand(command = ".setPronouns", startOfLine = true, coexistWithJarvis = true)
 	public void setPronouns(CommandData data){
-		if(data.isAuthenticatedUser(magnusMode, true)){
+		if(data.isAuthenticatedUser(adminMode, true)){
 			String response = Pronouns.insertPronouns(data);
 			if(response.contains("banned term" )){
 				Tells.sendTell("DrMagnus", "Secretary_Helen", "User " + data.getSender() + " attempted to add a banned term:" + response, true);
@@ -296,14 +296,14 @@ public class Command {
 	
 	@IRCCommand(command = ".clearPronouns", startOfLine = true, coexistWithJarvis = true)
 	public void clearPronouns(CommandData data){
-		if(data.isAuthenticatedUser(magnusMode, true)){
+		if(data.isAuthenticatedUser(adminMode, true)){
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.clearPronouns(data.getSender()));
 		}
 	}
 	
 	@IRCCommand(command = ".removePronouns", startOfLine = true, coexistWithJarvis = true)
 	public void removePronouns(CommandData data){
-		if(data.isAuthenticatedUser(magnusMode, false)){
+		if(data.isAuthenticatedUser(adminMode, false)){
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.clearPronouns(data.getTarget()));
 		}
 	}
@@ -311,21 +311,21 @@ public class Command {
 	// Authentication Required Commands
 	@IRCCommand(command = ".join", startOfLine = true, coexistWithJarvis = true)
 	public void enterChannel(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, true))
+		if (data.isAuthenticatedUser(adminMode, true))
 			helen.joinChannel(data.getTarget());
 
 	}
 
 	@IRCCommand(command = ".leave", startOfLine = true, coexistWithJarvis = true)
 	public void leaveChannel(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, true))
+		if (data.isAuthenticatedUser(adminMode, true))
 			helen.partChannel(data.getTarget());
 
 	}
 
 	@IRCCommand(command = ".tell", startOfLine = true)
 	public void tell(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, true)) {
+		if (data.isAuthenticatedUser(adminMode, true)) {
 			String str = Tells.sendTell(data.getTarget(), data.getSender(), data.getTellMessage(),
 					(data.getChannel().isEmpty() ? true : false));
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + str);
@@ -334,7 +334,7 @@ public class Command {
 
 	@IRCCommand(command = ".exit", startOfLine = true, coexistWithJarvis = true)
 	public void exitBot(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, true)) {
+		if (data.isAuthenticatedUser(adminMode, true)) {
 			for(String channel : helen.getChannels()){
 				helen.partChannel(channel,"Stay out of the revolver's sights...");
 			}
@@ -351,7 +351,7 @@ public class Command {
 
 	@IRCCommand(command = ".allProperties", startOfLine = true)
 	public void getAllProperties(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, false)) {
+		if (data.isAuthenticatedUser(adminMode, false)) {
 			ArrayList<Config> properties = Configs.getConfiguredProperties(true);
 			helen.sendMessage(data.getResponseTarget(),
 					data.getSender() + ": Configured properties: " + buildResponse(properties));
@@ -360,7 +360,7 @@ public class Command {
 
 	@IRCCommand(command = ".property", startOfLine = true)
 	public void getProperty(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, false)) {
+		if (data.isAuthenticatedUser(adminMode, false)) {
 			ArrayList<Config> properties = Configs.getProperty(data.getTarget());
 			helen.sendMessage(data.getResponseTarget(),
 					data.getSender() + ": Configured properties: " + buildResponse(properties));
@@ -369,7 +369,7 @@ public class Command {
 
 	@IRCCommand(command = ".setProperty", startOfLine = true)
 	public void setProperty(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, false)) {
+		if (data.isAuthenticatedUser(adminMode, false)) {
 			String properties = Configs.setProperty(data.getSplitMessage()[1], data.getSplitMessage()[2],
 					data.getSplitMessage()[3]);
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + properties);
@@ -378,7 +378,7 @@ public class Command {
 
 	@IRCCommand(command = ".updateProperty", startOfLine = true)
 	public void updateProperty(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, false)) {
+		if (data.isAuthenticatedUser(adminMode, false)) {
 			String properties = Configs.updateSingle(data.getSplitMessage()[1], data.getSplitMessage()[2],
 					data.getSplitMessage()[3]);
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + properties);
@@ -387,7 +387,7 @@ public class Command {
 
 	@IRCCommand(command = ".deleteProperty", startOfLine = true)
 	public void deleteProperty(CommandData data) {
-		if (data.isAuthenticatedUser(magnusMode, false)) {
+		if (data.isAuthenticatedUser(adminMode, false)) {
 			String properties = Configs.removeProperty(data.getSplitMessage()[1], data.getSplitMessage()[2]);
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + properties);
 		}
@@ -395,27 +395,11 @@ public class Command {
 	
 	@IRCCommand(command = ".clearCache", startOfLine = true)
 	public void clearCache(CommandData data){
-		if(data.isAuthenticatedUser(magnusMode, false)){
+		if(data.isAuthenticatedUser(adminMode, false)){
 			Queries.clear();
 			Configs.clear();
 		}
 	}
-	/*
-	@IRCCommand(command = ".searchTest", startOfLine = true)
-	public void search(CommandData data){
-		if(data.isAuthenticatedUser(magnusMode, false)){
-			Pages.uploadSeries();
-		}
-	}
-	
-	/*
-	 * 
-	 * if(data.getCommand().toLowerCase().contains("scp") && data.getSplitMessage().length == 1){
-				scpSearch(data);
-			}
-	 */
-	
-	
 
 	private String buildResponse(ArrayList<? extends DatabaseObject> dbo) {
 		StringBuilder str = new StringBuilder();
