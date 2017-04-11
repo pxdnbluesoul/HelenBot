@@ -300,6 +300,13 @@ public class Command {
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.clearPronouns(data.getSender()));
 		}
 	}
+	
+	@IRCCommand(command = ".removePronouns", startOfLine = true, coexistWithJarvis = true)
+	public void removePronouns(CommandData data){
+		if(data.isAuthenticatedUser(magnusMode, false)){
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.clearPronouns(data.getTarget()));
+		}
+	}
 
 	// Authentication Required Commands
 	@IRCCommand(command = ".join", startOfLine = true, coexistWithJarvis = true)
