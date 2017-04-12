@@ -40,9 +40,6 @@ public class Pronouns {
 					}
 				}
 				if(accepted.length() > 0 || pronouns.length() > 0){
-					str.append("My record of pronouns for ");
-					str.append(user);
-					str.append(" are as follows: ");
 					if(pronouns.length() > 0){
 						str.append(user);
 						str.append(" uses the following pronouns : ");
