@@ -1,9 +1,7 @@
 package com.helen.database;
 
-import java.awt.Color;
 import java.net.URL;
 import java.sql.ResultSet;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -135,7 +133,6 @@ public class Pages {
 			for (int i = 0; i < result.length; i++) {
 				pageList[i] = (String) result[i];
 			}
-			int i = 0;
 			logger.info(pageList.length);
 			for (String str : pageList) {
 				if (!storedPages.contains(str)) {
@@ -184,6 +181,7 @@ public class Pages {
 		keyswewant.add("created_by");
 		keyswewant.add("tags");
 		try {
+			@SuppressWarnings("unchecked")
 			HashMap<String, HashMap<String, Object>> result = (HashMap<String, HashMap<String, Object>>) pushToAPI(
 					"pages.get_meta", params);
 			
@@ -270,7 +268,6 @@ public class Pages {
 			for (int i = 0; i < result.length; i++) {
 				pageList[i] = (String) result[i];
 			}
-			int i = 0;
 			logger.info(pageList.length);
 			for (String str : pageList) {
 				logger.info(str);
@@ -279,7 +276,7 @@ public class Pages {
 			logger.error("There was an exception", e);
 		}
 	}
-
+/*
 	private static void loadMetaData() {
 		if (synching) {
 			java.sql.Timestamp now = new java.sql.Timestamp(
@@ -290,7 +287,7 @@ public class Pages {
 			}
 		}
 	}
-
+*/
 	private static void loadPages() {
 		storedPages = new HashSet<String>();
 

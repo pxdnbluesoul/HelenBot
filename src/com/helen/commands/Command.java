@@ -1,7 +1,6 @@
 package com.helen.commands;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -295,6 +294,11 @@ public class Command {
 		helen.sendMessage(data.getResponseTarget(),
 				data.getSender() + ": " + YouTubeSearch.youtubeSearch(data.getMessage()).toString());
 
+	}
+	
+	@IRCCommand(command = ".help", startOfLine = true, securityLevel = 1)
+	public void help(CommandData data){
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": https://home.helenbot.com/usage.html");
 	}
 
 	@IRCCommand(command = ".seen", startOfLine = true, securityLevel = 1)

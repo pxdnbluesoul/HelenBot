@@ -109,7 +109,6 @@ public class Pronouns {
 	
 	public static String clearPronouns(String username){
 		try{
-			StringBuilder str = new StringBuilder();
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("deleteNouns"), username.toLowerCase());
 			stmt.executeUpdate();
 			
