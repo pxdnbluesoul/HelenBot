@@ -143,11 +143,8 @@ public class Command {
 
 				Method m = hashableCommandList.get(data.getCommand().toLowerCase());
 				if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !jarvisInChannel) {
-					int requiredSecurity = 4;
-					if(adminMode){
-							requiredSecurity = Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity);
-					}
-					if (securityLevel >= requiredSecurity) {
+					if (securityLevel >= (adminMode ? Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity) 
+							: m.getAnnotation(IRCCommand.class).securityLevel())) {
 						m.invoke(this, data);
 					} else {
 						logger.info("User " + data.getSender() + " attempted to use command: " + data.getCommand()
@@ -166,12 +163,8 @@ public class Command {
 					try {
 						Method m = slowCommands.get(command);
 						if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !jarvisInChannel) {
-							int requiredSecurity = 4;
-							if(adminMode){
-								requiredSecurity = Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity);
-							}
-							
-							if (securityLevel >= requiredSecurity) {
+							if (securityLevel >= (adminMode ? Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity) 
+									: m.getAnnotation(IRCCommand.class).securityLevel())) {
 								m.invoke(this, data);
 							} else {
 								logger.info(
@@ -195,11 +188,8 @@ public class Command {
 						try {
 							Method m = regexCommands.get(regex);
 							if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !jarvisInChannel) {
-								int requiredSecurity = 4;
-								if(adminMode){
-									requiredSecurity = Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity);
-								}
-								if (securityLevel >= requiredSecurity) {
+								if (securityLevel >= (adminMode ? Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity) 
+										: m.getAnnotation(IRCCommand.class).securityLevel())) {
 									m.invoke(this, data);
 								} else {
 									logger.info("User " + data.getSender() + " attempted to use command: "
