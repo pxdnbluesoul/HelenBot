@@ -88,7 +88,7 @@ public class Command {
 		if(!(data.getChannel() == null || data.getChannel().isEmpty())){
 			User[] list = helen.getUsers(data.getChannel());
 			for(User u: list){
-				logger.info(u.getNick());
+				logger.info(u.getNick() + " " + (u.isOp() ? "is op" : "is not op"));
 				if(u.getNick().equalsIgnoreCase("jarvis")){
 					jarvisInChannel = true;
 				}
