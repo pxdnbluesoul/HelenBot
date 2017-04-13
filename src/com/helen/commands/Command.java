@@ -89,16 +89,18 @@ public class Command {
 
 			User user = null;
 			for (User u : userlist) {
-				if (data.getSender().equals(u.getNick())) {
+				if (data.getSender().equalsIgnoreCase(u.getNick())) {
 					user = u;
 				}
 			}
-			
+
 			if (user != null) {
+				if(user.isOp()){
+					return 3;
+				}
 				switch (user.getPrefix()) {
 				case "~":
 				case "&":
-				case "@":
 					return 3;
 				case "%":
 					return 2;
@@ -143,12 +145,14 @@ public class Command {
 
 				Method m = hashableCommandList.get(data.getCommand().toLowerCase());
 				if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !jarvisInChannel) {
-					if (securityLevel >= (adminMode ? Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity) 
+					if (securityLevel >= (adminMode
+							? Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity)
 							: m.getAnnotation(IRCCommand.class).securityLevel())) {
 						m.invoke(this, data);
 					} else {
-						logger.info("User " + data.getSender() + " attempted to use command: " + data.getCommand()
-								+ " which is above their security level of: " + securityLevel + ".");
+						logger.info("User " + data.getSender() + " attempted to use command: "
+								+ data.getCommand() + " which is above their security level of: "
+								+ securityLevel + (adminMode ? ".  I am currently in admin mode." : "."));
 					}
 				}
 
@@ -163,13 +167,14 @@ public class Command {
 					try {
 						Method m = slowCommands.get(command);
 						if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !jarvisInChannel) {
-							if (securityLevel >= (adminMode ? Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity) 
+							if (securityLevel >= (adminMode
+									? Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity)
 									: m.getAnnotation(IRCCommand.class).securityLevel())) {
 								m.invoke(this, data);
 							} else {
-								logger.info(
-										"User " + data.getSender() + " attempted to use command: " + data.getCommand()
-												+ " which is above their security level of: " + securityLevel + ".");
+								logger.info("User " + data.getSender() + " attempted to use command: "
+										+ data.getCommand() + " which is above their security level of: "
+										+ securityLevel + (adminMode ? ".  I am currently in admin mode." : "."));
 							}
 						}
 					} catch (Exception e) {
@@ -188,13 +193,15 @@ public class Command {
 						try {
 							Method m = regexCommands.get(regex);
 							if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !jarvisInChannel) {
-								if (securityLevel >= (adminMode ? Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity) 
+								if (securityLevel >= (adminMode
+										? Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity)
 										: m.getAnnotation(IRCCommand.class).securityLevel())) {
 									m.invoke(this, data);
 								} else {
 									logger.info("User " + data.getSender() + " attempted to use command: "
 											+ data.getCommand() + " which is above their security level of: "
-											+ securityLevel + ".");
+											+ securityLevel + (adminMode ? ".  I am currently in admin mode." : "."));
+
 								}
 							}
 						} catch (Exception e) {
