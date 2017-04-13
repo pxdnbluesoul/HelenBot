@@ -418,13 +418,29 @@ public class Command {
 	
 	@IRCCommand(command = ".shoot", startOfLine = true, securityLevel = 4)
 	public void shootUser(CommandData data) {
+		helen.sendAction(data.getChannel(), "shoots " + data.getTarget());
 		bullets--;
 		if(bullets < 1){
-			helen.sendAction(data.getChannel(), "reloads all six barrels.");
+			reload(data);
 		}
-		helen.sendAction(data.getChannel(), "shoots " + data.getTarget());
 		helen.sendMessage(data.getChannel(), "Be careful " + data.getTarget() + ". I still have " + 
-		(bullets > 1 ? bullets + "bullets left." : "one in the chamber."));
+		(bullets > 1 ? bullets + " bullets left." : "one in the chamber."));
+		
+	}
+	
+	@IRCCommand(command = ".reload", startOfLine = true, securityLevel = 4)
+	public void reload(CommandData data) {
+		helen.sendAction(data.getChannel(), "reloads all six barrels.");
+		bullets = 6;
+	}
+	
+	@IRCCommand(command = ".unload", startOfLine = true, securityLevel = 4)
+	public void unload(CommandData data) {
+		helen.sendAction(data.getChannel(), "calmly thumbs back the hammer and unleashes"
+				+ (bullets == 6 ? " all six barrels on " : " the remaining " + bullets + " chambers on ")
+		+ data.getTarget() + ".");
+		helen.sendMessage(data.getChannel(), "Stay out of the revolver's sights.");
+		reload(data);
 	}
 
 	private String buildResponse(ArrayList<? extends DatabaseObject> dbo) {
