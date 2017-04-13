@@ -33,6 +33,7 @@ public class Command {
 
 	private boolean adminMode = false;
 	private final int adminSecurity = 2;
+	private int bullets = 6;
 
 	private static HashMap<String, Method> hashableCommandList = new HashMap<String, Method>();
 	private static HashMap<String, Method> slowCommands = new HashMap<String, Method>();
@@ -413,6 +414,17 @@ public class Command {
 	public void clearCache(CommandData data) {
 		Queries.clear();
 		Configs.clear();
+	}
+	
+	@IRCCommand(command = ".shoot", startOfLine = true, securityLevel = 4)
+	public void shootUser(CommandData data) {
+		bullets--;
+		if(bullets < 1){
+			helen.sendAction(data.getChannel(), "reloads all six barrels.");
+		}
+		helen.sendAction(data.getChannel(), "shoots " + data.getTarget());
+		helen.sendMessage(data.getChannel(), "Be careful " + data.getTarget() + ". I still have " + 
+		(bullets > 1 ? bullets + "bullets left." : "one in the chamber."));
 	}
 
 	private String buildResponse(ArrayList<? extends DatabaseObject> dbo) {
