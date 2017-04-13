@@ -298,7 +298,7 @@ public class Command {
 	
 	@IRCCommand(command = ".help", startOfLine = true, securityLevel = 1)
 	public void help(CommandData data){
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": https://home.helenbot.com/usage.html");
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": http://home.helenbot.com/usage.html");
 	}
 
 	@IRCCommand(command = ".seen", startOfLine = true, securityLevel = 1)
