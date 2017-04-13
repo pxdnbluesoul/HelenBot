@@ -11,4 +11,5 @@ public @interface IRCCommand {
 	boolean reg() default false;
 	String[] regex() default "";
 	boolean coexistWithJarvis() default false;
+	int securityLevel();
 }

@@ -68,17 +68,13 @@ public class CommandData {
 		return message.substring(message.indexOf(getTarget()) + getTarget().length()).trim();
 	}
 	
-	public boolean isAuthenticatedUser(boolean magnusMode, boolean lowLevel) {
-		if(!magnusMode && lowLevel) {
-			return true;
-		}else {
-			for(Config config : Configs.getProperty("registeredNicks")){
-				if(getSender().equals(config.getValue())){
-					return true;
-				}
+	public boolean isWhiteList(){
+		for(Config config : Configs.getProperty("registeredNicks")){
+			if(getSender().equals(config.getValue())){
+				return true;
 			}
-			return false;
 		}
+		return false;
 	}
 	
 	
