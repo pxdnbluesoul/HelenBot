@@ -215,7 +215,7 @@ public class Command {
 	}
 
 	// Relateively unregulated commands (anyone can try these)
-	@IRCCommand(command = { ".HelenBot" }, startOfLine = false, coexistWithJarvis = true, securityLevel = 1)
+	@IRCCommand(command = { ".HelenBot" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
 	public void versionResponse(CommandData data) {
 		if (data.getChannel().isEmpty()) {
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Greetings, I am HelenBot v"
@@ -311,7 +311,7 @@ public class Command {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getCommand()));
 	}
 
-	@IRCCommand(command = ".tagLoad", startOfLine = true, coexistWithJarvis = true, securityLevel = 5)
+	@IRCCommand(command = ".tagLoad", startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
 	public void updateTags(CommandData data) {
 		Pages.getTags();
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Tags have been updated in my database.");
