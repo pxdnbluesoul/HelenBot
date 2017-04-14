@@ -34,20 +34,26 @@ public class Users {
 				logger.error("Error code " + e.getErrorCode() + e.getMessage() + " Insertion exception for " + username,
 						e);
 			} else {
-				updateUserSeen(username, message);
+				updateUserSeen(username, message, hostmask);
 			}
 		}
 	}
 
-	private static void updateUserSeen(String username, String message) {
+	private static void updateUserSeen(String username, String message, String hostmask) {
 		try {
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("updateUser"),
 					new java.sql.Timestamp(System.currentTimeMillis()),
 					message,
 					username.toLowerCase());
 			stmt.executeUpdate();
+			
+			CloseableStatement hostStatement = Connector.getStatement(Queries.getQuery("insertHostmask"),
+					username.toLowerCase(),
+					hostmask,
+					new java.sql.Date(new Date().getTime()));
+			hostStatement.executeUpdate();
 		} catch (SQLException e) {
-			if (!e.getMessage().contains("user_unique")) {
+			if (!e.getMessage().contains("user_unique") && !e.getMessage().contains("host_unique")) {
 				logger.error("Error code " + e.getErrorCode() + e.getMessage() + " Insertion exception for " + username,
 						e);
 			} else {
