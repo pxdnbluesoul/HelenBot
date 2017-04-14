@@ -238,16 +238,23 @@ public class Pages {
 			Object[] result = (Object[]) pushToAPI("tags.select", params);
 
 			// Convert result to a String[]
-			String[] pageList = new String[result.length];
+			ArrayList<String> pageList = new ArrayList<String>();
 			for (int i = 0; i < result.length; i++) {
-				pageList[i] = (String) result[i];
+				pageList.add((String) result[i]);
 			}
-			
-			logger.info(pageList.length);
+			//Insert differences between wiki tags and current list
 			for (String str : pageList) {
 				if(!tags.contains(str)){
 					CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertTag"),str);
 					stmt.executeUpdate();
+				}
+			}
+			//remove things in the database that aren't on the wiki
+			for(String str: tags){
+				if(!pageList.contains(str)){
+					CloseableStatement stmt = Connector.getStatement(Queries.getQuery("deleteTag"), str);
+					stmt.executeUpdate();
+					logger.info("Removed tag: " + str);
 				}
 			}
 		} catch (Exception e) {
