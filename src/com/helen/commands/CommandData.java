@@ -19,9 +19,12 @@ public class CommandData {
 		this.message = message;
 	}
 
+	public boolean isPrivate(){
+		return getChannel() == null || getChannel().isEmpty();
+	}
 	
 	public String getResponseTarget(){
-		return (getChannel() == null || getChannel().isEmpty()) ? getSender() : getChannel();
+		return (isPrivate()) ? getSender() : getChannel();
 	}
 
 	public String getChannel() {

@@ -123,9 +123,11 @@ public class Command {
 	}
 
 	private boolean jarvisInChannel(User[] userlist) {
-		for (User u : userlist) {
-			if (u.getNick().equalsIgnoreCase("jarvis")) {
-				return true;
+		if(userlist != null){
+			for (User u : userlist) {
+				if (u.getNick().equalsIgnoreCase("jarvis")) {
+					return true;
+				}
 			}
 		}
 		return false;
@@ -135,7 +137,7 @@ public class Command {
 
 		checkTells(data);
 		User[] userList = getUserlist(data);
-		boolean jarvisInChannel = jarvisInChannel(userList);
+		boolean jarvisInChannel = (data.isPrivate()) ? false :  jarvisInChannel(userList);
 		Integer securityLevel = getSecurityLevel(userList, data);
 		logger.info("Entering dispatch table with command: \"" + data.getCommand() + "\"");
 
