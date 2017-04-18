@@ -425,6 +425,7 @@ public class Command {
 	public void clearCache(CommandData data) {
 		Queries.clear();
 		Configs.clear();
+		Pronouns.reload();
 	}
 	
 	@IRCCommand(command = ".shoot", startOfLine = true, securityLevel = 4)
