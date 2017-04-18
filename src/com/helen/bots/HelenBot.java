@@ -29,9 +29,6 @@ public class HelenBot extends PircBot {
 		connect();
 		joinChannels();
 		cmd = new Command(this);
-		
-		handler = new FileHandler("/var/log/helenbot/chatLog.log", 50, 1024 * 1000 * 1000, true);
-		chatLogger.addHandler(handler);
 	}
 
 	private void connect() throws NickAlreadyInUseException, IOException, IrcException, InterruptedException {
