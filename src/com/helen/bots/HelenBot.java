@@ -65,6 +65,8 @@ public class HelenBot extends PircBot {
 		cmd.dispatchTable(new CommandData("", sender, login, hostname, message));
 	}
 	
-	
+	public void log(String line){
+		logger.info(System.currentTimeMillis() + " " + line);
+	}
 
 }

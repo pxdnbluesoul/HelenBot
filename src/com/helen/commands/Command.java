@@ -139,7 +139,7 @@ public class Command {
 		User[] userList = getUserlist(data);
 		boolean jarvisInChannel = (data.isPrivate()) ? false :  jarvisInChannel(userList);
 		Integer securityLevel = getSecurityLevel(userList, data);
-		logger.info("Entering dispatch table with command: \"" + data.getCommand() + "\"");
+		//logger.info("Entering dispatch table with command: \"" + data.getCommand() + "\"");
 
 		// If we can use hashcommands, do so
 		if (hashableCommandList.containsKey(data.getCommand().toLowerCase())) {
@@ -421,7 +421,7 @@ public class Command {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + properties);
 	}
 
-	@IRCCommand(command = ".clearCache", startOfLine = true, securityLevel = 4)
+	@IRCCommand(command = {".clearCache",".clear"}, startOfLine = true, securityLevel = 4)
 	public void clearCache(CommandData data) {
 		Queries.clear();
 		Configs.clear();
