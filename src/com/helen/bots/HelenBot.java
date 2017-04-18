@@ -2,6 +2,7 @@ package com.helen.bots;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.logging.FileHandler;
 
 import org.apache.log4j.Logger;
 import org.jibble.pircbot.IrcException;
@@ -17,8 +18,10 @@ import com.helen.database.Users;
 public class HelenBot extends PircBot {
 	
 	private static Command cmd = null;
+	private static FileHandler handler = null;
 	
 	private static final Logger logger = Logger.getLogger(HelenBot.class);
+	private static final java.util.logging.Logger chatLogger = java.util.logging.Logger.getAnonymousLogger();
 
 	public HelenBot() throws NickAlreadyInUseException, IOException, IrcException, InterruptedException {
 		logger.info("Initializing HelenBot v" + Configs.getSingleProperty("version").getValue());
@@ -26,6 +29,9 @@ public class HelenBot extends PircBot {
 		connect();
 		joinChannels();
 		cmd = new Command(this);
+		
+		handler = new FileHandler("/var/log/helenbot/chatLog.log", 50, 1024 * 1000 * 1000, true);
+		chatLogger.addHandler(handler);
 	}
 
 	private void connect() throws NickAlreadyInUseException, IOException, IrcException, InterruptedException {
@@ -60,6 +66,10 @@ public class HelenBot extends PircBot {
 
 	private void dispatchTable(String sender, String login, String hostname, String message) {
 		cmd.dispatchTable(new CommandData("", sender, login, hostname, message));
+	}
+	
+	public void log(String line){
+		chatLogger.info(System.currentTimeMillis() + " " + line);
 	}
 
 }

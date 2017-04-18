@@ -14,8 +14,13 @@ public class Pronouns {
 	private static ArrayList<String> bannedNouns = new ArrayList<String>();
 	
 	static{
+		//Just a couple examples.
 		bannedNouns.add("apache");
 		bannedNouns.add("helicopter");
+		//More are added on the back end.
+		for(Config c: Configs.getProperty("bannedNouns")){
+			bannedNouns.add(c.getValue());
+		}
 	}
 	
 	public static String getPronouns(String user){

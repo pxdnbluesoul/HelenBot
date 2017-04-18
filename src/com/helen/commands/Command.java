@@ -223,7 +223,7 @@ public class Command {
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Greetings, I am HelenBot v"
 					+ Configs.getSingleProperty("version").getValue());
 		}
-		helen.sendMessage(data.getChannel(),
+		helen.sendMessage(data.getResponseTarget(),
 				data.getSender() + ": Greetings, I am HelenBot v" + Configs.getSingleProperty("version").getValue());
 	}
 
@@ -256,7 +256,7 @@ public class Command {
 	public void roll(CommandData data) {
 		Roll roll = new Roll(data.getMessage(), data.getSender());
 		Rolls.insertRoll(roll);
-		helen.sendMessage(data.getChannel(), data.getSender() + ": " + roll.toString());
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + roll.toString());
 	}
 
 	@IRCCommand(command = { ".myRolls", ".myrolls" }, startOfLine = true, securityLevel = 1)
@@ -347,6 +347,11 @@ public class Command {
 	@IRCCommand(command = ".removePronouns", startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
 	public void removePronouns(CommandData data) {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.clearPronouns(data.getTarget()));
+	}
+	
+	@IRCCommand(command = {".def",".definition"}, startOfLine = true, coexistWithJarvis = false, securityLevel = 1)
+	public void define(CommandData data){
+		
 	}
 
 	// Authentication Required Commands
