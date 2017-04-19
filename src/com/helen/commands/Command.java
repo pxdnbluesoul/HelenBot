@@ -298,6 +298,11 @@ public class Command {
 
 	}
 	
+	@IRCCommand(command = {".helen",".helenHelp"}, startOfLine = true, securityLevel = 1, coexistWithJarvis = true)
+	public void helenHelp(CommandData data){
+		help(data);
+	}
+	
 	@IRCCommand(command = ".help", startOfLine = true, securityLevel = 1)
 	public void help(CommandData data){
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": http://home.helenbot.com/usage.html");
