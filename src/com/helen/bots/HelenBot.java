@@ -66,7 +66,9 @@ public class HelenBot extends PircBot {
 	}
 	
 	public void log(String line){
-		logger.info(System.currentTimeMillis() + " " + line);
+		if(!line.contains("PING :") && !line.contains(">>>PONG")){
+			logger.info(System.currentTimeMillis() + " " + line);
+		}
 	}
 
 }
