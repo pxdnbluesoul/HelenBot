@@ -51,8 +51,8 @@ public class WebsterSearch {
 		Document doc = null;
 		try {
 			StringBuilder result = new StringBuilder();
-			URL url = new URL(Configs.getSingleProperty("dictionaryURL") + keyword
-					+ "?key=" + Configs.getSingleProperty("dictionaryKey"));
+			URL url = new URL(Configs.getSingleProperty("dictionaryURL").getValue() + keyword
+					+ "?key=" + Configs.getSingleProperty("dictionaryKey").getValue());
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 			BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
