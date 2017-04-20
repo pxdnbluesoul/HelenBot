@@ -23,6 +23,7 @@ import com.helen.database.Tell;
 import com.helen.database.Tells;
 import com.helen.database.Users;
 import com.helen.search.WebSearch;
+import com.helen.search.WebsterSearch;
 import com.helen.search.YouTubeSearch;
 
 public class Command {
@@ -47,6 +48,7 @@ public class Command {
 	}
 
 	static {
+		logger.info("Initializing commandList.");
 		for (Method m : Command.class.getDeclaredMethods()) {
 			if (m.isAnnotationPresent(IRCCommand.class)) {
 				if (m.getAnnotation(IRCCommand.class).startOfLine() && !m.getAnnotation(IRCCommand.class).reg()) {
@@ -62,8 +64,9 @@ public class Command {
 						regexCommands.put(s, m);
 					}
 				}
-
-				logger.info(((IRCCommand) m.getAnnotation(IRCCommand.class)).command());
+				for(String s: ((IRCCommand) m.getAnnotation(IRCCommand.class)).command()){
+					logger.info("Loaded command: " + m + " with activation string " + s);
+				}
 			}
 		}
 		logger.info("Finished Initializing commandList.");
@@ -356,7 +359,7 @@ public class Command {
 	
 	@IRCCommand(command = {".def",".definition"}, startOfLine = true, coexistWithJarvis = false, securityLevel = 1)
 	public void define(CommandData data){
-		
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + WebsterSearch.dictionarySearch(data.getTarget()));
 	}
 
 	// Authentication Required Commands
