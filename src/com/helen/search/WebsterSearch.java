@@ -78,6 +78,7 @@ public class WebsterSearch {
 
 	private static String processDocument(Document doc, String keyword) {
 		NodeList list = doc.getElementsByTagName("entry");
+		if(list.getLength() > 0){
 		ArrayList<Node> nodesToAnalyze = new ArrayList<Node>();
 		try {
 			for (int i = 0; i < list.getLength(); i++) {
@@ -136,5 +137,8 @@ public class WebsterSearch {
 		}
 
 		return str.toString();
+		}else{
+			return "I couldn't find a definition for " + keyword + ".";
+		}
 	}
 }

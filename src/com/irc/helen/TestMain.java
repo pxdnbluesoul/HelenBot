@@ -26,7 +26,7 @@ public class TestMain {
 
 	public static void main(String args[]) throws DOMException, Exception {
 
-		String keyword = "dickery";
+		String keyword = "HERGENFLERGENSTOW";
 		
 		
 		Document doc = findDefinition(keyword);
@@ -70,7 +70,7 @@ public class TestMain {
 	
 	public static void doProcess(Document doc, String keyword){
 		NodeList list = doc.getElementsByTagName("entry");
-		// doSomething(doc.getDocumentElement(), "bird");
+		if(list.getLength() > 0){
 		ArrayList<Node> nodesToAnalyze = new ArrayList<Node>();
 		try {
 			for (int i = 0; i < list.getLength(); i++) {
@@ -126,8 +126,11 @@ public class TestMain {
 			}
 
 		}
-
+		
 		System.out.println(str.toString());
+		}else{
+			System.out.println("I couldn't find a definition for " + keyword);
+		}
 	}
 
 	public static void doSomething(Node node, String keyword) {
