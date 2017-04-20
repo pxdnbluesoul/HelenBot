@@ -192,11 +192,14 @@ public class Command {
 			for (String regex : regexCommands.keySet()) {
 				Pattern r = Pattern.compile(regex);
 
-				if (!(data.getSplitMessage().length > 1)) {
 					Matcher match = r.matcher(data.getSplitMessage()[0]);
 					if (match.matches()) {
 						try {
 							Method m = regexCommands.get(regex);
+							
+							if(m.getAnnotation(IRCCommand.class).matcherGroup() != -1){
+								data.setRegexTarget(match.group(m.getAnnotation(IRCCommand.class).matcherGroup()));
+							}
 							if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !jarvisInChannel) {
 								if (securityLevel >= (adminMode
 										? Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity)
@@ -214,7 +217,7 @@ public class Command {
 									+ regexCommands.get(regex).getAnnotation(IRCCommand.class).command(), e);
 						}
 					}
-				}
+				
 			}
 		}
 	}
@@ -314,6 +317,11 @@ public class Command {
 	@IRCCommand(command = ".seen", startOfLine = true, securityLevel = 1)
 	public void seen(CommandData data) {
 		helen.sendMessage(data.getResponseTarget(), Users.seen(data));
+	}
+	
+	@IRCCommand(command = "SCPPAGEREGEX", startOfLine= true, reg = true, regex = { "http:\\/\\/www.scp-wiki.net\\/(.*)" }, securityLevel = 1)
+	public void getPageInfo(CommandData data){
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getRegexTarget()));
 	}
 
 	@IRCCommand(command = "SCP", startOfLine = true, reg = true, regex = { "(scp|SCP)-([0-9]+)" }, securityLevel = 1)

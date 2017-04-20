@@ -9,6 +9,7 @@ public class CommandData {
 	private String login;
 	private String hostname;
 	private String message;
+	private String regexTarget;
 
 	
 	public CommandData(String channel, String sender, String login, String hostname, String message) {
@@ -18,9 +19,19 @@ public class CommandData {
 		this.hostname = hostname;
 		this.message = message;
 	}
+	
+	
 
 	public boolean isPrivate(){
 		return getChannel() == null || getChannel().isEmpty();
+	}
+	
+	public String getRegexTarget(){
+		return regexTarget;
+	}
+	
+	public void setRegexTarget(String str){
+		regexTarget = str;
 	}
 	
 	public String getResponseTarget(){

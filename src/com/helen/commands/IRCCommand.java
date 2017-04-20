@@ -10,6 +10,7 @@ public @interface IRCCommand {
 	boolean startOfLine();
 	boolean reg() default false;
 	String[] regex() default "";
+	int matcherGroup () default -1;
 	boolean coexistWithJarvis() default false;
 	int securityLevel();
 }
