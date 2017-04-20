@@ -26,16 +26,16 @@ public class TestMain {
 
 	public static void main(String args[]) throws DOMException, Exception {
 
-		String keyword = "revolver";
+		String keyword = "Revolver";
 		
 		
-		Document doc = findDefinition(keyword);
+		Document doc = findDefinition(keyword.toLowerCase());
 		NodeList sugList = doc.getElementsByTagName("suggestion");
 		if(sugList.getLength() > 0){
 			System.out.println(sugList.item(0).getFirstChild().getNodeValue());
 			doProcess(findDefinition(sugList.item(0).getFirstChild().getNodeValue()), sugList.item(0).getFirstChild().getNodeValue());
 		}else{
-			doProcess(doc, keyword);
+			doProcess(doc, keyword.toLowerCase());
 		}
 		
 		

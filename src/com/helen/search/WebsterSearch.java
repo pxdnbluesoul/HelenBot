@@ -25,6 +25,7 @@ public class WebsterSearch {
 	private static Logger logger = Logger.getLogger(WebsterSearch.class);
 
 	public static String dictionarySearch(String query) {
+		query = query.toLowerCase();
 		String result = "There was an error, please contact Dr. Magnus";
 		try {
 			Document doc = findDefinition(query);
