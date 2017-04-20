@@ -26,7 +26,7 @@ public class TestMain {
 
 	public static void main(String args[]) throws DOMException, Exception {
 
-		String keyword = "HERGENFLERGENSTOW";
+		String keyword = "revolver";
 		
 		
 		Document doc = findDefinition(keyword);
@@ -93,15 +93,20 @@ public class TestMain {
 			NodeList defs = ((Element) nodeler.getElementsByTagName("def").item(0)).getElementsByTagName("dt");
 			for (int i = 0; i < defs.getLength(); i++) {
 				NodeList sxList = ((Element) defs.item(i)).getElementsByTagName("sx");
+				NodeList fwList = ((Element) defs.item(i)).getElementsByTagName("fw");
 				NodeList testList = defs.item(i).getChildNodes();
 				String definition;
+				
+				
 				if (sxList.getLength() > 0) {
-					definition = ":" + testList.item(1).getFirstChild().getNodeValue();
-				} else {
-					definition = defs.item(i).getFirstChild().getNodeValue();
-					if(definition.charAt(0) == ':'){
-						definition = definition.substring(1);
-					}
+					definition =  testList.item(1).getFirstChild().getNodeValue().replace(":", "");
+				}else if(fwList.getLength() > 0){
+					definition = defs.item(i).getFirstChild().getNodeValue().replace(":", "") + testList.item(1).getFirstChild().getNodeValue().replace(":", "");
+					
+				}
+					else {
+					definition = defs.item(i).getFirstChild().getNodeValue().replace(":", "");
+					
 				}
 				if (!definition.trim().isEmpty()) {
 					def.definitions.add(definition);
