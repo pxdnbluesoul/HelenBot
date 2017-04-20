@@ -11,6 +11,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.log4j.Logger;
+import org.jibble.pircbot.Colors;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -104,10 +105,7 @@ public class WebsterSearch {
 				if (sxList.getLength() > 0) {
 					definition = ":" + testList.item(1).getFirstChild().getNodeValue();
 				} else {
-					definition = defs.item(i).getFirstChild().getNodeValue();
-					if (definition.charAt(0) == ':') {
-						definition = definition.substring(1);
-					}
+					definition = defs.item(i).getFirstChild().getNodeValue().replace(":", "");
 				}
 				if (!definition.trim().isEmpty()) {
 					def.definitions.add(definition);
@@ -116,11 +114,15 @@ public class WebsterSearch {
 			test.add(def);
 		}
 		StringBuilder str = new StringBuilder();
+		str.append(Colors.BOLD);
 		str.append(keyword);
-		str.append(": ");
+		str.append(" - ");
+		str.append(Colors.NORMAL);
 		for (Definition d : test) {
+			str.append(Colors.BOLD);
 			str.append(d.partOfSpeech);
-			str.append(" - ");
+			str.append(": ");
+			str.append(Colors.NORMAL);
 			int i = 0;
 			for (String s : d.definitions) {
 				if (i < 2) {

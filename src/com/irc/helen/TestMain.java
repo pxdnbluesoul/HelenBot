@@ -26,7 +26,7 @@ public class TestMain {
 
 	public static void main(String args[]) throws DOMException, Exception {
 
-		String keyword = "bird";
+		String keyword = "dickery";
 		
 		
 		Document doc = findDefinition(keyword);
