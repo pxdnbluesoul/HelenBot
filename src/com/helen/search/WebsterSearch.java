@@ -103,7 +103,7 @@ public class WebsterSearch {
 				NodeList testList = defs.item(i).getChildNodes();
 				String definition;
 				if (sxList.getLength() > 0) {
-					definition = ":" + testList.item(1).getFirstChild().getNodeValue();
+					definition = testList.item(1).getFirstChild().getNodeValue();
 				} else {
 					definition = defs.item(i).getFirstChild().getNodeValue().replace(":", "");
 				}
