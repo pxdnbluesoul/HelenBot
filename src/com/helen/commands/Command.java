@@ -341,7 +341,9 @@ public class Command {
 	
 	@IRCCommand(command = "SCPPAGEREGEX", startOfLine= true, reg = true, regex = { "http:\\/\\/www.scp-wiki.net\\/(.*)" }, securityLevel = 1, matcherGroup = 1)
 	public void getPageInfo(CommandData data){
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getRegexTarget()));
+		if(!data.getRegexTarget().contains("/") && !data.getRegexTarget().contains("forum")){
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getRegexTarget()));
+		}
 	}
 
 	@IRCCommand(command = "SCP", startOfLine = true, reg = true, regex = { "(scp|SCP)-([0-9]+)" }, securityLevel = 1)

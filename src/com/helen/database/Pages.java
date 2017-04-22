@@ -61,7 +61,7 @@ public class Pages {
 		Pattern r = Pattern.compile(regex);
 
 		String[] pages = new String[] { "scp-series	", "scp-series-2",
-				"scp-series-3" };
+				"scp-series-3","scp-series-4" };
 
 		for (String page : pages) {
 			Map<String, Object> params = new HashMap<String, Object>();
@@ -211,7 +211,7 @@ public class Pages {
 			logger.error("There was an exception retreiving metadata",e);
 		}
 		
-		return null;
+		return "I couldn't find anything matching that, apologies.";
 	}
 
 	public static void getTags() {
