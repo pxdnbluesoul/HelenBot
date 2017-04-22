@@ -276,6 +276,22 @@ public class Command {
 		}
 
 	}
+	
+	@IRCCommand(command={".hugHelen",".helenhug"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
+	public void hug(CommandData data){
+		if(data.getSender().equalsIgnoreCase("DrMagnus")){
+			helen.sendMessage(data.getResponseTarget(), "Awww, thanks boss. *Hugs*");
+		}else if(data.isWhiteList()){
+			helen.sendAction(data.getResponseTarget(), "hugs " + data.getSender() +".");
+		}else{
+			String[] messages = new String[]{
+					"Thank you for the display of affection.",
+					"*Click* Please remove your hands from my cylinders.",
+					"Hugging a revolver must be difficult."};
+			
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + messages[((int) (Math.random() * (messages.length - 1)) + 1)]);
+		}
+	}
 
 	@IRCCommand(command = { ".average", ".avg" }, startOfLine = true, securityLevel = 1)
 	public void getAverage(CommandData data) {
