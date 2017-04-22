@@ -287,9 +287,13 @@ public class Command {
 			String[] messages = new String[]{
 					"Thank you for the display of affection.",
 					"*Click* Please remove your hands from my cylinders.",
-					"Hugging a revolver must be difficult."};
+					"Hugging a revolver must be difficult.",
+					"You're smudging my finish.",
+					"*Sigh* And I just calibrated my sights...",
+					"I'm not sure why you're hugging me but...thank...you?",
+					"Yes...Human emotion.  This is...nice.  Please let go of me."};
 			
-			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + messages[((int) (Math.random() * (messages.length - 1)) + 1)]);
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + messages[((int) (Math.random() * (messages.length - 1)))]);
 		}
 	}
 
