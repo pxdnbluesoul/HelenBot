@@ -142,7 +142,7 @@ public class Pages {
 				if (!storedPages.contains(str)) {
 					try {
 						CloseableStatement stmt = Connector.getStatement(
-								Queries.getQuery("insertPage"), str);
+								Queries.getQuery("insertPage"), str, str);
 						stmt.executeUpdate();
 					} catch (Exception e) {
 						logger.error("Couldn't insert page name", e);
