@@ -363,7 +363,7 @@ public class Pages {
 			
 			CloseableStatement stmt1 = Connector.getStatement(Queries
 					.getQuery("getPageTitles"));
-			ResultSet rs1 = stmt.getResultSet();
+			ResultSet rs1 = stmt1.getResultSet();
 
 			while (rs1 != null && rs1.next()) {
 				titleToPageName.put(rs.getString("title"),rs.getString("pagename"));
@@ -421,9 +421,9 @@ public class Pages {
 	public static String getPotentialTargets(String[] terms){
 		ArrayList<String> potentialPages = new ArrayList<String>();
 		for(String str: terms){
+			
 			logger.info(str);
 		}
-		
 		
 		
 		
