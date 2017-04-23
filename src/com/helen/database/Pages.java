@@ -4,6 +4,7 @@ import java.net.URL;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -350,7 +351,7 @@ public class Pages {
 
 	private static void loadPages() {
 		storedPages = new HashSet<String>();
-
+		titleToPageName = new HashMap<String, String>();
 		try {
 			CloseableStatement stmt = Connector.getStatement(Queries
 					.getQuery("getStoredPages"));
@@ -420,16 +421,25 @@ public class Pages {
 	public static String getPotentialTargets(String[] terms){
 		ArrayList<String> potentialPages = new ArrayList<String>();
 		logger.info(terms);
+		
+		
+		
+		
 		for(String str: titleToPageName.keySet()){
+			String strLow = str.toLowerCase();
+			ArrayList<String> words = new ArrayList<String>();
+			words.addAll(Arrays.asList(strLow.split(" ")));
 			boolean potential = true;
+			
 			for(int i = 1; i < terms.length; i++){
-				if(!str.toLowerCase().contains(terms[i].toLowerCase())){
+				if(!words.contains(terms[i])){
 					potential = false;
 				}
 			}
 			if(potential){
 				potentialPages.add(str);
 			}
+			
 		}
 		
 		if(potentialPages.size() > 1){
