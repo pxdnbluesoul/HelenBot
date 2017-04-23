@@ -376,6 +376,7 @@ public class Pages {
 						synching = true;
 						listPage();
 						gatherMetadata();
+						uploadSeries();
 					}
 					synching = false;
 				}
@@ -403,6 +404,35 @@ public class Pages {
 			logger.error(
 					"There was an error attempting to get pages in groups of ten",
 					e);
+		}
+	}
+	
+	public static String getPotentialTargets(String[] terms){
+		ArrayList<String> potentialPages = new ArrayList<String>();
+		
+		for(String str: storedPages){
+			boolean potential = true;
+			for(int i = 1; i < terms.length; i++){
+				if(potential && !str.contains(terms[i].toLowerCase())){
+					potential = false;
+				}
+			}
+			if(potential){
+				potentialPages.add(str);
+			}
+		}
+		
+		if(potentialPages.size() > 1){
+			StringBuilder str = new StringBuilder();
+			str.append("Did you mean (beta feature, please pick exact title words): ");
+			for(String page: potentialPages){
+				str.append(getTitle(page));
+				str.append(",");
+			}
+			str.append("?");
+			return str.toString();
+		}else{
+			return getPageInfo(potentialPages.get(0));
 		}
 	}
 

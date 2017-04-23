@@ -368,6 +368,11 @@ public class Command {
 		Pages.uploadSeries();
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Series pages have been updated");
 	}
+	
+	@IRCCommand(command = {".s",".sea"}, startOfLine = true, securityLevel = 1)
+	public void findSkip(CommandData data){
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPotentialTargets(data.getSplitMessage()));
+	}
 
 	@IRCCommand(command = { ".pronouns", ".pronoun" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
 	public void getPronouns(CommandData data) {
