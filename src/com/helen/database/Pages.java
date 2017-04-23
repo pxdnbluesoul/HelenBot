@@ -26,7 +26,7 @@ public class Pages {
 	private static XmlRpcClientConfigImpl config;
 	private static XmlRpcClient client;
 	private static HashSet<String> storedPages = new HashSet<String>();
-
+	private static HashMap<String, String> titleToPageName = new HashMap<String, String>();
 	static {
 		config = new XmlRpcClientConfigImpl();
 		try {
@@ -359,6 +359,16 @@ public class Pages {
 			while (rs != null && rs.next()) {
 				storedPages.add(rs.getString("pagename"));
 			}
+			
+			CloseableStatement stmt1 = Connector.getStatement(Queries
+					.getQuery("getPageTitles"));
+			ResultSet rs1 = stmt.getResultSet();
+
+			while (rs1 != null && rs1.next()) {
+				titleToPageName.put(rs.getString("title"),rs.getString("pagename"));
+			}
+			stmt.close();
+			stmt1.close();
 		} catch (Exception e) {
 			logger.error("There was an exception retreiving stored pages", e);
 		}
@@ -409,16 +419,16 @@ public class Pages {
 	
 	public static String getPotentialTargets(String[] terms){
 		ArrayList<String> potentialPages = new ArrayList<String>();
-		
-		for(String str: storedPages){
+		logger.info(terms);
+		for(String str: titleToPageName.keySet()){
 			boolean potential = true;
 			for(int i = 1; i < terms.length; i++){
-				if(potential && !str.contains(terms[i].toLowerCase())){
+				if(!titleToPageName.get(str).contains(terms[i].toLowerCase())){
 					potential = false;
 				}
 			}
 			if(potential){
-				potentialPages.add(str);
+				potentialPages.add(titleToPageName.get(str));
 			}
 		}
 		
