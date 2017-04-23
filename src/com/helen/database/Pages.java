@@ -420,12 +420,15 @@ public class Pages {
 	
 	public static String getPotentialTargets(String[] terms){
 		ArrayList<String> potentialPages = new ArrayList<String>();
-		logger.info(terms);
+		for(String str: terms){
+			logger.info(str);
+		}
 		
 		
 		
 		
 		for(String str: titleToPageName.keySet()){
+			logger.info(str);
 			String strLow = str.toLowerCase();
 			ArrayList<String> words = new ArrayList<String>();
 			words.addAll(Arrays.asList(strLow.split(" ")));
