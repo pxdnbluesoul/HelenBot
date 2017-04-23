@@ -206,7 +206,7 @@ public class Pages {
 							.get("created_at"));
 
 					CloseableStatement stmt = Connector.getStatement(
-							Queries.getQuery("updatePage"), displayTitle,
+							Queries.getQuery("updateMetadata"), displayTitle,
 							rating, creator,
 							new java.sql.Timestamp(createdAt.getTime()),
 							targetName);
