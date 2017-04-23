@@ -92,7 +92,10 @@ public class Pages {
 								pageParts[2]);
 						stmt.executeUpdate();
 					} else {
-
+						CloseableStatement stmt = Connector.getStatement(
+								Queries.getQuery("updateTitle"),
+								pageParts[2],pageParts[0]);
+						stmt.executeUpdate();
 					}
 				}
 
@@ -204,15 +207,10 @@ public class Pages {
 							"created_by");
 					Date createdAt = df.parse((String) result.get(targetName)
 							.get("created_at"));
-					logger.info("displayTitle " + displayTitle);
-					logger.info("rating " + rating);
-					logger.info("created_by " + creator);
-					logger.info("creator " + creator);
-					logger.info("created_at " + createdAt.toString());
 					CloseableStatement stmt = Connector.getStatement(
-							Queries.getQuery("updateMetadata"), displayTitle,
-							rating, creator,
-							new java.sql.Timestamp(createdAt.getTime()),
+							Queries.getQuery("updateMetadata"), displayTitle == null ? "unknown" : displayTitle,
+							rating == null ? 0 : rating, creator == null ? "unknown" : creator,
+							new java.sql.Timestamp(createdAt == null ? System.currentTimeMillis() : createdAt.getTime()) ,
 							targetName);
 					stmt.executeUpdate();
 				} catch (Exception e) {
