@@ -204,7 +204,11 @@ public class Pages {
 							"created_by");
 					Date createdAt = df.parse((String) result.get(targetName)
 							.get("created_at"));
-
+					logger.info("displayTitle " + displayTitle);
+					logger.info("rating " + rating);
+					logger.info("created_by " + creator);
+					logger.info("creator " + creator);
+					logger.info("created_at " + createdAt.toString());
 					CloseableStatement stmt = Connector.getStatement(
 							Queries.getQuery("updateMetadata"), displayTitle,
 							rating, creator,
