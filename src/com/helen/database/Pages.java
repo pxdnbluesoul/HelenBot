@@ -449,7 +449,7 @@ public class Pages {
 			StringBuilder str = new StringBuilder();
 			str.append("Did you mean (beta feature, please pick exact title words): ");
 			for(String page: potentialPages){
-				str.append(getTitle(page));
+				str.append(page);
 				str.append(",");
 			}
 			str.append("?");
