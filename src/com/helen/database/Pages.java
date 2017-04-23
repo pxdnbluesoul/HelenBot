@@ -459,7 +459,7 @@ public class Pages {
 	
 	public static String getStoredInfo(String index, String username){
 		try{
-			return getPageInfo(titleToPageName.get(storedEvents.get(username).get(Integer.parseInt(index))));
+			return getPageInfo(titleToPageName.get(storedEvents.get(username).get(Integer.parseInt(index - 1))));
 		}catch(Exception e){
 			logger.error("There was an exception getting stored info",e);
 		}
