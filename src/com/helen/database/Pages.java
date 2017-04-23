@@ -198,7 +198,7 @@ public class Pages {
 					// result.get(targetName).get("title");
 					String displayTitle = (String) result.get(targetName).get(
 							"title_shown");
-					String rating = (String) result.get(targetName).get(
+					Integer rating = (Integer) result.get(targetName).get(
 							"rating");
 					String creator = (String) result.get(targetName).get(
 							"created_by");
