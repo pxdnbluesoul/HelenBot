@@ -423,12 +423,12 @@ public class Pages {
 		for(String str: titleToPageName.keySet()){
 			boolean potential = true;
 			for(int i = 1; i < terms.length; i++){
-				if(!titleToPageName.get(str).contains(terms[i].toLowerCase())){
+				if(!str.toLowerCase().contains(terms[i].toLowerCase())){
 					potential = false;
 				}
 			}
 			if(potential){
-				potentialPages.add(titleToPageName.get(str));
+				potentialPages.add(str);
 			}
 		}
 		
@@ -442,7 +442,7 @@ public class Pages {
 			str.append("?");
 			return str.toString();
 		}else{
-			return getPageInfo(potentialPages.get(0));
+			return getPageInfo(titleToPageName.get(potentialPages.get(0)));
 		}
 	}
 
