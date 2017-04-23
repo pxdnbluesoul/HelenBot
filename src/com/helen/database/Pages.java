@@ -361,15 +361,15 @@ public class Pages {
 				storedPages.add(rs.getString("pagename"));
 			}
 			
-			CloseableStatement stmt1 = Connector.getStatement(Queries
+			CloseableStatement titlesStatement = Connector.getStatement(Queries
 					.getQuery("getPageTitles"));
-			ResultSet rs1 = stmt1.getResultSet();
+			ResultSet titlesResult = titlesStatement.getResultSet();
 
-			while (rs1 != null && rs1.next()) {
-				titleToPageName.put(rs.getString("title"),rs.getString("pagename"));
+			while (titlesResult != null && titlesResult.next()) {
+				titleToPageName.put(titlesResult.getString("title"),titlesResult.getString("pagename"));
 			}
 			stmt.close();
-			stmt1.close();
+			titlesStatement.close();
 		} catch (Exception e) {
 			logger.error("There was an exception retreiving stored pages", e);
 		}
