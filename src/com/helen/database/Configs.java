@@ -40,6 +40,17 @@ public class Configs {
 			return null;
 		}
 	}
+	
+	public static java.sql.Timestamp getTimestamp(String key) {
+		if (!cacheValid) {
+			loadProperties();
+		}
+		if (cachedProperties.containsKey(key)) {
+			return java.sql.Timestamp.valueOf( cachedProperties.get(key).get(0).getValue());
+		} else {
+			return null;
+		}
+	}
 
 	public static String setProperty(String key, String value, String publicFlag) {
 		try {

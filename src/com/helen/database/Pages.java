@@ -2,7 +2,9 @@ package com.helen.database;
 
 import java.net.URL;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -61,7 +63,7 @@ public class Pages {
 		Pattern r = Pattern.compile(regex);
 
 		String[] pages = new String[] { "scp-series	", "scp-series-2",
-				"scp-series-3","scp-series-4" };
+				"scp-series-3", "scp-series-4", "joke-scps" };
 
 		for (String page : pages) {
 			Map<String, Object> params = new HashMap<String, Object>();
@@ -89,10 +91,12 @@ public class Pages {
 								Queries.getQuery("insertPage"), pageParts[0],
 								pageParts[2]);
 						stmt.executeUpdate();
+					} else {
+
 					}
 				}
 
-				// TODO construct batches of 10 to do meta-data updates on
+				loadPages();
 
 			} catch (Exception e) {
 				logger.error(
@@ -151,28 +155,79 @@ public class Pages {
 			logger.error("There was an exception", e);
 		}
 	}
-	
-	private static String getTitle(String pagename){
+
+	private static String getTitle(String pagename) {
 		String pageName = null;
-		try{
-			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getPageByName"),pagename);
+		try {
+			CloseableStatement stmt = Connector.getStatement(
+					Queries.getQuery("getPageByName"), pagename);
 			ResultSet rs = stmt.getResultSet();
-			if(rs != null && rs.next()){
+			if (rs != null && rs.next()) {
 				pageName = rs.getString("title");
 			}
-		}catch(Exception e){
-			logger.error("Exception getting title",e);
+		} catch (Exception e) {
+			logger.error("Exception getting title", e);
 		}
 		return pageName;
 
 	}
-	
-	public static String getPageInfo(String pagename){
+
+	public static String getPageInfo(String[] pagename) {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("site", Configs.getSingleProperty("site").getValue());
+		params.put("pages", pagename);
+		ArrayList<String> keyswewant = new ArrayList<String>();
+		keyswewant.add("title_shown");
+		keyswewant.add("rating");
+		keyswewant.add("created_at");
+		keyswewant.add("title");
+		keyswewant.add("created_by");
+		keyswewant.add("tags");
+		try {
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+			@SuppressWarnings("unchecked")
+			HashMap<String, HashMap<String, Object>> result = (HashMap<String, HashMap<String, Object>>) pushToAPI(
+					"pages.get_meta", params);
+
+			StringBuilder returnString = new StringBuilder();
+			returnString.append(Colors.BOLD);
+
+			for (String targetName : result.keySet()) {
+				try {
+					// String title = (String)
+					// result.get(targetName).get("title");
+					String displayTitle = (String) result.get(targetName).get(
+							"title_shown");
+					String rating = (String) result.get(targetName).get(
+							"rating");
+					String creator = (String) result.get(targetName).get(
+							"created_by");
+					Date createdAt = df.parse((String) result.get(targetName)
+							.get("created_at"));
+
+					CloseableStatement stmt = Connector.getStatement(
+							Queries.getQuery("updatePage"), displayTitle,
+							rating, creator,
+							new java.sql.Timestamp(createdAt.getTime()),
+							targetName);
+					stmt.executeUpdate();
+				} catch (Exception e) {
+					logger.error("Error updating metadata", e);
+				}
+			}
+		} catch (Exception e) {
+			logger.error("There was an exception retreiving metadata", e);
+		}
+
+		return "I couldn't find anything matching that, apologies.";
+	}
+
+	public static String getPageInfo(String pagename) {
 		String targetName = pagename.toLowerCase();
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("site", Configs.getSingleProperty("site").getValue());
-		String[] target = new String[]{targetName.toLowerCase()};
-		params.put("pages",target);
+		String[] target = new String[] { targetName.toLowerCase() };
+		params.put("pages", target);
 		ArrayList<String> keyswewant = new ArrayList<String>();
 		keyswewant.add("title_shown");
 		keyswewant.add("rating");
@@ -184,17 +239,22 @@ public class Pages {
 			@SuppressWarnings("unchecked")
 			HashMap<String, HashMap<String, Object>> result = (HashMap<String, HashMap<String, Object>>) pushToAPI(
 					"pages.get_meta", params);
-			
-			
+
 			StringBuilder returnString = new StringBuilder();
 			returnString.append(Colors.BOLD);
-			returnString.append(result.get(targetName).get("title_shown"));
-			returnString.append(": ");
-			returnString.append(getTitle(targetName));
+
+			String title = getTitle(targetName);
+			if (title == null || title.isEmpty()) {
+				returnString.append(result.get(targetName).get("title_shown"));
+			} else {
+				returnString.append(result.get(targetName).get("title_shown"));
+				returnString.append(": ");
+				returnString.append(title);
+			}
 			returnString.append(Colors.NORMAL);
 			returnString.append(" (Rating: ");
 			Integer rating = (Integer) result.get(targetName).get("rating");
-			if(rating > 0){
+			if (rating > 0) {
 				returnString.append("+");
 			}
 			returnString.append(rating);
@@ -204,13 +264,13 @@ public class Pages {
 			returnString.append(" - ");
 			returnString.append("http://www.scp-wiki.net/");
 			returnString.append(targetName);
-			
+
 			return returnString.toString();
-			
-		}catch(Exception e){
-			logger.error("There was an exception retreiving metadata",e);
+
+		} catch (Exception e) {
+			logger.error("There was an exception retreiving metadata", e);
 		}
-		
+
 		return "I couldn't find anything matching that, apologies.";
 	}
 
@@ -218,21 +278,21 @@ public class Pages {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("site", Configs.getSingleProperty("site").getValue());
 		ArrayList<String> tags = new ArrayList<String>();
-		
-		try{
-			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getTags"));
+
+		try {
+			CloseableStatement stmt = Connector.getStatement(Queries
+					.getQuery("getTags"));
 			ResultSet rs = stmt.getResultSet();
-			if(rs != null){
-				while(rs.next()){
+			if (rs != null) {
+				while (rs.next()) {
 					tags.add(rs.getString("tag"));
 				}
 			}
 			stmt.close();
-		}catch(Exception e){
-			logger.error("Exception getting tags",e);
+		} catch (Exception e) {
+			logger.error("Exception getting tags", e);
 		}
-		
-		
+
 		try {
 
 			Object[] result = (Object[]) pushToAPI("tags.select", params);
@@ -242,17 +302,19 @@ public class Pages {
 			for (int i = 0; i < result.length; i++) {
 				pageList.add((String) result[i]);
 			}
-			//Insert differences between wiki tags and current list
+			// Insert differences between wiki tags and current list
 			for (String str : pageList) {
-				if(!tags.contains(str)){
-					CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertTag"),str);
+				if (!tags.contains(str)) {
+					CloseableStatement stmt = Connector.getStatement(
+							Queries.getQuery("insertTag"), str);
 					stmt.executeUpdate();
 				}
 			}
-			//remove things in the database that aren't on the wiki
-			for(String str: tags){
-				if(!pageList.contains(str)){
-					CloseableStatement stmt = Connector.getStatement(Queries.getQuery("deleteTag"), str);
+			// remove things in the database that aren't on the wiki
+			for (String str : tags) {
+				if (!pageList.contains(str)) {
+					CloseableStatement stmt = Connector.getStatement(
+							Queries.getQuery("deleteTag"), str);
 					stmt.executeUpdate();
 					logger.info("Removed tag: " + str);
 				}
@@ -283,18 +345,7 @@ public class Pages {
 			logger.error("There was an exception", e);
 		}
 	}
-/*
-	private static void loadMetaData() {
-		if (synching) {
-			java.sql.Timestamp now = new java.sql.Timestamp(
-					System.currentTimeMillis());
 
-			for (int i = 0; i < storedPages.size(); i++) {
-
-			}
-		}
-	}
-*/
 	private static void loadPages() {
 		storedPages = new HashSet<String>();
 
@@ -312,7 +363,7 @@ public class Pages {
 	}
 
 	public static void checkIfUpdate() {
-		if (!synching) {
+		if (!synching && Configs.getSingleProperty("featurePages").getValue().equals("true")) {
 			try {
 				CloseableStatement stmt = Connector.getStatement(Queries
 						.getQuery("lastPageUpdate"));
@@ -322,11 +373,34 @@ public class Pages {
 					if ((System.currentTimeMillis() - ts.getTime()) > (60 * 60 * 1000)) {
 						synching = true;
 						listPage();
+						gatherMetadata();
 					}
+					synching = false;
 				}
 			} catch (Exception e) {
 				logger.error("Error checking if update required.", e);
 			}
+		}
+	}
+
+	private static void gatherMetadata() {
+		try {
+			int j = 0;
+			String[] pageSet = new String[10];
+			for (String str : storedPages) {
+				if (j < 10) {
+					pageSet[j] = str;
+					j++;
+				} else {
+					getPageInfo(pageSet);
+					pageSet = new String[10];
+					j = 0;
+				}
+			}
+		} catch (Exception e) {
+			logger.error(
+					"There was an error attempting to get pages in groups of ten",
+					e);
 		}
 	}
 

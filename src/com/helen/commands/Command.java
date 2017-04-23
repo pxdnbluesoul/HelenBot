@@ -138,6 +138,12 @@ public class Command {
 
 	public void dispatchTable(CommandData data) {
 
+		new Thread() {
+	        public void run() {
+	              Pages.checkIfUpdate();
+	        }
+	    }.start();
+		
 		checkTells(data);
 		User[] userList = getUserlist(data);
 		boolean jarvisInChannel = (data.isPrivate()) ? false :  jarvisInChannel(userList);
@@ -355,6 +361,12 @@ public class Command {
 	public void updateTags(CommandData data) {
 		Pages.getTags();
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Tags have been updated in my database.");
+	}
+	
+	@IRCCommand(command = ".seriesload", startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
+	public void uploadSeries(CommandData data){
+		Pages.uploadSeries();
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Series pages have been updated");
 	}
 
 	@IRCCommand(command = { ".pronouns", ".pronoun" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
