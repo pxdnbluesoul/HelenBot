@@ -345,6 +345,11 @@ public class Command {
 		helen.sendMessage(data.getResponseTarget(), Users.seen(data));
 	}
 	
+	@IRCCommand(command = ".sm", startOfLine = true, securityLevel = 1)
+	public void selectResult(CommandData data){
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getStoredInfo(data.getTarget(), data.getSender()));
+	}
+	
 	@IRCCommand(command = "SCPPAGEREGEX", startOfLine= true, reg = true, regex = { "http:\\/\\/www.scp-wiki.net\\/(.*)" }, securityLevel = 1, matcherGroup = 1)
 	public void getPageInfo(CommandData data){
 		if(!data.getRegexTarget().contains("/") && !data.getRegexTarget().contains("forum")){
@@ -371,7 +376,7 @@ public class Command {
 	
 	@IRCCommand(command = {".s",".sea"}, startOfLine = true, securityLevel = 1)
 	public void findSkip(CommandData data){
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPotentialTargets(data.getSplitMessage()));
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPotentialTargets(data.getSplitMessage(), data.getSender()));
 	}
 
 	@IRCCommand(command = { ".pronouns", ".pronoun" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)

@@ -28,6 +28,7 @@ public class Pages {
 	private static XmlRpcClient client;
 	private static HashSet<String> storedPages = new HashSet<String>();
 	private static HashMap<String, String> titleToPageName = new HashMap<String, String>();
+	private static HashMap<String, ArrayList<String>> storedEvents = new HashMap<String, ArrayList<String>>();
 	static {
 		config = new XmlRpcClientConfigImpl();
 		try {
@@ -418,24 +419,17 @@ public class Pages {
 		}
 	}
 	
-	public static String getPotentialTargets(String[] terms){
+	public static String getPotentialTargets(String[] terms,String username){
 		ArrayList<String> potentialPages = new ArrayList<String>();
-		for(String str: terms){
-			
-			logger.info(str);
-		}
-		
-		
 		
 		for(String str: titleToPageName.keySet()){
-			logger.info(str);
 			String strLow = str.toLowerCase();
 			ArrayList<String> words = new ArrayList<String>();
 			words.addAll(Arrays.asList(strLow.split(" ")));
 			boolean potential = true;
 			
 			for(int i = 1; i < terms.length; i++){
-				if(!words.contains(terms[i])){
+				if(!words.contains(terms[i].toLowerCase())){
 					potential = false;
 				}
 			}
@@ -446,10 +440,14 @@ public class Pages {
 		}
 		
 		if(potentialPages.size() > 1){
+			storedEvents.put(username, potentialPages);
 			StringBuilder str = new StringBuilder();
 			str.append("Did you mean (beta feature, please pick exact title words): ");
+			
 			for(String page: potentialPages){
+				str.append(Colors.BOLD);
 				str.append(page);
+				str.append(Colors.NORMAL);
 				str.append(",");
 			}
 			str.append("?");
@@ -457,6 +455,16 @@ public class Pages {
 		}else{
 			return getPageInfo(titleToPageName.get(potentialPages.get(0)));
 		}
+	}
+	
+	public static String getStoredInfo(String index, String username){
+		try{
+			return getPageInfo(titleToPageName.get(storedEvents.get(username).get(Integer.parseInt(index))));
+		}catch(Exception e){
+			logger.error("There was an exception getting stored info",e);
+		}
+		
+		return "Either the command was malformed, or I have nothing for you to get.";
 	}
 
 }
