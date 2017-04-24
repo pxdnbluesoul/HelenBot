@@ -19,14 +19,6 @@ public class Tags {
 		return tags.get(tagname);
 	}
 	
-	public static void recordTag(Tag tag, Page p){
-		if(tags.containsKey(tag.tagName)){
-			if(!tags.get(tag).getPages().contains(p)){
-				tags.get(tag).addPage(p);
-			}
-		}
-	}
-	
 	static ArrayList<Tag> getTags(String pagename) {
 		ArrayList<Tag> tags = null;
 		try {

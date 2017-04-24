@@ -4,7 +4,6 @@ import java.net.URL;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -158,7 +157,7 @@ public class Pages {
 			}
 			logger.info(pageList.length);
 			for (String str : pageList) {
-				if (!storedPages.contains(str)) {
+				if (!storedPages.contains(str.toLowerCase())) {
 					try {
 						CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertPage"), str, str);
 						stmt.executeUpdate();
@@ -410,7 +409,6 @@ public class Pages {
 
 	private static void loadPages() {
 		storedPages = new HashSet<String>();
-		//titleToPageName = new HashMap<String, String>();
 		Tags.reloadTags();
 		pages = new ArrayList<Page>();
 		try {
@@ -418,7 +416,7 @@ public class Pages {
 			ResultSet rs = stmt.getResultSet();
 
 			while (rs != null && rs.next()) {
-				storedPages.add(rs.getString("pagename"));
+				storedPages.add(rs.getString("pagename").toLowerCase());
 
 			
 			// TODO This is part of the new code
@@ -428,20 +426,10 @@ public class Pages {
 					rs.getBoolean("scpPage"), rs.getString("scpTitle") == null ? "" : rs.getString("Title"),
 					Tags.getTags(rs.getString("pagename"))));
 			}
-//			CloseableStatement titlesStatement = Connector.getStatement(Queries.getQuery("getPageTitles"));
-//			ResultSet titlesResult = titlesStatement.getResultSet();
 
-//			while (titlesResult != null && titlesResult.next()) {
-//				titleToPageName.put(titlesResult.getString("title"), titlesResult.getString("pagename"));
-//			}
 			stmt.close();
-//			titlesStatement.close();
+
 			
-			for(Page p: pages){
-				for(Tag t: p.getTags()){
-					Tags.recordTag(t, p);
-				}
-			}
 			rs.close();
 			stmt.close();
 		} catch (Exception e) {
