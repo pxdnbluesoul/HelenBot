@@ -415,14 +415,14 @@ public class Pages {
 			while (rs != null && rs.next()) {
 				storedPages.add(rs.getString("pagename"));
 
-			}
+			
 			// TODO This is part of the new code
 			pages.add(new Page(rs.getString("pagename") == null ? "" : rs.getString("pagename"),
 					rs.getString("title") == null ? "" : rs.getString("pagename"), rs.getInt("rating"),
 					rs.getString("createdBy") == null ? "" : rs.getString("createdBy"), rs.getTimestamp("createdAt"),
 					rs.getBoolean("scpPage"), rs.getString("scpTitle") == null ? "" : rs.getString("Title"),
 					Tags.getTags(rs.getString("pagename"))));
-
+			}
 //			CloseableStatement titlesStatement = Connector.getStatement(Queries.getQuery("getPageTitles"));
 //			ResultSet titlesResult = titlesStatement.getResultSet();
 
