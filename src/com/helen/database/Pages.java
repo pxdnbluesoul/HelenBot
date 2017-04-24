@@ -18,6 +18,7 @@ import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.apache.xmlrpc.client.XmlRpcSun15HttpTransportFactory;
 import org.jibble.pircbot.Colors;
 import org.jsoup.Jsoup;
+import org.postgresql.util.PSQLException;
 
 public class Pages {
 
@@ -26,7 +27,8 @@ public class Pages {
 	private static XmlRpcClientConfigImpl config;
 	private static XmlRpcClient client;
 	private static HashSet<String> storedPages = new HashSet<String>();
-	//private static HashMap<String, String> titleToPageName = new HashMap<String, String>();
+	// private static HashMap<String, String> titleToPageName = new
+	// HashMap<String, String>();
 	private static HashMap<String, ArrayList<Page>> storedEvents = new HashMap<String, ArrayList<Page>>();
 
 	private static ArrayList<Page> pages;
@@ -50,7 +52,7 @@ public class Pages {
 			logger.error("There was an exception", e);
 		}
 
-		if(Configs.getSingleProperty("featurePages").getValue().equals("true")){
+		if (Configs.getSingleProperty("featurePages").getValue().equals("true")) {
 			loadPages();
 		}
 	}
@@ -113,12 +115,10 @@ public class Pages {
 				}
 				// TODO if this is called, set scpPage = true
 				for (String[] update : updateList) {
-					CloseableStatement stmt = Connector.getStatement(Queries.getQuery("updateTitle"),true, update[2],
+					CloseableStatement stmt = Connector.getStatement(Queries.getQuery("updateTitle"), true, update[2],
 							update[0]);
 					stmt.executeUpdate();
 				}
-
-				
 
 			} catch (Exception e) {
 				logger.error("There was an exception attempting to grab the series page metadata", e);
@@ -223,47 +223,42 @@ public class Pages {
 					Integer rating = (Integer) result.get(targetName).get("rating");
 					String creator = (String) result.get(targetName).get("created_by");
 					Date createdAt = df.parse((String) result.get(targetName).get("created_at"));
-					//For each page, if the tags don't match the database tags, 
+					// For each page, if the tags don't match the database tags,
 					Object[] tags = (Object[]) result.get(targetName).get("tags");
-					
+
 					ArrayList<Object> insertTags = new ArrayList<Object>();
 					ArrayList<Tag> deleteTags = new ArrayList<Tag>();
 					ArrayList<Tag> dbTags = Tags.getTags(targetName);
-					
-					for(Object obj : tags){
-						if(!dbTags.contains(obj.toString())){
+
+					for (Object obj : tags) {
+						if (!dbTags.contains(obj.toString())) {
 							insertTags.add(obj);
 						}
 					}
-					
-					for(Tag tag: dbTags){
+
+					for (Tag tag : dbTags) {
 						boolean keep = false;
-						for( int i = 0; i < tags.length; i++){
-							if(tags[i].toString().equalsIgnoreCase(tag.tagName)){
+						for (int i = 0; i < tags.length; i++) {
+							if (tags[i].toString().equalsIgnoreCase(tag.tagName)) {
 								keep = true;
 							}
 						}
-						if(!keep){
+						if (!keep) {
 							deleteTags.add(tag);
 						}
 					}
-					
-					for(Object obj: insertTags){
-						CloseableStatement stmt = Connector
-								.getStatement(Queries.getQuery("insertPageTag"),
-										targetName,
-										obj.toString());
+
+					for (Object obj : insertTags) {
+						CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertPageTag"), targetName,
+								obj.toString());
 						stmt.executeUpdate();
 					}
-					
-					for(Object obj: insertTags){
-						CloseableStatement stmt = Connector
-								.getStatement(Queries.getQuery("deletePageTag"),
-										targetName,
-										obj.toString());
+
+					for (Object obj : insertTags) {
+						CloseableStatement stmt = Connector.getStatement(Queries.getQuery("deletePageTag"), targetName,
+								obj.toString());
 						stmt.executeUpdate();
 					}
-					
 
 					CloseableStatement stmt = Connector
 							.getStatement(Queries.getQuery("updateMetadata"),
@@ -418,26 +413,27 @@ public class Pages {
 			while (rs != null && rs.next()) {
 				storedPages.add(rs.getString("pagename").toLowerCase());
 
-			
-			// TODO This is part of the new code
-			pages.add(new Page(rs.getString("pagename") == null ? "" : rs.getString("pagename"),
-					rs.getString("title") == null ? "" : rs.getString("pagename"), rs.getInt("rating"),
-					rs.getString("created_by") == null ? "" : rs.getString("created_by"), rs.getTimestamp("created_on"),
-					rs.getBoolean("scpPage"), rs.getString("scpTitle") == null ? "" : rs.getString("Title"),
-					Tags.getTags(rs.getString("pagename"))));
+				try {
+					// TODO This is part of the new code
+					pages.add(new Page(rs.getString("pagename") == null ? "" : rs.getString("pagename"),
+							rs.getString("title") == null ? "" : rs.getString("pagename"), rs.getInt("rating"),
+							rs.getString("created_by") == null ? "" : rs.getString("created_by"),
+							rs.getTimestamp("created_on"), rs.getBoolean("scpPage"),
+							rs.getString("scpTitle") == null ? "" : rs.getString("Title"),
+							Tags.getTags(rs.getString("pagename"))));
+				} catch (PSQLException e) {
+					logger.error("Couldn't create page, keep going", e);
+				}
+				
+
+				
 			}
-
-			stmt.close();
-
-			
 			rs.close();
 			stmt.close();
 		} catch (Exception e) {
 			logger.error("There was an exception retreiving stored pages", e);
 		}
 	}
-
-	
 
 	public static void checkIfUpdate() {
 		if (!synching && Configs.getSingleProperty("featurePages").getValue().equals("true")) {
@@ -485,7 +481,7 @@ public class Pages {
 		ArrayList<Page> potentialPages = new ArrayList<Page>();
 
 		for (Page p : pages) {
-			if(p.searchTest(terms)){
+			if (p.searchTest(terms)) {
 				potentialPages.add(p);
 			}
 		}
