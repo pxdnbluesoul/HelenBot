@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.xmlrpc.XmlRpcException;
@@ -78,7 +79,10 @@ public class TestMain {
 			returnString.append(pagename.toLowerCase());
 			returnString.append(" ");
 			Date date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse((String) result.get(pagename).get("created_at"));
-			
+			Object[] tags = (Object[]) result.get(pagename).get("tags");
+			for(Object tag: tags){
+				System.out.println(tag.toString());
+			}
 			returnString.append(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse((String) result.get(pagename).get("created_at")));
 			System.out.println( returnString.toString());
 			
