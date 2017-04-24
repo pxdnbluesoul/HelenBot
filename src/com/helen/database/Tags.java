@@ -36,6 +36,8 @@ public class Tags {
 			while (tagSet != null && tagSet.next()) {
 				tags.add(Tags.getTag(tagSet.getString("tag")));
 			}
+			tagSet.close();
+			stmt.close();
 		} catch (Exception e) {
 			logger.error("There was an exception attempting to grab tags", e);
 		}
@@ -50,6 +52,8 @@ public class Tags {
 			while (tagSet != null && tagSet.next()) {
 				tags.put(tagSet.getString("pagename"), Tags.getTag(tagSet.getString("tag")));
 			}
+			tagSet.close();
+			stmt.close();
 		} catch (Exception e) {
 			logger.error("There was an exception attempting to grab tags", e);
 		}

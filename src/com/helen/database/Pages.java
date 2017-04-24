@@ -179,6 +179,8 @@ public class Pages {
 			if (rs != null && rs.next()) {
 				pageName = rs.getString("title");
 			}
+			rs.close();
+			stmt.close();
 		} catch (Exception e) {
 			logger.error("Exception getting title", e);
 		}
@@ -347,6 +349,7 @@ public class Pages {
 					tags.add(rs.getString("tag"));
 				}
 			}
+			rs.close();
 			stmt.close();
 		} catch (Exception e) {
 			logger.error("Exception getting tags", e);
@@ -437,6 +440,8 @@ public class Pages {
 					Tags.recordTag(t, p);
 				}
 			}
+			rs.close();
+			stmt.close();
 		} catch (Exception e) {
 			logger.error("There was an exception retreiving stored pages", e);
 		}
@@ -451,6 +456,8 @@ public class Pages {
 				ResultSet rs = stmt.getResultSet();
 				if (rs != null && rs.next()) {
 					java.sql.Timestamp ts = rs.getTimestamp("lastUpdate");
+					rs.close();
+					stmt.close();
 					if ((System.currentTimeMillis() - ts.getTime()) > (60 * 60 * 1000)) {
 						synching = true;
 						listPage();
