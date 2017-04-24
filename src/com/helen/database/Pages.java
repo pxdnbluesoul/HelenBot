@@ -51,7 +51,9 @@ public class Pages {
 			logger.error("There was an exception", e);
 		}
 
-		loadPages();
+		if(Configs.getSingleProperty("featurePages").getValue().equals("true")){
+			loadPages();
+		}
 	}
 
 	private static Object pushToAPI(String method, Object... params) throws XmlRpcException {
