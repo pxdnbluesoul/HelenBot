@@ -419,7 +419,7 @@ public class Pages {
 			// TODO This is part of the new code
 			pages.add(new Page(rs.getString("pagename") == null ? "" : rs.getString("pagename"),
 					rs.getString("title") == null ? "" : rs.getString("pagename"), rs.getInt("rating"),
-					rs.getString("createdBy") == null ? "" : rs.getString("createdBy"), rs.getTimestamp("createdAt"),
+					rs.getString("created_by") == null ? "" : rs.getString("created_by"), rs.getTimestamp("created_on"),
 					rs.getBoolean("scpPage"), rs.getString("scpTitle") == null ? "" : rs.getString("Title"),
 					Tags.getTags(rs.getString("pagename"))));
 			}
