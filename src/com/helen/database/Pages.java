@@ -524,17 +524,19 @@ public class Pages {
 		String[] lowerterms = new String[terms.length];
 		for (int i = 1; i < terms.length; i++) {
 			lowerterms[i] = terms[i].toLowerCase();
+			logger.info(lowerterms[i]);
 		}
 		try {
-			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findSCPS"), (Object)lowerterms);
-
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findSCPS"), lowerterms);
+			logger.info(stmt.toString());
 			ResultSet rs = stmt.getResultSet();
 
 			while (rs != null && rs.next()) {
 				potentialPages.add(new Page(rs.getString("pagename"), rs.getString("title"), rs.getBoolean("scppage"),
 						rs.getString("scptitle")));
 			}
-
+			stmt.close();
+			rs.close();
 		} catch (SQLException e) {
 			logger.error("There was an issue grabbing potential SCP pages", e);
 		}
@@ -542,7 +544,7 @@ public class Pages {
 		if (potentialPages.size() > 1) {
 			storedEvents.put(username, potentialPages);
 			StringBuilder str = new StringBuilder();
-			str.append("Did you mean (beta feature, please pick exact title words): ");
+			str.append("(Beta)Did you mean : ");
 
 			for (Page page : potentialPages) {
 				str.append(Colors.BOLD);

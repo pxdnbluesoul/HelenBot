@@ -73,5 +73,9 @@ public class CloseableStatement {
 		}
 		return rs;
 	}
+	
+	public String toString(){
+		return stmt.toString();
+	}
 
 }
