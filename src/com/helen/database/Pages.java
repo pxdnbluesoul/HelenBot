@@ -28,7 +28,6 @@ public class Pages {
 	private static XmlRpcClientConfigImpl config;
 	private static XmlRpcClient client;
 	private static HashSet<String> storedPages = new HashSet<String>();
-	private static boolean pagesLoaded = false;
 	// private static HashMap<String, String> titleToPageName = new
 	// HashMap<String, String>();
 	private static HashMap<String, ArrayList<Page>> storedEvents = new HashMap<String, ArrayList<Page>>();
@@ -129,7 +128,6 @@ public class Pages {
 							insert[2]);
 					stmt.executeUpdate();
 				}
-				// TODO if this is called, set scpPage = true
 				for (String[] update : updateList) {
 					CloseableStatement stmt = Connector.getStatement(Queries.getQuery("updateTitle"), update[2],
 							update[0]);
@@ -444,11 +442,8 @@ public class Pages {
 				while (rs != null && rs.next()) {
 
 					storedPages.add(rs.getString("pagename").trim().toLowerCase());
-					// logger.info("adding " +
-					// rs.getString("pagename").trim().toLowerCase() + " To
-					// stored pages");
+					
 					try {
-						// TODO This is part of the new code
 						pages.add(new Page(rs.getString("pagename") == null ? "" : rs.getString("pagename"),
 								rs.getString("title") == null ? "" : rs.getString("pagename"), rs.getInt("rating"),
 								rs.getString("created_by") == null ? "" : rs.getString("created_by"),
@@ -471,7 +466,6 @@ public class Pages {
 				}
 				rs.close();
 				stmt.close();
-				pagesLoaded = true;
 			} catch (Exception e) {
 				logger.error("There was an exception retreiving stored pages", e);
 			}
@@ -528,7 +522,7 @@ public class Pages {
 	public static String getPotentialTargets(String[] terms, String username) {
 		ArrayList<Page> potentialPages = new ArrayList<Page>();
 		String[] lowerterms = new String[terms.length];
-		for (int i = 0; i < terms.length; i++) {
+		for (int i = 1; i < terms.length; i++) {
 			lowerterms[i] = terms[i].toLowerCase();
 		}
 		try {
