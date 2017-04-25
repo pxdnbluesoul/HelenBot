@@ -524,7 +524,7 @@ public class Pages {
 		String[] lowerterms = new String[terms.length - 1];
 		for (int i = 1; i < terms.length; i++) {
 			lowerterms[i - 1] = terms[i].toLowerCase();
-			logger.info(lowerterms[i]);
+			logger.info(lowerterms[i - 1]);
 		}
 		try {
 			CloseableStatement stmt = Connector.getArrayStatement(Queries.getQuery("findSCPS"), lowerterms);
