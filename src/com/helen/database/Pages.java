@@ -521,7 +521,7 @@ public class Pages {
 
 	public static String getPotentialTargets(String[] terms, String username) {
 		ArrayList<Page> potentialPages = new ArrayList<Page>();
-		String[] lowerterms = new String[terms.length];
+		String[] lowerterms = new String[terms.length - 1];
 		for (int i = 1; i < terms.length; i++) {
 			lowerterms[i] = terms[i].toLowerCase();
 			logger.info(lowerterms[i]);
