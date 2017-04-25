@@ -171,7 +171,7 @@ public class Pages {
 			}
 			//loadPages();
 		} catch (Exception e) {
-			logger.error("There was an exception", e);
+			logger.error("There was an exception", e);	
 		}
 	}
 
@@ -431,6 +431,15 @@ public class Pages {
 
 				
 			}
+			
+			int i = 0;
+			for(String str: storedPages){
+				if(i++ < 10){
+					logger.info("Stored page string: " + str);
+				}else{
+					break;
+				}
+			}
 			rs.close();
 			stmt.close();
 		} catch (Exception e) {
@@ -449,7 +458,7 @@ public class Pages {
 					stmt.close();
 					if ((System.currentTimeMillis() - ts.getTime()) > (60 * 60 * 1000)) {
 						synching = true;
-						listPage();
+						//listPage();
 						//gatherMetadata();
 						//uploadSeries();
 					}

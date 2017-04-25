@@ -1,45 +1,39 @@
 package com.irc.helen;
 
-<<<<<<< Updated upstream
-=======
-import java.net.URL;
->>>>>>> Stashed changes
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.ParseException;
-<<<<<<< Updated upstream
-=======
-import java.util.HashMap;
-import java.util.Map;
->>>>>>> Stashed changes
+import java.util.HashSet;
 
 import org.apache.xmlrpc.XmlRpcException;
+import org.apache.xmlrpc.client.XmlRpcClient;
+import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
 public class TestMain {
 
+	
+	
 
-
-	public static void main(String args[]) throws XmlRpcException, ParseException {
-		Connection con = getConnection();
-		System.out.println("Win");
-	}
-
-<<<<<<< Updated upstream
-=======
 	
 	public static void main(String args[]) throws XmlRpcException, ParseException {
-		Connection con = getConnection();
-		System.out.println("works?");
-	}
-	
-	public static Connection getConnection() {
-		try {
-			return DriverManager.getConnection(
-					"jdbc:postgresql://home.helenbot.com:80/helen_db", "helen_bot",
-					"helenrevolver");
-		} catch (SQLException e) {
-			return null;
+		HashSet<String> test = new HashSet<String>();
+		test.add("test string");
+		test.add("scp-106");
+		test.add("scp-998");
+		test.add("dr-magnus-profile");
+		test.add("test");
+		
+		
+		
+		if(test.contains("test string")){
+			System.out.println("contains");
+		}else{
+			for(String str: test){
+				System.out.println(str);
+			}
+			
+			System.out.println(test);
 		}
 	}
 	
@@ -83,17 +77,7 @@ public class TestMain {
 			System.out.println( returnString.toString());
 			
 		
->>>>>>> Stashed changes
 	
-	
-	public static Connection getConnection() {
-		try {
-			return DriverManager.getConnection(
-					"jdbc:postgresql://helen_bot:5432/helen_db", "helen_bot",
-					"helenrevolver");
-		} catch (SQLException e) {
-			return null;
-		}
 	}
 */
 }
