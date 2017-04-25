@@ -271,12 +271,18 @@ public class Pages {
 					}
 
 					for (Object obj : insertTags) {
+						try{
 						CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertPageTag"), targetName,
 								obj.toString());
 						stmt.executeUpdate();
+						}catch(PSQLException e){
+							if(!e.getMessage().contains("unique")){
+								logger.error("There was a problem inserting tags",e);
+							}
+						}
 					}
 
-					for (Object obj : insertTags) {
+					for (Object obj : deleteTags) {
 						CloseableStatement stmt = Connector.getStatement(Queries.getQuery("deletePageTag"), targetName,
 								obj.toString());
 						stmt.executeUpdate();
