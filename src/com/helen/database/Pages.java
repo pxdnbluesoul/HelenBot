@@ -157,13 +157,16 @@ public class Pages {
 			}
 			logger.info(pageList.length);
 			for (String str : pageList) {
-				if (!storedPages.contains(str.toLowerCase())) {
+				if (!storedPages.contains(str.trim().toLowerCase())) {
+					logger.info("storedPages does not contain: " + str.trim().toLowerCase());
+					/*
 					try {
 						CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertPage"), str, str);
 						stmt.executeUpdate();
 					} catch (Exception e) {
 						logger.error("Couldn't insert page name", e);
 					}
+					*/
 				}
 			}
 			loadPages();
@@ -411,8 +414,8 @@ public class Pages {
 			ResultSet rs = stmt.getResultSet();
 
 			while (rs != null && rs.next()) {
-				storedPages.add(rs.getString("pagename").toLowerCase());
-
+				storedPages.add(rs.getString("pagename").trim().toLowerCase());
+				logger.info("adding " + rs.getString("pagename").trim().toLowerCase() + " To stored pages");
 				try {
 					// TODO This is part of the new code
 					pages.add(new Page(rs.getString("pagename") == null ? "" : rs.getString("pagename"),
@@ -447,8 +450,8 @@ public class Pages {
 					if ((System.currentTimeMillis() - ts.getTime()) > (60 * 60 * 1000)) {
 						synching = true;
 						listPage();
-						gatherMetadata();
-						uploadSeries();
+						//gatherMetadata();
+						//uploadSeries();
 					}
 					synching = false;
 				}

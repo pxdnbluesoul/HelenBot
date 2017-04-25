@@ -243,6 +243,11 @@ public class Command {
 	public void toggleMode(CommandData data) {
 		adminMode = !adminMode;
 	}
+	
+	@IRCCommand(command = { ".listTest" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
+	public void listTest(CommandData data) {
+		Pages.listPage();
+	}
 
 	@IRCCommand(command = { ".ch", ".choose" }, startOfLine = true, securityLevel = 1)
 	public void choose(CommandData data) {
