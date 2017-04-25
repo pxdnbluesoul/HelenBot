@@ -51,7 +51,9 @@ public class Connector {
 						stmt.setBoolean(i, (Boolean) o);
 					} else if (o instanceof Date) {
 						stmt.setDate(i, new java.sql.Date(((Date) o).getTime()));
-					} else {
+					} else if (o instanceof String[]){
+						stmt.setArray(i, conn.createArrayOf("text", (Object[])o));
+					}else {
 						logger.error("Unknown object type: " + o.toString());
 					}
 					i++;
@@ -63,4 +65,6 @@ public class Connector {
 		}
 		return null;
 	}
+	
+	
 }

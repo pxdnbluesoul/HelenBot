@@ -2,6 +2,7 @@ package com.helen.database;
 
 import java.net.URL;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,13 +36,13 @@ public class Pages {
 	private static ArrayList<Page> pages;
 
 	private static synchronized boolean acquireLock() {
-		if(!synching){
+		if (!synching) {
 			synching = true;
 			return false;
-		}else{
+		} else {
 			return true;
 		}
-		
+
 	}
 
 	private static synchronized void setSynching(boolean flag) {
@@ -70,7 +71,6 @@ public class Pages {
 			logger.error("There was an exception", e);
 		}
 
-		
 	}
 
 	private static Object pushToAPI(String method, Object... params) throws XmlRpcException {
@@ -176,12 +176,14 @@ public class Pages {
 			for (String str : pageList) {
 				if (!storedPages.contains(str.trim().toLowerCase())) {
 					logger.info("storedPages does not contain: " + str.trim().toLowerCase());
-					
-					  try { CloseableStatement stmt =
-					  Connector.getStatement(Queries.getQuery("insertPage"),
-					  str, str); stmt.executeUpdate(); } catch (Exception e) {
-					  logger.error("Couldn't insert page name", e); }
-					  storedPages.add(str);	 
+
+					try {
+						CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertPage"), str, str);
+						stmt.executeUpdate();
+					} catch (Exception e) {
+						logger.error("Couldn't insert page name", e);
+					}
+					storedPages.add(str);
 				}
 			}
 			logger.info("Ending site-wide page gather");
@@ -211,7 +213,7 @@ public class Pages {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("site", Configs.getSingleProperty("site").getValue());
 		String[] pageNames = new String[10];
-		for(int i = 0; i < pages.length; i++){
+		for (int i = 0; i < pages.length; i++) {
 			pageNames[i] = pages[i].getPageLink();
 		}
 		params.put("pages", pageNames);
@@ -271,13 +273,13 @@ public class Pages {
 					}
 
 					for (Object obj : insertTags) {
-						try{
-						CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertPageTag"), targetName,
-								obj.toString());
-						stmt.executeUpdate();
-						}catch(PSQLException e){
-							if(!e.getMessage().contains("unique")){
-								logger.error("There was a problem inserting tags",e);
+						try {
+							CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertPageTag"),
+									targetName, obj.toString());
+							stmt.executeUpdate();
+						} catch (PSQLException e) {
+							if (!e.getMessage().contains("unique")) {
+								logger.error("There was a problem inserting tags", e);
 							}
 						}
 					}
@@ -440,7 +442,7 @@ public class Pages {
 				ResultSet rs = stmt.getResultSet();
 				logger.info("Beginning load of Stored Pages");
 				while (rs != null && rs.next()) {
-					
+
 					storedPages.add(rs.getString("pagename").trim().toLowerCase());
 					// logger.info("adding " +
 					// rs.getString("pagename").trim().toLowerCase() + " To
@@ -451,12 +453,11 @@ public class Pages {
 								rs.getString("title") == null ? "" : rs.getString("pagename"), rs.getInt("rating"),
 								rs.getString("created_by") == null ? "" : rs.getString("created_by"),
 								rs.getTimestamp("created_on"), rs.getBoolean("scpPage"),
-								rs.getString("scpTitle") == null ? "" : rs.getString("Title"),
+								rs.getString("scpTitle") == null ? "" : rs.getString("title"),
 								Tags.getTags(rs.getString("pagename"))));
 					} catch (PSQLException e) {
 						logger.error("Couldn't create page, keep going", e);
 					}
-					
 
 				}
 				logger.info("Finished logging stored pages");
@@ -489,10 +490,10 @@ public class Pages {
 					rs.close();
 					stmt.close();
 					if ((System.currentTimeMillis() - ts.getTime()) > (60 * 60 * 1000)) {
-						 listPage();
-						 gatherMetadata();
-						 uploadSeries();
-						 loadPages();
+						listPage();
+						gatherMetadata();
+						uploadSeries();
+						loadPages();
 					}
 				}
 			} catch (Exception e) {
@@ -526,11 +527,22 @@ public class Pages {
 
 	public static String getPotentialTargets(String[] terms, String username) {
 		ArrayList<Page> potentialPages = new ArrayList<Page>();
+		String[] lowerterms = new String[terms.length];
+		for (int i = 0; i < terms.length; i++) {
+			lowerterms[i] = terms[i].toLowerCase();
+		}
+		try {
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findSCPS"), (Object)lowerterms);
 
-		for (Page p : pages) {
-			if (p.searchTest(terms)) {
-				potentialPages.add(p);
+			ResultSet rs = stmt.getResultSet();
+
+			while (rs != null && rs.next()) {
+				potentialPages.add(new Page(rs.getString("pagename"), rs.getString("title"), rs.getBoolean("scppage"),
+						rs.getString("scptitle")));
 			}
+
+		} catch (SQLException e) {
+			logger.error("There was an issue grabbing potential SCP pages", e);
 		}
 
 		if (potentialPages.size() > 1) {
@@ -540,14 +552,18 @@ public class Pages {
 
 			for (Page page : potentialPages) {
 				str.append(Colors.BOLD);
-				str.append(page.getTitle());
+				str.append(page.getScpPage() ? page.getTitle() + page.getScpTitle() : page.getTitle());
 				str.append(Colors.NORMAL);
 				str.append(",");
 			}
 			str.append("?");
 			return str.toString();
 		} else {
-			return getPageInfo(potentialPages.get(0).getPageLink());
+			if (potentialPages.size() == 1) {
+				return getPageInfo(potentialPages.get(0).getPageLink());
+			} else {
+				return "I couldn't find anything.";
+			}
 		}
 	}
 

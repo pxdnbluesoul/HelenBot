@@ -1,14 +1,8 @@
 package com.irc.helen;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.HashSet;
 
 import org.apache.xmlrpc.XmlRpcException;
-import org.apache.xmlrpc.client.XmlRpcClient;
-import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
 public class TestMain {
 
@@ -17,23 +11,10 @@ public class TestMain {
 
 	
 	public static void main(String args[]) throws XmlRpcException, ParseException {
-		HashSet<String> test = new HashSet<String>();
-		test.add("test string");
-		test.add("scp-106");
-		test.add("scp-998");
-		test.add("dr-magnus-profile");
-		test.add("test");
-		
-		
-		
-		if(test.contains("test string")){
-			System.out.println("contains");
-		}else{
-			for(String str: test){
-				System.out.println(str);
-			}
-			
-			System.out.println(test);
+		String nounData = "he/him/his, they/them/their, he/his/him";
+		String[] nouns = nounData.replace(","," ").replace("/"," ").replace("\\"," ").trim().replaceAll(" +", " ").split(" ");
+		for(String str: nouns){
+			System.out.println(str);
 		}
 	}
 	

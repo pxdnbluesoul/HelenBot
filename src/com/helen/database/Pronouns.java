@@ -81,7 +81,7 @@ public class Pronouns {
 			String nounData = data.getMessage().substring(data.getMessage().split(" ")[0].length(),
 					data.getMessage().length());
 			
-			String[] nouns = nounData.replace(","," ").trim().replaceAll(" +", " ").split(" ");
+			String[] nouns = nounData.replace(","," ").replace("/"," ").replace("\\"," ").trim().replaceAll(" +", " ").split(" ");
 			if (rs != null && rs.next()) {
 				int pronounID = rs.getInt("pronounID");
 				int j = 0;

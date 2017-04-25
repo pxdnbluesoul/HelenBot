@@ -39,6 +39,13 @@ public class Page {
 		this.tags = tags;
 	}
 	
+	public Page (String pageLink, String title,Boolean scpPage, String scpTitle){
+		this.pageLink = pageLink;
+		this.title = title;
+		this.scpPage = scpPage;
+		this.scpTitle = scpTitle;
+	}
+	
 	public Page (String pageLink, String title, Integer rating, String createdBy,
 			java.sql.Timestamp createdAt, Boolean scpPage, String scpTitle){
 		this.pageLink = pageLink;
@@ -52,7 +59,14 @@ public class Page {
 	
 	
 	public boolean searchTest(String[] terms){
-		String strLow = title.toLowerCase();
+		String search = null;
+		if(scpPage){
+			search = scpTitle;
+		}else{
+			search = title;
+		}
+		
+		String strLow = search.toLowerCase();
 		ArrayList<String> words = new ArrayList<String>();
 		words.addAll(Arrays.asList(strLow.split(" ")));
 		for(int i = 1; i < terms.length; i++){
