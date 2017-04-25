@@ -80,7 +80,7 @@ public class Pages {
 	public static void uploadSeries() {
 		String regex = "(?m)<li><a href=\"\\/(.+)\">(.+)<\\/a> - (.+)<\\/li>";
 		Pattern r = Pattern.compile(regex);
-
+		logger.info("Beggining gather of series pages: 1, 2, 3, 4 and jokes");
 		String[] series = new String[] { "scp-series	", "scp-series-2", "scp-series-3", "scp-series-4",
 				"joke-scps" };
 
@@ -131,7 +131,7 @@ public class Pages {
 				}
 				// TODO if this is called, set scpPage = true
 				for (String[] update : updateList) {
-					CloseableStatement stmt = Connector.getStatement(Queries.getQuery("updateTitle"), true, update[2],
+					CloseableStatement stmt = Connector.getStatement(Queries.getQuery("updateTitle"), update[2],
 							update[0]);
 					stmt.executeUpdate();
 				}
@@ -140,6 +140,7 @@ public class Pages {
 				logger.error("There was an exception attempting to grab the series page metadata", e);
 			}
 		}
+		logger.info("Finished gathering series pages");
 	}
 
 	public static void getMethodList() {
@@ -164,7 +165,7 @@ public class Pages {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("site", Configs.getSingleProperty("site").getValue());
 		try {
-
+			logger.info("Beginning site-wide page gather");
 			Object[] result = (Object[]) pushToAPI("pages.select", params);
 			// Convert result to a String[]
 			String[] pageList = new String[result.length];
@@ -180,10 +181,10 @@ public class Pages {
 					  Connector.getStatement(Queries.getQuery("insertPage"),
 					  str, str); stmt.executeUpdate(); } catch (Exception e) {
 					  logger.error("Couldn't insert page name", e); }
-					 
+					  storedPages.add(str);	 
 				}
 			}
-			// loadPages();
+			logger.info("Ending site-wide page gather");
 		} catch (Exception e) {
 			logger.error("There was an exception", e);
 		}
@@ -429,6 +430,7 @@ public class Pages {
 				ResultSet rs = stmt.getResultSet();
 
 				while (rs != null && rs.next()) {
+					logger.info("Beginning load of Stored Pages");
 					storedPages.add(rs.getString("pagename").trim().toLowerCase());
 					// logger.info("adding " +
 					// rs.getString("pagename").trim().toLowerCase() + " To
@@ -444,6 +446,7 @@ public class Pages {
 					} catch (PSQLException e) {
 						logger.error("Couldn't create page, keep going", e);
 					}
+					logger.info("Finished logging stored pages");
 
 				}
 
@@ -485,12 +488,14 @@ public class Pages {
 				logger.error("Error checking if update required.", e);
 			}
 			setSynching(false);
+			loadPages();
 		}
 
 	}
 
 	private static void gatherMetadata() {
 		try {
+			logger.info("Gathering metadata.");
 			int j = 0;
 			Page[] pageSet = new Page[10];
 			for (Page str : pages) {
@@ -503,6 +508,7 @@ public class Pages {
 					j = 0;
 				}
 			}
+			logger.info("Finished gathering metadata");
 		} catch (Exception e) {
 			logger.error("There was an error attempting to get pages in groups of ten", e);
 		}
