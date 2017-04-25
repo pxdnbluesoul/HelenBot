@@ -428,9 +428,9 @@ public class Pages {
 			try {
 				CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getStoredPages"));
 				ResultSet rs = stmt.getResultSet();
-
+				logger.info("Beginning load of Stored Pages");
 				while (rs != null && rs.next()) {
-					logger.info("Beginning load of Stored Pages");
+					
 					storedPages.add(rs.getString("pagename").trim().toLowerCase());
 					// logger.info("adding " +
 					// rs.getString("pagename").trim().toLowerCase() + " To
@@ -446,10 +446,10 @@ public class Pages {
 					} catch (PSQLException e) {
 						logger.error("Couldn't create page, keep going", e);
 					}
-					logger.info("Finished logging stored pages");
+					
 
 				}
-
+				logger.info("Finished logging stored pages");
 				int i = 0;
 				for (String str : storedPages) {
 					if (i++ < 10) {
