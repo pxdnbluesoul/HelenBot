@@ -147,6 +147,9 @@ public class Command {
 		checkTells(data);
 		User[] userList = getUserlist(data);
 		boolean jarvisInChannel = (data.isPrivate()) ? false :  jarvisInChannel(userList);
+		if(data.getChannel().equalsIgnoreCase("site19") || data.getChannel().equalsIgnoreCase("#site19")){
+			jarvisInChannel = true;
+		}
 		Integer securityLevel = getSecurityLevel(userList, data);
 		//logger.info("Entering dispatch table with command: \"" + data.getCommand() + "\"");
 
