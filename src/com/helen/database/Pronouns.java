@@ -77,29 +77,33 @@ public class Pronouns {
 					data.getSender().toLowerCase(),
 					data.getSplitMessage()[1].equalsIgnoreCase("accepted") ? true : false);
 			ResultSet rs = stmt.execute();
-
+			
+			String nounData = data.getMessage().substring(data.getMessage().split(" ")[0].length(),
+					data.getMessage().length());
+			
+			String[] nouns = nounData.replace(","," ").trim().replaceAll(" +", " ").split(" ");
 			if (rs != null && rs.next()) {
 				int pronounID = rs.getInt("pronounID");
 				int j = 1;
-				if (data.getSplitMessage()[1].equalsIgnoreCase("accepted")) {
+				if (nouns[0].equalsIgnoreCase("accepted")) {
 					j = 2;
 				}
 
-				for (int i = j; i < data.getSplitMessage().length; i++) {
-					if (bannedNouns.contains(data.getSplitMessage()[i].trim().toLowerCase())) {
-						return "Your noun list contains a banned term: " + data.getSplitMessage()[i];
+				for (int i = j; i < nouns.length; i++) {
+					if (bannedNouns.contains(nouns[i].trim().toLowerCase())) {
+						return "Your noun list contains a banned term: " + nouns[i];
 					}
 				}
 
-				for (int i = j; i < data.getSplitMessage().length; i++) {
+				for (int i = j; i < nouns.length; i++) {
 
 					CloseableStatement insertStatement = Connector.getStatement(Queries.getQuery("insertPronoun"),
-							pronounID, data.getSplitMessage()[i]);
+							pronounID, nouns[i]);
 					insertStatement.executeUpdate();
 					if (str.length() > 0) {
 						str.append(", ");
 					}
-					str.append(data.getSplitMessage()[i]);
+					str.append(nouns[i]);
 				}
 			}
 			return "Inserted the following pronouns: " + str.toString() + " as "
