@@ -210,7 +210,11 @@ public class Pages {
 	public static String getPageInfo(Page[] pages) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("site", Configs.getSingleProperty("site").getValue());
-		params.put("pages", pages);
+		String[] pageNames = new String[10];
+		for(int i = 0; i < pages.length; i++){
+			pageNames[i] = pages[i].getPageLink();
+		}
+		params.put("pages", pageNames);
 		ArrayList<String> keyswewant = new ArrayList<String>();
 		keyswewant.add("title_shown");
 		keyswewant.add("rating");
