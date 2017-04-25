@@ -84,9 +84,9 @@ public class Pronouns {
 			String[] nouns = nounData.replace(","," ").trim().replaceAll(" +", " ").split(" ");
 			if (rs != null && rs.next()) {
 				int pronounID = rs.getInt("pronounID");
-				int j = 1;
+				int j = 0;
 				if (nouns[0].equalsIgnoreCase("accepted")) {
-					j = 2;
+					j = 1;
 				}
 
 				for (int i = j; i < nouns.length; i++) {
