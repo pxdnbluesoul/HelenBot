@@ -51,9 +51,7 @@ public class Connector {
 						stmt.setBoolean(i, (Boolean) o);
 					} else if (o instanceof Date) {
 						stmt.setDate(i, new java.sql.Date(((Date) o).getTime()));
-					} else if (o instanceof String[]){
-						stmt.setArray(i, conn.createArrayOf("text", (Object[])o));
-					}else {
+					} else {
 						logger.error("Unknown object type: " + o.toString());
 					}
 					i++;
@@ -66,5 +64,16 @@ public class Connector {
 		return null;
 	}
 	
-	
+	public static CloseableStatement getArrayStatement(String queryString,
+			String[] args) {
+		try {
+			Connection conn = getConnection();
+			PreparedStatement stmt = conn.prepareStatement(queryString);
+			stmt.setArray(1, conn.createArrayOf("text", (Object[])args));
+			return new CloseableStatement(stmt, conn);
+		} catch (Exception e) {
+			logger.error("Error constructing statement.", e);
+		}
+		return null;
+	}
 }

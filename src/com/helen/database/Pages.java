@@ -527,7 +527,7 @@ public class Pages {
 			logger.info(lowerterms[i]);
 		}
 		try {
-			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findSCPS"), lowerterms);
+			CloseableStatement stmt = Connector.getArrayStatement(Queries.getQuery("findSCPS"), lowerterms);
 			logger.info(stmt.toString());
 			ResultSet rs = stmt.getResultSet();
 
