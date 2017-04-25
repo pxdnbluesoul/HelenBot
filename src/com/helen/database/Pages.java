@@ -175,12 +175,12 @@ public class Pages {
 			for (String str : pageList) {
 				if (!storedPages.contains(str.trim().toLowerCase())) {
 					logger.info("storedPages does not contain: " + str.trim().toLowerCase());
-					/*
-					 * try { CloseableStatement stmt =
-					 * Connector.getStatement(Queries.getQuery("insertPage"),
-					 * str, str); stmt.executeUpdate(); } catch (Exception e) {
-					 * logger.error("Couldn't insert page name", e); }
-					 */
+					
+					  try { CloseableStatement stmt =
+					  Connector.getStatement(Queries.getQuery("insertPage"),
+					  str, str); stmt.executeUpdate(); } catch (Exception e) {
+					  logger.error("Couldn't insert page name", e); }
+					 
 				}
 			}
 			// loadPages();
