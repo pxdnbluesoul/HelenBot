@@ -128,7 +128,7 @@ public class Command {
 	private boolean jarvisInChannel(User[] userlist) {
 		if(userlist != null){
 			for (User u : userlist) {
-				if (u.getNick().equalsIgnoreCase("jarvis")) {
+				if (u.getNick().equalsIgnoreCase("jarvis") || u.getNick().toLowerCase().contains("jarvis")) {
 					return true;
 				}
 			}
