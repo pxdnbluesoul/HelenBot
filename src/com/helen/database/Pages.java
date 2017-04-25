@@ -27,13 +27,31 @@ public class Pages {
 	private static XmlRpcClientConfigImpl config;
 	private static XmlRpcClient client;
 	private static HashSet<String> storedPages = new HashSet<String>();
+	private static boolean pagesLoaded = false;
 	// private static HashMap<String, String> titleToPageName = new
 	// HashMap<String, String>();
 	private static HashMap<String, ArrayList<Page>> storedEvents = new HashMap<String, ArrayList<Page>>();
 
 	private static ArrayList<Page> pages;
 
+	private static synchronized boolean acquireLock() {
+		if(!synching){
+			synching = true;
+			return false;
+		}else{
+			return true;
+		}
+		
+	}
+
+	private static synchronized void setSynching(boolean flag) {
+		synching = flag;
+	}
+
 	static {
+		if (Configs.getSingleProperty("featurePages").getValue().equals("true")) {
+			loadPages();
+		}
 		config = new XmlRpcClientConfigImpl();
 		try {
 			config.setServerURL(new URL(Configs.getSingleProperty("wikidotServer").getValue()));
@@ -52,9 +70,7 @@ public class Pages {
 			logger.error("There was an exception", e);
 		}
 
-		if (Configs.getSingleProperty("featurePages").getValue().equals("true")) {
-			loadPages();
-		}
+		
 	}
 
 	private static Object pushToAPI(String method, Object... params) throws XmlRpcException {
@@ -160,18 +176,16 @@ public class Pages {
 				if (!storedPages.contains(str.trim().toLowerCase())) {
 					logger.info("storedPages does not contain: " + str.trim().toLowerCase());
 					/*
-					try {
-						CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertPage"), str, str);
-						stmt.executeUpdate();
-					} catch (Exception e) {
-						logger.error("Couldn't insert page name", e);
-					}
-					*/
+					 * try { CloseableStatement stmt =
+					 * Connector.getStatement(Queries.getQuery("insertPage"),
+					 * str, str); stmt.executeUpdate(); } catch (Exception e) {
+					 * logger.error("Couldn't insert page name", e); }
+					 */
 				}
 			}
-			//loadPages();
+			// loadPages();
 		} catch (Exception e) {
-			logger.error("There was an exception", e);	
+			logger.error("There was an exception", e);
 		}
 	}
 
@@ -406,50 +420,55 @@ public class Pages {
 	}
 
 	private static void loadPages() {
-		storedPages = new HashSet<String>();
-		Tags.reloadTags();
-		pages = new ArrayList<Page>();
-		try {
-			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getStoredPages"));
-			ResultSet rs = stmt.getResultSet();
+		if (!acquireLock()) {
+			storedPages = new HashSet<String>();
+			Tags.reloadTags();
+			pages = new ArrayList<Page>();
+			try {
+				CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getStoredPages"));
+				ResultSet rs = stmt.getResultSet();
 
-			while (rs != null && rs.next()) {
-				storedPages.add(rs.getString("pagename").trim().toLowerCase());
-				//logger.info("adding " + rs.getString("pagename").trim().toLowerCase() + " To stored pages");
-				try {
-					// TODO This is part of the new code
-					pages.add(new Page(rs.getString("pagename") == null ? "" : rs.getString("pagename"),
-							rs.getString("title") == null ? "" : rs.getString("pagename"), rs.getInt("rating"),
-							rs.getString("created_by") == null ? "" : rs.getString("created_by"),
-							rs.getTimestamp("created_on"), rs.getBoolean("scpPage"),
-							rs.getString("scpTitle") == null ? "" : rs.getString("Title"),
-							Tags.getTags(rs.getString("pagename"))));
-				} catch (PSQLException e) {
-					logger.error("Couldn't create page, keep going", e);
-				}
-				
+				while (rs != null && rs.next()) {
+					storedPages.add(rs.getString("pagename").trim().toLowerCase());
+					// logger.info("adding " +
+					// rs.getString("pagename").trim().toLowerCase() + " To
+					// stored pages");
+					try {
+						// TODO This is part of the new code
+						pages.add(new Page(rs.getString("pagename") == null ? "" : rs.getString("pagename"),
+								rs.getString("title") == null ? "" : rs.getString("pagename"), rs.getInt("rating"),
+								rs.getString("created_by") == null ? "" : rs.getString("created_by"),
+								rs.getTimestamp("created_on"), rs.getBoolean("scpPage"),
+								rs.getString("scpTitle") == null ? "" : rs.getString("Title"),
+								Tags.getTags(rs.getString("pagename"))));
+					} catch (PSQLException e) {
+						logger.error("Couldn't create page, keep going", e);
+					}
 
-				
-			}
-			
-			int i = 0;
-			for(String str: storedPages){
-				if(i++ < 10){
-					logger.info("Stored page string: " + str);
-				}else{
-					break;
 				}
+
+				int i = 0;
+				for (String str : storedPages) {
+					if (i++ < 10) {
+						logger.info("Stored page string: " + str);
+					} else {
+						break;
+					}
+				}
+				rs.close();
+				stmt.close();
+				pagesLoaded = true;
+			} catch (Exception e) {
+				logger.error("There was an exception retreiving stored pages", e);
 			}
-			rs.close();
-			stmt.close();
-		} catch (Exception e) {
-			logger.error("There was an exception retreiving stored pages", e);
+			setSynching(false);
 		}
 	}
 
 	public static void checkIfUpdate() {
-		if (!synching && Configs.getSingleProperty("featurePages").getValue().equals("true")) {
+		if (!acquireLock() && Configs.getSingleProperty("featurePages").getValue().equals("true")) {
 			try {
+
 				CloseableStatement stmt = Connector.getStatement(Queries.getQuery("lastPageUpdate"));
 				ResultSet rs = stmt.getResultSet();
 				if (rs != null && rs.next()) {
@@ -457,17 +476,17 @@ public class Pages {
 					rs.close();
 					stmt.close();
 					if ((System.currentTimeMillis() - ts.getTime()) > (60 * 60 * 1000)) {
-						synching = true;
-						//listPage();
-						//gatherMetadata();
-						//uploadSeries();
+						 listPage();
+						 gatherMetadata();
+						 uploadSeries();
 					}
-					synching = false;
 				}
 			} catch (Exception e) {
 				logger.error("Error checking if update required.", e);
 			}
+			setSynching(false);
 		}
+
 	}
 
 	private static void gatherMetadata() {
