@@ -70,5 +70,9 @@ public class HelenBot extends PircBot {
 			logger.info(System.currentTimeMillis() + " " + line);
 		}
 	}
+	
+	public void onUserList(String channel, Users[] users){
+		logger.info("Recieved user list for a channel" + channel);
+	}
 
 }

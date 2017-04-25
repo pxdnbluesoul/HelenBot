@@ -492,13 +492,13 @@ public class Pages {
 						 listPage();
 						 gatherMetadata();
 						 uploadSeries();
+						 loadPages();
 					}
 				}
 			} catch (Exception e) {
 				logger.error("Error checking if update required.", e);
 			}
 			setSynching(false);
-			loadPages();
 		}
 
 	}

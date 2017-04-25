@@ -41,7 +41,7 @@ public class Pronouns {
 				if (accepted.length() > 0 || pronouns.length() > 0) {
 					if (pronouns.length() > 0) {
 						str.append(user);
-						str.append(" uses the following pronouns : ");
+						str.append(" uses the following pronouns: ");
 						str.append(pronouns.toString());
 						str.append(";");
 					} else {
