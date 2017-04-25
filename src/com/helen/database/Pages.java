@@ -169,7 +169,7 @@ public class Pages {
 					*/
 				}
 			}
-			loadPages();
+			//loadPages();
 		} catch (Exception e) {
 			logger.error("There was an exception", e);
 		}
@@ -415,7 +415,7 @@ public class Pages {
 
 			while (rs != null && rs.next()) {
 				storedPages.add(rs.getString("pagename").trim().toLowerCase());
-				logger.info("adding " + rs.getString("pagename").trim().toLowerCase() + " To stored pages");
+				//logger.info("adding " + rs.getString("pagename").trim().toLowerCase() + " To stored pages");
 				try {
 					// TODO This is part of the new code
 					pages.add(new Page(rs.getString("pagename") == null ? "" : rs.getString("pagename"),
