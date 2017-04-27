@@ -89,7 +89,7 @@ public class HelenBot extends PircBot {
 	public void onServerResponse(int code, String response) {
 		if (code == 352) {
 			if(response.split(" ")[5].equalsIgnoreCase("jarvis")){
-				jarvisPresent.put(response.split(" ")[1], true);
+				jarvisPresent.put(response.split(" ")[1].toLowerCase(), true);
 			}
 		}
 	}
@@ -97,15 +97,15 @@ public class HelenBot extends PircBot {
 	public void onPart(String channel, String sender, String login,
 			String hostname) {
 		if (sender.equalsIgnoreCase("jarvis")) {
-			if (jarvisPresent.containsKey(channel)) {
-				jarvisPresent.put(channel, false);
+			if (jarvisPresent.containsKey(channel.toLowerCase())) {
+				jarvisPresent.put(channel.toLowerCase(), false);
 			}
 		}
 	}
 
 	public Boolean jarvisCheck(String channel) {
-		if (jarvisPresent.containsKey(channel)) {
-			return jarvisPresent.get(channel);
+		if (jarvisPresent.containsKey(channel.toLowerCase())) {
+			return jarvisPresent.get(channel.toLowerCase());
 		} else {
 			return false;
 		}
@@ -114,8 +114,8 @@ public class HelenBot extends PircBot {
 	public void onJoin(String channel, String sender, String login,
 			String hostname) {
 		if (sender.equalsIgnoreCase("jarvis")) {
-			if (jarvisPresent.containsKey(channel)) {
-				jarvisPresent.put(channel, true);
+			if (jarvisPresent.containsKey(channel.toLowerCase())) {
+				jarvisPresent.put(channel.toLowerCase(), true);
 			}
 		}
 	}

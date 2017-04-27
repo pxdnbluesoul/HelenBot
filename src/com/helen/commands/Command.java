@@ -145,7 +145,7 @@ public class Command {
 			try {
 
 				Method m = hashableCommandList.get(data.getCommand().toLowerCase());
-				if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !helen.jarvisCheck(data.getChannel())) {
+				if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !helen.jarvisCheck(data.getChannel().toLowerCase())) {
 					if (securityLevel >= (adminMode
 							? Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity)
 							: m.getAnnotation(IRCCommand.class).securityLevel())) {
