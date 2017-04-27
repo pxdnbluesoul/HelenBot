@@ -125,16 +125,7 @@ public class Command {
 		return list;
 	}
 
-	private boolean jarvisInChannel(User[] userlist) {
-		if(userlist != null){
-			for (User u : userlist) {
-				if (u.getNick().equalsIgnoreCase("jarvis") || u.getNick().toLowerCase().contains("jarvis")) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+	
 
 	public void dispatchTable(CommandData data) {
 
@@ -146,10 +137,6 @@ public class Command {
 		
 		checkTells(data);
 		User[] userList = getUserlist(data);
-		boolean jarvisInChannel = (data.isPrivate()) ? false :  jarvisInChannel(userList);
-		if(data.getChannel().equalsIgnoreCase("site19") || data.getChannel().equalsIgnoreCase("#site19")){
-			jarvisInChannel = true;
-		}
 		Integer securityLevel = getSecurityLevel(userList, data);
 		//logger.info("Entering dispatch table with command: \"" + data.getCommand() + "\"");
 
@@ -158,7 +145,7 @@ public class Command {
 			try {
 
 				Method m = hashableCommandList.get(data.getCommand().toLowerCase());
-				if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !jarvisInChannel) {
+				if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !helen.jarvisCheck(data.getChannel())) {
 					if (securityLevel >= (adminMode
 							? Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity)
 							: m.getAnnotation(IRCCommand.class).securityLevel())) {
@@ -180,7 +167,7 @@ public class Command {
 				if (data.getMessage().toLowerCase().contains(command.toLowerCase())) {
 					try {
 						Method m = slowCommands.get(command);
-						if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !jarvisInChannel) {
+						if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !helen.jarvisCheck(data.getChannel())) {
 							if (securityLevel >= (adminMode
 									? Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity)
 									: m.getAnnotation(IRCCommand.class).securityLevel())) {
@@ -209,7 +196,7 @@ public class Command {
 							if(m.getAnnotation(IRCCommand.class).matcherGroup() != -1){
 								data.setRegexTarget(match.group(m.getAnnotation(IRCCommand.class).matcherGroup()));
 							}
-							if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !jarvisInChannel) {
+							if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !helen.jarvisCheck(data.getChannel())) {
 								if (securityLevel >= (adminMode
 										? Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity)
 										: m.getAnnotation(IRCCommand.class).securityLevel())) {
