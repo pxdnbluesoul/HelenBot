@@ -8,9 +8,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-import org.jibble.pircbot.PircBot;
 import org.jibble.pircbot.User;
 
+import com.helen.bots.HelenBot;
 import com.helen.database.Config;
 import com.helen.database.Configs;
 import com.helen.database.DatabaseObject;
@@ -29,7 +29,7 @@ import com.helen.search.YouTubeSearch;
 public class Command {
 	private static final Logger logger = Logger.getLogger(Command.class);
 
-	private PircBot helen;
+	private HelenBot helen;
 
 	private boolean adminMode = false;
 	private final int adminSecurity = 2;
@@ -43,7 +43,7 @@ public class Command {
 
 	}
 
-	public Command(PircBot ircBot) {
+	public Command(HelenBot ircBot) {
 		helen = ircBot;
 	}
 
@@ -231,7 +231,7 @@ public class Command {
 		}
 	}
 
-	// Relateively unregulated commands (anyone can try these)
+	// Relatively unregulated commands (anyone can try these)
 	@IRCCommand(command = { ".HelenBot" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
 	public void versionResponse(CommandData data) {
 		if (data.getChannel().isEmpty()) {
@@ -247,9 +247,9 @@ public class Command {
 		adminMode = !adminMode;
 	}
 	
-	@IRCCommand(command = { ".listTest" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
+	@IRCCommand(command = { ".jarvistest" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
 	public void listTest(CommandData data) {
-		Pages.listPage();
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + helen.jarvisCheck(data.getTarget()));
 	}
 
 	@IRCCommand(command = { ".ch", ".choose" }, startOfLine = true, securityLevel = 1)
