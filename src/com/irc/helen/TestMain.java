@@ -1,10 +1,10 @@
 package com.irc.helen;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,13 +12,7 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.apache.xmlrpc.client.XmlRpcSun15HttpTransportFactory;
-import org.jibble.pircbot.Colors;
-import org.jsoup.Jsoup;
 
-import com.helen.database.CloseableStatement;
-import com.helen.database.Configs;
-import com.helen.database.Connector;
-import com.helen.database.Queries;
 import com.helen.database.XmlRpcTypeNil;
 
 public class TestMain {
@@ -55,29 +49,43 @@ public class TestMain {
 	}
 
 	public static void main(String args[]) throws XmlRpcException {
-			Map<String, Object> params = new HashMap<String, Object>();
-			params.put("site", "scp-wiki");
-			params.put("page", "most-recently-created");
-			params.put("tags_none", new String[]{"admin"});
-			//params.put("rating", "");
-			params.put("order", "created_at desc");
-			params.put("rating", "=");
+		try {
+			String regex = "<td style=\"vertical-align: top;\"><a href=\"\\/(.+)\">(.+)-(.+)<\\/a><\\/td>";
+			Pattern r = Pattern.compile(regex);
+			ArrayList<String> pagelist = new ArrayList<String>();
 
-			try {
-				@SuppressWarnings("unchecked")
-				Object[] result = (Object[]) pushToAPI("pages.select", params);
-
-				for(int i = 0;i < 5; i++){
-					System.out.println(result[i]);
+			URL u;
+			InputStream is = null;
+			DataInputStream dis;
+			String s;
+			u = new URL("http://www.scp-wiki.net/most-recently-created");
+			is = u.openStream();
+			dis = new DataInputStream(new BufferedInputStream(is));
+			int i = 0;
+			while ((s = dis.readLine()) != null) {
+				Matcher m = r.matcher(s);
+				if (m.matches()) {
+					if (i++ < 3) {
+						pagelist.add(m.group(1));
+					} else {
+						dis.close();
+						break;
+					}
 				}
-				
-
-			} catch (Exception e) {
-			e.printStackTrace();
 			}
+			for (String str : pagelist) {
+				System.out.println(str);
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		
-	
-	
+
+		try {
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 }

@@ -1,11 +1,16 @@
 package com.helen.database;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.InputStream;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcException;
@@ -19,7 +24,7 @@ public class Pages {
 	private static final Logger logger = Logger.getLogger(Pages.class);
 	private static XmlRpcClientConfigImpl config;
 	private static XmlRpcClient client;
-	private static Long lastLc = System.currentTimeMillis();
+	private static Long lastLc = System.currentTimeMillis() - 20000;
 	private static HashMap<String, ArrayList<Page>> storedEvents = new HashMap<String, ArrayList<Page>>();
 
 	static {
@@ -55,24 +60,25 @@ public class Pages {
 	public static ArrayList<String> lastCreated() {
 		if (System.currentTimeMillis() - lastLc > 15000) {
 			ArrayList<String> pagelist = new ArrayList<String>();
-			logger.info("Entering last created");
-			lastLc = System.currentTimeMillis();
-			Map<String, Object> params = new HashMap<String, Object>();
-			params.put("site", "scp-wiki");
-			params.put("page", "most-recently-created");
-			params.put("tags_none", new String[] { "admin" });
-			// params.put("rating", "");
-			params.put("order", "created_at desc");
-			// params.put("rating", "-15");
-
 			try {
-				@SuppressWarnings("unchecked")
-				Object[] result = (Object[]) pushToAPI("pages.select", params);
-
-				for (int i = 0; i < 5; i++) {
-					pagelist.add(getPageInfo((String) result[i]));
+				String regex = "<td style=\"vertical-align: top;\"><a href=\"\\/(.+)\">(.+)-(.+)<\\/a><\\/td>";
+				Pattern r = Pattern.compile(regex);
+				String s;
+				URL u = new URL("http://www.scp-wiki.net/most-recently-created");
+				InputStream is = u.openStream();
+				DataInputStream dis = new DataInputStream(new BufferedInputStream(is));
+				int i = 0;
+				while ((s = dis.readLine()) != null) {
+					Matcher m = r.matcher(s);
+					if (m.matches()) {
+						if (i++ < 3) {
+							pagelist.add(m.group(1));
+						} else {
+							dis.close();
+							break;
+						}
+					}
 				}
-
 			} catch (Exception e) {
 				logger.error(
 						"There was an exception attempting to grab last created",
