@@ -146,34 +146,27 @@ public class Pages {
 	
 	public static ArrayList<String> lastCreated() {
 		if(System.currentTimeMillis() - lastLc > 15000){
+			ArrayList<String> pagelist = new ArrayList<String>();
 			logger.info("Entering last created");
 		lastLc = System.currentTimeMillis();
-		String regex = "<td style=\"vertical-align: top;\"><a href=\"\\/(.+)\">(.+)-(.+)<\\/a><\\/td>";
-		Pattern r = Pattern.compile(regex);
-		ArrayList<String> pagelist = new ArrayList<String>();
-			Map<String, Object> params = new HashMap<String, Object>();
-			params.put("site", "scp-wiki");
-			params.put("page", "most-recently-created");
-
-			try {
-				@SuppressWarnings("unchecked")
-				HashMap<String, Object> result = (HashMap<String, Object>) pushToAPI(
-						"pages.get_one", params);
-
-				String[] lines = ((String) result.get("html")).split("\n");
-
-				int i = 0;
-				for (String s : lines) {
-					Matcher m = r.matcher(s);
-					if (m.find()) {
-						if (i++ < 3) {
-							pagelist.add(m.group(1));
-						} else {
-							break;
+					Map<String, Object> params = new HashMap<String, Object>();
+					params.put("site", "scp-wiki");
+					params.put("page", "most-recently-created");
+					params.put("tags_none", new String[]{"admin"});
+					//params.put("rating", "");
+					params.put("order", "created_at desc");
+					//params.put("rating", "-15");
+			
+					try {
+						@SuppressWarnings("unchecked")
+						Object[] result = (Object[]) pushToAPI("pages.select", params);
+			
+						for(int i = 0;i < 5; i++){
+							pagelist.add(getPageInfo((String)result[i]));
 						}
-					}
-
-				}
+						
+			
+					
 
 			} catch (Exception e) {
 				logger.error(
@@ -356,6 +349,8 @@ public class Pages {
 
 		return "I couldn't find anything matching that, apologies.";
 	}
+	
+	
 
 	public static String getPageInfo(String pagename) {
 		String targetName = pagename.toLowerCase();
