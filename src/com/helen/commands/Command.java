@@ -345,6 +345,19 @@ public class Command {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getStoredInfo(data.getTarget(), data.getSender()));
 	}
 	
+	@IRCCommand(command = {".lc",".l"}, startOfLine = true, securityLevel = 1)
+	public void lastCreated(CommandData data){
+		ArrayList<String> pages = Pages.lastCreated();
+		if (pages != null) {
+			for (String str : pages) {
+				helen.sendMessage(data.getResponseTarget(), data.getSender()
+						+ ": " + Pages.getPageInfo(str));
+			}
+		}else{
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I can't do that yet.");
+		}
+	}
+	
 	@IRCCommand(command = "SCPPAGEREGEX", startOfLine= true, reg = true, regex = { "http:\\/\\/www.scp-wiki.net\\/(.*)" }, securityLevel = 1, matcherGroup = 1)
 	public void getPageInfo(CommandData data){
 		if(!data.getRegexTarget().contains("/") && !data.getRegexTarget().contains("forum")){
@@ -352,7 +365,7 @@ public class Command {
 		}
 	}
 
-	@IRCCommand(command = "SCP", startOfLine = true, reg = true, regex = { "(scp|SCP)-([0-9]+)" }, securityLevel = 1)
+	@IRCCommand(command = "SCP", startOfLine = true, reg = true, regex = { "(scp|SCP)-([0-9]+)(-(ex|j|arc))?" }, securityLevel = 1)
 	public void scpSearch(CommandData data) {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getCommand()));
 	}
@@ -449,21 +462,21 @@ public class Command {
 				data.getSender() + ": Configured properties: " + buildResponse(properties));
 	}
 
-	@IRCCommand(command = ".property", startOfLine = true, securityLevel = 2)
+	@IRCCommand(command = ".property", startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
 	public void getProperty(CommandData data) {
 		ArrayList<Config> properties = Configs.getProperty(data.getTarget());
 		helen.sendMessage(data.getResponseTarget(),
 				data.getSender() + ": Configured properties: " + buildResponse(properties));
 	}
 
-	@IRCCommand(command = ".setProperty", startOfLine = true, securityLevel = 4)
+	@IRCCommand(command = ".setProperty", startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
 	public void setProperty(CommandData data) {
 		String properties = Configs.setProperty(data.getSplitMessage()[1], data.getSplitMessage()[2],
 				data.getSplitMessage()[3]);
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + properties);
 	}
 
-	@IRCCommand(command = ".updateProperty", startOfLine = true, securityLevel = 4)
+	@IRCCommand(command = ".updateProperty", startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
 	public void updateProperty(CommandData data) {
 		String properties = Configs.updateSingle(data.getSplitMessage()[1], data.getSplitMessage()[2],
 				data.getSplitMessage()[3]);

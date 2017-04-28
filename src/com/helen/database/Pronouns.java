@@ -20,7 +20,8 @@ public class Pronouns {
 	public static String getPronouns(String user) {
 		try {
 			StringBuilder str = new StringBuilder();
-			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getPronouns"), user.toLowerCase());
+			CloseableStatement stmt = Connector.getStatement(
+					Queries.getQuery("getPronouns"), user.toLowerCase());
 			ResultSet rs = stmt.getResultSet();
 			StringBuilder accepted = new StringBuilder();
 			StringBuilder pronouns = new StringBuilder();
@@ -57,7 +58,8 @@ public class Pronouns {
 					}
 					str.append(".");
 				} else {
-					str.append("I'm sorry, I don't have any record of pronouns for " + user);
+					str.append("I'm sorry, I don't have any record of pronouns for "
+							+ user);
 				}
 			} else {
 				str.append("I'm sorry there was an error.  Please inform Dr Magnus.");
@@ -70,56 +72,72 @@ public class Pronouns {
 	}
 
 	public static String insertPronouns(CommandData data) {
+		if (data.getSplitMessage().length > 1) {
+			try {
+				StringBuilder str = new StringBuilder();
+				CloseableStatement stmt = Connector.getStatement(Queries
+						.getQuery("establishPronoun"), data.getSender()
+						.toLowerCase(), data.getSplitMessage()[1]
+						.equalsIgnoreCase("accepted") ? true : false);
+				ResultSet rs = stmt.execute();
 
-		try {
-			StringBuilder str = new StringBuilder();
-			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("establishPronoun"),
-					data.getSender().toLowerCase(),
-					data.getSplitMessage()[1].equalsIgnoreCase("accepted") ? true : false);
-			ResultSet rs = stmt.execute();
-			
-			String nounData = data.getMessage().substring(data.getMessage().split(" ")[0].length(),
-					data.getMessage().length());
-			
-			String[] nouns = nounData.replace(","," ").replace("/"," ").replace("\\"," ").trim().replaceAll(" +", " ").split(" ");
-			if (rs != null && rs.next()) {
-				int pronounID = rs.getInt("pronounID");
-				int j = 0;
-				if (nouns[0].equalsIgnoreCase("accepted")) {
-					j = 1;
-				}
+				String nounData = data.getMessage().substring(
+						data.getMessage().split(" ")[0].length(),
+						data.getMessage().length());
 
-				for (int i = j; i < nouns.length; i++) {
-					if (bannedNouns.contains(nouns[i].trim().toLowerCase())) {
-						return "Your noun list contains a banned term: " + nouns[i];
+				String[] nouns = nounData.replace(",", " ").replace("/", " ")
+						.replace("\\", " ").trim().replaceAll(" +", " ")
+						.split(" ");
+				if (rs != null && rs.next()) {
+					int pronounID = rs.getInt("pronounID");
+					int j = 0;
+					if (nouns[0].equalsIgnoreCase("accepted")) {
+						j = 1;
+					}
+
+					for (int i = j; i < nouns.length; i++) {
+						if (bannedNouns.contains(nouns[i].trim().toLowerCase())) {
+							return "Your noun list contains a banned term: "
+									+ nouns[i];
+						}
+					}
+
+					for (int i = j; i < nouns.length; i++) {
+
+						CloseableStatement insertStatement = Connector
+								.getStatement(
+										Queries.getQuery("insertPronoun"),
+										pronounID, nouns[i]);
+						insertStatement.executeUpdate();
+						if (str.length() > 0) {
+							str.append(", ");
+						}
+						str.append(nouns[i]);
 					}
 				}
-
-				for (int i = j; i < nouns.length; i++) {
-
-					CloseableStatement insertStatement = Connector.getStatement(Queries.getQuery("insertPronoun"),
-							pronounID, nouns[i]);
-					insertStatement.executeUpdate();
-					if (str.length() > 0) {
-						str.append(", ");
-					}
-					str.append(nouns[i]);
-				}
+				return "Inserted the following pronouns: "
+						+ str.toString()
+						+ " as "
+						+ (data.getSplitMessage()[1]
+								.equalsIgnoreCase("accepted") ? "accepted pronouns."
+								: "pronouns");
+			} catch (Exception e) {
+				logger.error("Error retreiving pronouns", e);
 			}
-			return "Inserted the following pronouns: " + str.toString() + " as "
-					+ (data.getSplitMessage()[1].equalsIgnoreCase("accepted") ? "accepted pronouns." : "pronouns");
-		} catch (Exception e) {
-			logger.error("Error retreiving pronouns", e);
+			return "I'm sorry there was an error.  Please inform Dr Magnus.";
+		} else {
+			return "Usage: .setPronouns (accepted) pronoun1 pronoun2 pronoun3 ... pronoun[n]";
 		}
-		return "I'm sorry there was an error.  Please inform Dr Magnus.";
 	}
 
 	public static String clearPronouns(String username) {
 		try {
-			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("deleteNouns"), username.toLowerCase());
+			CloseableStatement stmt = Connector.getStatement(
+					Queries.getQuery("deleteNouns"), username.toLowerCase());
 			stmt.executeUpdate();
 
-			stmt = Connector.getStatement(Queries.getQuery("deleteNounRecord"), username.toLowerCase());
+			stmt = Connector.getStatement(Queries.getQuery("deleteNounRecord"),
+					username.toLowerCase());
 			stmt.executeUpdate();
 
 			return "Deleted all pronoun records for " + username + ".";

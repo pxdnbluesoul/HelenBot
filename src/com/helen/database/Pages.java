@@ -28,6 +28,7 @@ public class Pages {
 	private static XmlRpcClientConfigImpl config;
 	private static XmlRpcClient client;
 	private static HashSet<String> storedPages = new HashSet<String>();
+	private static Long lastLc = System.currentTimeMillis();
 	// private static HashMap<String, String> titleToPageName = new
 	// HashMap<String, String>();
 	private static HashMap<String, ArrayList<Page>> storedEvents = new HashMap<String, ArrayList<Page>>();
@@ -139,6 +140,50 @@ public class Pages {
 			}
 		}
 		logger.info("Finished gathering series pages");
+	}
+	
+	public static ArrayList<String> lastCreated() {
+		if(System.currentTimeMillis() - lastLc > 15000){
+			
+		lastLc = System.currentTimeMillis();
+		String regex = "<td style=\"vertical-align: top;\"><a href=\"\\/(.+)\">(.+)-(.+)<\\/a><\\/td>";
+		Pattern r = Pattern.compile(regex);
+		ArrayList<String> pagelist = new ArrayList<String>();
+			Map<String, Object> params = new HashMap<String, Object>();
+			params.put("site", "scp-wiki");
+			params.put("page", "most-recently-created");
+
+			try {
+				@SuppressWarnings("unchecked")
+				HashMap<String, Object> result = (HashMap<String, Object>) pushToAPI(
+						"pages.get_one", params);
+
+				String[] lines = ((String) result.get("html")).split("\n");
+
+				int i = 0;
+				for (String s : lines) {
+					Matcher m = r.matcher(s);
+					if (m.find()) {
+						if (i++ < 3) {
+							pagelist.add(m.group(1));
+						} else {
+							break;
+						}
+					}
+
+				}
+
+			} catch (Exception e) {
+				logger.error(
+						"There was an exception attempting to grab the series page metadata",
+						e);
+			}
+			return pagelist;
+		}
+		
+		return null;
+		
+
 	}
 
 	public static void getMethodList() {
