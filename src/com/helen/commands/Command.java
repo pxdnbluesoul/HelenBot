@@ -342,11 +342,16 @@ public class Command {
 	@IRCCommand(command = {".lc",".l"}, startOfLine = true, securityLevel = 1)
 	public void lastCreated(CommandData data){
 		ArrayList<String> pages = Pages.lastCreated();
+		ArrayList<String> infoz = new ArrayList<String>();
 		if (pages != null) {
 			for (String str : pages) {
+				infoz.add(Pages.getPageInfo(str));
+			}
+			for(String str: infoz){
 				helen.sendMessage(data.getResponseTarget(), data.getSender()
 						+ ": " + Pages.getPageInfo(str));
 			}
+			
 		}else{
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I can't do that yet.");
 		}
