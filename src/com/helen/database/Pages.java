@@ -61,7 +61,7 @@ public class Pages {
 		if (System.currentTimeMillis() - lastLc > 15000) {
 			ArrayList<String> pagelist = new ArrayList<String>();
 			try {
-				String regex = "<td style=\"vertical-align: top;\"><a href=\"\\/(.+)\">(.+)-(.+)<\\/a><\\/td>";
+				String regex = "<td style=\"vertical-align: top;\"><a href=\"\\/(.+)\">(.+)<\\/a><\\/td>";
 				Pattern r = Pattern.compile(regex);
 				String s;
 				URL u = new URL("http://www.scp-wiki.net/most-recently-created");
@@ -150,7 +150,7 @@ public class Pages {
 			returnString.append(Colors.BOLD);
 
 			String title = getTitle(targetName);
-			if (title == null || title.isEmpty()) {
+			if (title == null || title.isEmpty() || title.equals("[ACCESS DENIED]")) {
 				returnString.append(result.get(targetName).get("title_shown"));
 			} else {
 				returnString.append(result.get(targetName).get("title_shown"));
