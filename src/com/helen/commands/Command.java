@@ -129,12 +129,6 @@ public class Command {
 
 	public void dispatchTable(CommandData data) {
 
-		new Thread() {
-	        public void run() {
-	              Pages.checkIfUpdate();
-	        }
-	    }.start();
-		
 		checkTells(data);
 		User[] userList = getUserlist(data);
 		Integer securityLevel = getSecurityLevel(userList, data);
@@ -368,18 +362,6 @@ public class Command {
 	@IRCCommand(command = "SCP", startOfLine = true, reg = true, regex = { "(scp|SCP)-([0-9]+)(-(ex|j|arc))?" }, securityLevel = 1)
 	public void scpSearch(CommandData data) {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getCommand()));
-	}
-
-	@IRCCommand(command = ".tagLoad", startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
-	public void updateTags(CommandData data) {
-		Pages.getTags();
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Tags have been updated in my database.");
-	}
-	
-	@IRCCommand(command = ".seriesload", startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
-	public void uploadSeries(CommandData data){
-		Pages.uploadSeries();
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Series pages have been updated");
 	}
 	
 	@IRCCommand(command = {".s",".sea"}, startOfLine = true, securityLevel = 1)
