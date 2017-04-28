@@ -349,7 +349,7 @@ public class Command {
 			}
 			for(String str: infoz){
 				helen.sendMessage(data.getResponseTarget(), data.getSender()
-						+ ": " + Pages.getPageInfo(str));
+						+ ": " + str);
 			}
 			
 		}else{
