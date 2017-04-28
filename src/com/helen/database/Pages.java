@@ -136,7 +136,9 @@ public class Pages {
 				}
 
 			} catch (Exception e) {
-				logger.error("There was an exception attempting to grab the series page metadata", e);
+				if(!e.getMessage().contains("unique")){
+					logger.error("There was an exception attempting to grab the series page metadata", e);
+				}
 			}
 		}
 		logger.info("Finished gathering series pages");
@@ -144,7 +146,7 @@ public class Pages {
 	
 	public static ArrayList<String> lastCreated() {
 		if(System.currentTimeMillis() - lastLc > 15000){
-			
+			logger.info("Entering last created");
 		lastLc = System.currentTimeMillis();
 		String regex = "<td style=\"vertical-align: top;\"><a href=\"\\/(.+)\">(.+)-(.+)<\\/a><\\/td>";
 		Pattern r = Pattern.compile(regex);
@@ -175,7 +177,7 @@ public class Pages {
 
 			} catch (Exception e) {
 				logger.error(
-						"There was an exception attempting to grab the series page metadata",
+						"There was an exception attempting to grab last created",
 						e);
 			}
 			return pagelist;
@@ -224,7 +226,9 @@ public class Pages {
 						CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertPage"), str, str);
 						stmt.executeUpdate();
 					} catch (Exception e) {
-						logger.error("Couldn't insert page name", e);
+						if(!e.getMessage().contains("unique")){
+							logger.error("Couldn't insert page name", e);
+						}
 					}
 					storedPages.add(str);
 				}
