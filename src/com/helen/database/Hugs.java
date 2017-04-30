@@ -33,10 +33,12 @@ public class Hugs {
 					data.getMessageWithoutCommand());
 			stmt.executeUpdate();
 		}catch(Exception e){
-			if(e.getMessage().contains("unique")){
-				updateHugMessage(data.getSender().toLowerCase(), data.getMessageWithoutCommand());
-			}else{
+			if(!e.getMessage().contains("hugs_pkey")){
 				logger.error("Couldn't store the hug",e);
+				
+			}else{
+				logger.info("Updating");
+				updateHugMessage(data.getSender().toLowerCase(), data.getMessageWithoutCommand());
 			}
 		}
 		
@@ -48,6 +50,7 @@ public class Hugs {
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("updateHug"), username,
 					message);
 			stmt.executeUpdate();
+			logger.info("Update finished");
 		}catch(Exception e){
 			logger.error("Couldn't store the hug",e);
 			
