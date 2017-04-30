@@ -47,8 +47,8 @@ public class Hugs {
 	
 	public static void updateHugMessage(String username, String message){
 		try{
-			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("updateHug"), username,
-					message);
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("updateHug"), message,
+					username);
 			stmt.executeUpdate();
 			logger.info("Update finished");
 		}catch(Exception e){
