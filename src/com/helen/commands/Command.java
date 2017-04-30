@@ -369,7 +369,8 @@ public class Command {
 	
 	@IRCCommand(command = ".au", startOfLine = true, securityLevel = 1)
 	public void authorDetail(CommandData data){
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getAuthorDetail(data.getTarget()));
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getAuthorDetail(
+				data.getSplitMessage().length == 1 ? data.getSender() :  data.getTarget()));
 	}
 	
 	@IRCCommand(command = "SCPPAGEREGEX", startOfLine= true, reg = true, regex = { "http:\\/\\/www.scp-wiki.net\\/(.*)" }, securityLevel = 1, matcherGroup = 1)

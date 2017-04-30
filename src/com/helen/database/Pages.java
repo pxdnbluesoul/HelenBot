@@ -225,13 +225,14 @@ public class Pages {
 				str.append(authorPage.getPageLink());
 				str.append(") ");
 			}
+			String authorPageName = authorPage == null ? "null" : authorPage.getPageLink();
 			int scps = 0;
 			int tales = 0;
 			int rating = 0;
 			Timestamp ts = new java.sql.Timestamp(0l);
 			Page latest = null;
 			for(Page p: pages){
-				if(!p.getPageLink().equals(authorPage.getPageLink())){
+				if(!p.getPageLink().equals(authorPageName)){
 					if(p.getScpPage()){
 						scps++;
 					}else{

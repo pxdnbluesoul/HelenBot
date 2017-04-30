@@ -42,7 +42,7 @@ public class Hugs {
 			}
 		}
 		
-		return "Your hug message has been set, " + data.getSender() + ".";
+		return "*Jots that down on her clipboard* Noted, " + data.getSender() + ".";
 	}
 	
 	public static void updateHugMessage(String username, String message){
