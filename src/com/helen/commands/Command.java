@@ -14,6 +14,7 @@ import com.helen.bots.HelenBot;
 import com.helen.database.Config;
 import com.helen.database.Configs;
 import com.helen.database.DatabaseObject;
+import com.helen.database.Hugs;
 import com.helen.database.Pages;
 import com.helen.database.Pronouns;
 import com.helen.database.Queries;
@@ -272,10 +273,15 @@ public class Command {
 
 	}
 	
+	@IRCCommand(command = {".hugme"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
+	public void hugMe(CommandData data){
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Hugs.storeHugmessage(data));
+	}
+	
 	@IRCCommand(command={".hugHelen",".helenhug"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
 	public void hug(CommandData data){
-		if(data.getSender().equalsIgnoreCase("DrMagnus")){
-			helen.sendMessage(data.getResponseTarget(), "Awww, thanks boss. *Hugs*");
+		if(data.isHugList()){
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Hugs.getHugMessage(data.getSender().toLowerCase()));
 		}else if(data.isWhiteList()){
 			helen.sendAction(data.getResponseTarget(), "hugs " + data.getSender() +".");
 		}else{
@@ -393,8 +399,12 @@ public class Command {
 	public void setPronouns(CommandData data) {
 		String response = Pronouns.insertPronouns(data);
 		if (response.contains("banned term")) {
-			Tells.sendTell("DrMagnus", "Secretary_Helen",
-					"User " + data.getSender() + " attempted to add a banned term:" + response, true);
+			for(Config c : Configs.getProperty("registeredNicks")){
+				Tells.sendTell(c.getValue(), "Secretary_Helen",
+						"User " + data.getSender() + " attempted to add a banned term:" + response +". Their full message "
+						+ "was: " + data.getMessage(), true);
+				
+			}
 		}
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
 	}

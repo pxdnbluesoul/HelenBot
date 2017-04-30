@@ -276,6 +276,7 @@ public class Pages {
 			}else{
 				str.append(latest.getTitle());
 			}
+			str.append(Colors.NORMAL);
 			str.append(" at ");
 			str.append(Colors.BOLD);
 			str.append(latest.getRating());

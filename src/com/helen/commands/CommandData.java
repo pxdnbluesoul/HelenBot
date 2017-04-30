@@ -74,6 +74,10 @@ public class CommandData {
 		return message.split(" ")[1];
 	}
 	
+	public String getMessageWithoutCommand() {
+		return message.substring((message.split(" ")[0].length()),message.length());
+	}
+	
 	public String getTellMessage() {
 		return message.substring((message.split(" ")[0].length() + message.split(" ")[1].length() + 2),message.length());
 	}
@@ -91,5 +95,13 @@ public class CommandData {
 		return false;
 	}
 	
+	public boolean isHugList(){
+		for(Config config : Configs.getProperty("hugs")){
+			if(getSender().equalsIgnoreCase(config.getValue())){
+				return true;
+			}
+		}
+		return false;
+	}
 	
 }
