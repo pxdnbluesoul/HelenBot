@@ -275,7 +275,11 @@ public class Command {
 	
 	@IRCCommand(command = {".hugme"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
 	public void hugMe(CommandData data){
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Hugs.storeHugmessage(data));
+		if(data.isHugList()){
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Hugs.storeHugmessage(data));
+		}else{
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": You're not authorized to do that.");
+		}
 	}
 	
 	@IRCCommand(command={".hugHelen",".helenhug"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
