@@ -1,6 +1,5 @@
 package com.helen.database;
 
-import java.util.ArrayList;
 
 public class Tag {
 	

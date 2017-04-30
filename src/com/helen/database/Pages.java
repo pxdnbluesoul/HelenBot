@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -178,6 +179,117 @@ public class Pages {
 		}
 
 		return "I couldn't find anything matching that, apologies.";
+	}
+	
+	public static String getAuthorDetail(String user){
+		user = user.toLowerCase();
+		Page authorPage = null;
+		try{
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findAuthorPage"), user);
+			ResultSet rs = stmt.getResultSet();
+			if(rs != null && rs.next()){
+				authorPage = new Page(rs.getString("pagename"),
+						rs.getString("title"),
+						rs.getBoolean("scppage"),
+						rs.getString("scptitle"));
+			}
+			rs.close();
+			stmt.close();
+			
+			ArrayList<Page> pages = new ArrayList<Page>();
+			stmt = Connector.getStatement(Queries.getQuery("findPagesByAuthor"), user);
+			rs = stmt.getResultSet();
+			while(rs != null && rs.next()){
+				pages.add( new Page(rs.getString("pagename"),
+						rs.getString("title"),
+						rs.getInt("rating"),
+						rs.getString("created_by"),
+						rs.getTimestamp("created_on"),
+						rs.getBoolean("scppage"),
+						rs.getString("scptitle")));
+			}
+			
+			if(pages.size() == 0){
+				return "I'm sorry, I don't think that author exists.  Check your spelling?";
+			}
+			
+			StringBuilder str = new StringBuilder();
+			str.append(Colors.BOLD);
+			str.append(user);
+			str.append(Colors.NORMAL);
+			str.append(" - ");
+			
+			if(authorPage != null){
+				str.append("(");
+				str.append("www.scp-wiki.net/");
+				str.append(authorPage.getPageLink());
+				str.append(") ");
+			}
+			int scps = 0;
+			int tales = 0;
+			int rating = 0;
+			Timestamp ts = new java.sql.Timestamp(0l);
+			Page latest = null;
+			for(Page p: pages){
+				if(!p.getPageLink().equals(authorPage.getPageLink())){
+					if(p.getScpPage()){
+						scps++;
+					}else{
+						tales++;
+					}
+					rating += p.getRating();
+					
+					if(p.getCreatedAt().compareTo(ts) > 0){
+						ts = p.getCreatedAt();
+						latest = p;
+					}
+				}
+			}
+			str.append("has ");
+			str.append(Colors.BOLD);
+			str.append(scps + tales);
+			str.append(Colors.NORMAL);
+			str.append(" pages. (");
+			str.append(Colors.BOLD);
+			str.append(scps);
+			str.append(Colors.NORMAL);
+			str.append(" SCP articles, ");
+			str.append(Colors.BOLD);
+			str.append(tales);
+			str.append(Colors.NORMAL);
+			str.append(" Tales).");
+			str.append(" They have ");
+			str.append(Colors.BOLD);
+			str.append(rating);
+			str.append(Colors.NORMAL);
+			str.append(" net upvotes with an average of ");
+			str.append(Colors.BOLD);
+			double avg = (rating) / (tales + scps);
+			str.append(avg);
+			str.append(Colors.NORMAL);
+			str.append(".  Their latest page is ");
+			str.append(Colors.BOLD);
+			if(latest.getScpPage()){
+				str.append(latest.getTitle());
+				str.append(": ");
+				str.append(latest.getScpTitle());
+			}else{
+				str.append(latest.getTitle());
+			}
+			str.append(" at ");
+			str.append(Colors.BOLD);
+			str.append(latest.getRating());
+			str.append(Colors.NORMAL);
+			str.append(".");
+			
+			return str.toString();
+			
+			
+		}catch(Exception e){
+			logger.error("Error constructing author detail",e);
+		}
+		
+		return "I apologize, there's been an error.  Please inform DrMagnus there's an error with author details.";
 	}
 
 	public static String getPotentialTargets(String[] terms, String username) {

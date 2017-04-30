@@ -3,7 +3,6 @@ package com.helen.bots;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.logging.FileHandler;
 
 import org.apache.log4j.Logger;
 import org.jibble.pircbot.IrcException;
@@ -19,11 +18,8 @@ import com.helen.database.Users;
 public class HelenBot extends PircBot {
 
 	private static Command cmd = null;
-	private static FileHandler handler = null;
-
+	
 	private static final Logger logger = Logger.getLogger(HelenBot.class);
-	private static final java.util.logging.Logger chatLogger = java.util.logging.Logger
-			.getAnonymousLogger();
 	private static HashMap<String, Boolean> jarvisPresent = new HashMap<String, Boolean>();
 
 	public HelenBot() throws NickAlreadyInUseException, IOException,
@@ -95,6 +91,15 @@ public class HelenBot extends PircBot {
 	}
 
 	public void onPart(String channel, String sender, String login,
+			String hostname) {
+		if (sender.equalsIgnoreCase("jarvis")) {
+			if (jarvisPresent.containsKey(channel.toLowerCase())) {
+				jarvisPresent.put(channel.toLowerCase(), false);
+			}
+		}
+	}
+	
+	public void onQuit(String channel, String sender, String login,
 			String hostname) {
 		if (sender.equalsIgnoreCase("jarvis")) {
 			if (jarvisPresent.containsKey(channel.toLowerCase())) {

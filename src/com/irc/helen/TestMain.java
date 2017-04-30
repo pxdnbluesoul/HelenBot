@@ -20,11 +20,7 @@ public class TestMain {
 	private static XmlRpcClientConfigImpl config;
 	private static XmlRpcClient client;
 
-	private static Object pushToAPI(String method, Object... params)
-			throws XmlRpcException {
-		return (Object) client.execute(method, params);
-	}
-
+	
 	static {
 		config = new XmlRpcClientConfigImpl();
 		try {
