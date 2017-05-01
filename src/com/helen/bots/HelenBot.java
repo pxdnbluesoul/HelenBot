@@ -99,11 +99,14 @@ public class HelenBot extends PircBot {
 		}
 	}
 	
-	public void onQuit(String channel, String sender, String login,
-			String hostname) {
-		if (sender.equalsIgnoreCase("jarvis")) {
-			if (jarvisPresent.containsKey(channel.toLowerCase())) {
-				jarvisPresent.put(channel.toLowerCase(), false);
+	public void onQuit(String sourceNick,
+            String sourceLogin,
+            String sourceHostname,
+            String reason) {
+		
+		if (sourceNick.equalsIgnoreCase("jarvis")) {
+			for(String channel : jarvisPresent.keySet()){
+				jarvisPresent.put(channel, false);
 			}
 		}
 	}
