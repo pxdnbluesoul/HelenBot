@@ -75,7 +75,7 @@ public class CommandData {
 	}
 	
 	public String getMessageWithoutCommand() {
-		return message.substring((message.split(" ")[0].length()),message.length());
+		return message.substring((message.split(" ")[0].length() + 1),message.length());
 	}
 	
 	public String getTellMessage() {

@@ -24,7 +24,7 @@ public class Hugs {
 			logger.error("Couldn't get hug",e);
 		}
 		
-		return hug;
+		return hug.trim();
 	}
 	
 	public static String storeHugmessage(CommandData data){

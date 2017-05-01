@@ -326,7 +326,7 @@ public class Pages {
 			for (Page page : potentialPages) {
 				str.append(Colors.BOLD);
 				str.append(page.getScpPage() ? page.getTitle()
-						+ page.getScpTitle() : page.getTitle());
+						+ ": " + page.getScpTitle()  : page.getTitle());
 				str.append(Colors.NORMAL);
 				str.append(",");
 			}

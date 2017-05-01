@@ -282,7 +282,7 @@ public class Command {
 		}
 	}
 	
-	@IRCCommand(command={".hugHelen",".helenhug"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
+	@IRCCommand(command={".hugHelen",".helenhug",".hugsplox"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
 	public void hug(CommandData data){
 		if(data.isHugList()){
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Hugs.getHugMessage(data.getSender().toLowerCase()));
@@ -524,7 +524,7 @@ public class Command {
 	
 	@IRCCommand(command = ".reload", startOfLine = true, securityLevel = 4)
 	public void reload(CommandData data) {
-		helen.sendAction(data.getChannel(), "reloads all six barrels.");
+		helen.sendAction(data.getChannel(), "reloads all six cylinders.");
 		bullets = 6;
 	}
 	
