@@ -13,14 +13,15 @@ public class Users {
 
 	private static final Logger logger = Logger.getLogger(Users.class);
 
-	public static void insertUser(String username, Date date, String hostmask, String message) {
+	public static void insertUser(String username, Date date, String hostmask, String message, String channel) {
 		try {
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertUser"),
 					username.toLowerCase(),
 					new java.sql.Date(date.getTime()),
 					new java.sql.Timestamp(System.currentTimeMillis()),
 					message,
-					message);
+					message,
+					channel);
 			if (stmt.executeUpdate()) {
 				CloseableStatement hostStatement = Connector.getStatement(Queries.getQuery("insertHostmask"),
 						username.toLowerCase(),
@@ -34,17 +35,18 @@ public class Users {
 				logger.error("Error code " + e.getErrorCode() + e.getMessage() + " Insertion exception for " + username,
 						e);
 			} else {
-				updateUserSeen(username, message, hostmask);
+				updateUserSeen(username, message, hostmask, channel);
 			}
 		}
 	}
 
-	private static void updateUserSeen(String username, String message, String hostmask) {
+	private static void updateUserSeen(String username, String message, String hostmask, String channel) {
 		try {
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("updateUser"),
 					new java.sql.Timestamp(System.currentTimeMillis()),
 					message,
-					username.toLowerCase());
+					username.toLowerCase(),
+					channel);
 			stmt.executeUpdate();
 			
 			CloseableStatement hostStatement = Connector.getStatement(Queries.getQuery("insertHostmask"),
@@ -66,7 +68,7 @@ public class Users {
 		try {
 			if (data.getSplitMessage()[1].equals("-f")) {
 				CloseableStatement stmt = Connector.getStatement(Queries.getQuery("seenFirst"),
-						data.getSplitMessage()[2].toLowerCase());
+						data.getSplitMessage()[2].toLowerCase(), data.getChannel().toLowerCase());
 				ResultSet rs = stmt.executeQuery();
 				if (rs != null && rs.next()) {
 					return "I first met " + data.getSplitMessage()[2] + " on " + rs.getDate("first_seen").toString()
@@ -76,7 +78,7 @@ public class Users {
 				}
 			} else {
 				CloseableStatement stmt = Connector.getStatement(Queries.getQuery("seen"),
-						data.getSplitMessage()[1].toLowerCase());
+						data.getSplitMessage()[1].toLowerCase(), data.getChannel().toLowerCase());
 				ResultSet rs = stmt.executeQuery();
 				if (rs != null && rs.next()) {
 					return "I last saw " + data.getSplitMessage()[1] + " at "
