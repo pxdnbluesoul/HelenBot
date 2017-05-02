@@ -549,10 +549,12 @@ public class Command {
 		StringBuilder str = new StringBuilder();
 		str.append("{");
 		for (int i = 0; i < dbo.size(); i++) {
-			if (i != 0) {
-				str.append(dbo.get(i).getDelimiter());
+			if(dbo.get(i).displayToUser()){
+				if (i != 0) {
+					str.append(dbo.get(i).getDelimiter());
+				}
+				str.append(dbo.get(i).toString());
 			}
-			str.append(dbo.get(i).toString());
 		}
 		str.append("}");
 		return str.toString();

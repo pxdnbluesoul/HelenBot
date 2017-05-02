@@ -182,5 +182,9 @@ public class Roll implements DatabaseObject {
 		}
 		return expandedString.toString();
 	}
+	
+	public boolean displayToUser(){
+		return true;
+	}
 
 }

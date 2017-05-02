@@ -43,5 +43,9 @@ public class Config implements DatabaseObject {
 		str.append(value);
 		return str.toString();
 	}
+	
+	public boolean displayToUser(){
+		return displayToPublic;
+	}
 
 }
