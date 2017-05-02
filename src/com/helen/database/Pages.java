@@ -4,6 +4,8 @@ import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -295,25 +297,57 @@ public class Pages {
 	}
 
 	public static String getPotentialTargets(String[] terms, String username) {
+		Boolean exact = terms[1].equalsIgnoreCase("-e");
+		int indexOffset = 1;
+		if(exact){
+			indexOffset = 2;
+		}
 		ArrayList<Page> potentialPages = new ArrayList<Page>();
-		String[] lowerterms = new String[terms.length - 1];
-		for (int i = 1; i < terms.length; i++) {
-			lowerterms[i - 1] = terms[i].toLowerCase();
-			logger.info(lowerterms[i - 1]);
+		String[] lowerterms = new String[terms.length - indexOffset];
+		for (int i = indexOffset ; i < terms.length; i++) {
+			lowerterms[i - indexOffset] = terms[i].toLowerCase();
+			logger.info(lowerterms[i - indexOffset]);
 		}
 		try {
-			CloseableStatement stmt = Connector.getArrayStatement(
-					Queries.getQuery("findSCPS"), lowerterms);
-			logger.info(stmt.toString());
-			ResultSet rs = stmt.getResultSet();
-
+			ResultSet rs = null;
+			CloseableStatement stmt = null;
+			PreparedStatement state = null;
+			Connection conn = null;
+			if(exact){
+				stmt = Connector.getArrayStatement(
+						Queries.getQuery("findSCPS"), lowerterms);
+				logger.info(stmt.toString());
+				rs = stmt.getResultSet();
+			}else{
+				String query = "select pagename,title,scptitle,scppage from pages where";
+				for(int j = indexOffset; j < terms.length; j++){
+					if(j != indexOffset){
+						query +=" and";
+					}
+					query += " lower(coalesce(scptitle, title)) like ?";
+				}
+				conn = Connector.getConnection();
+				state = conn.prepareStatement(query);
+				for(int j = indexOffset; j < terms.length; j++){
+					state.setString(j - (indexOffset - 1), terms[j]);
+				}
+				rs = state.executeQuery();
+			}
 			while (rs != null && rs.next()) {
 				potentialPages.add(new Page(rs.getString("pagename"), rs
 						.getString("title"), rs.getBoolean("scppage"), rs
 						.getString("scptitle")));
 			}
-			stmt.close();
-			rs.close();
+			if(stmt != null){
+				stmt.close();
+			}
+			
+			if(conn != null){
+				conn.close();
+			}
+			if(rs != null){
+				rs.close();
+			}
 		} catch (SQLException e) {
 			logger.error("There was an issue grabbing potential SCP pages", e);
 		}
