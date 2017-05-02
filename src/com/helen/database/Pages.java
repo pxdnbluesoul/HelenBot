@@ -329,8 +329,9 @@ public class Pages {
 				conn = Connector.getConnection();
 				state = conn.prepareStatement(query);
 				for(int j = indexOffset; j < terms.length; j++){
-					state.setString(j - (indexOffset - 1), terms[j]);
+					state.setString(j - (indexOffset - 1), "%"+terms[j]+"%");
 				}
+				logger.info(state.toString());
 				rs = state.executeQuery();
 			}
 			while (rs != null && rs.next()) {
