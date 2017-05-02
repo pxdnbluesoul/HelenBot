@@ -329,7 +329,7 @@ public class Pages {
 				conn = Connector.getConnection();
 				state = conn.prepareStatement(query);
 				for(int j = indexOffset; j < terms.length; j++){
-					state.setString(j - (indexOffset - 1), "%"+terms[j]+"%");
+					state.setString(j - (indexOffset - 1), "%"+terms[j].toLowerCase()+"%");
 				}
 				logger.info(state.toString());
 				rs = state.executeQuery();
@@ -356,14 +356,14 @@ public class Pages {
 		if (potentialPages.size() > 1) {
 			storedEvents.put(username, potentialPages);
 			StringBuilder str = new StringBuilder();
-			str.append("(Beta)Did you mean : ");
+			str.append("Did you mean : ");
 
 			for (Page page : potentialPages) {
 				str.append(Colors.BOLD);
 				str.append(page.getScpPage() ? page.getTitle()
 						+ ": " + page.getScpTitle()  : page.getTitle());
 				str.append(Colors.NORMAL);
-				str.append(",");
+				str.append(", ");
 			}
 			str.append("?");
 			return str.toString();
