@@ -413,20 +413,25 @@ public class Pages {
 
 	
 	public static String findTime(Long time){
-		time = System.currentTimeMillis() - time;
+		//compensate for EST (helen runs in EST)
+		time  = (System.currentTimeMillis() + HOURS * 5) - time;
 		Long diff = 0l;
 		if(time >= YEARS){
 			diff = time/YEARS;
 			return (time/YEARS) + " year" + (diff > 1 ? "s" : "") + " ago by ";
+			
 		}else if( time >= DAYS){
 			diff = time/DAYS;
 			return (time/DAYS) + " day" + (diff > 1 ? "s" : "") + " ago by ";
+			
 		}else if(time >= HOURS){
 			diff = (time/HOURS);
 			return (time/HOURS) + " hour" + (diff > 1 ? "s" : "") + " ago by ";
+			
 		}else if( time >= MINUTES){
 			diff = time/MINUTES;
 			return (time/MINUTES) + " minute" + (diff > 1 ? "s" : "") + " ago by ";
+			
 		}else{
 			return "A few seconds ago ";
 		}
