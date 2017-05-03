@@ -13,4 +13,5 @@ public @interface IRCCommand {
 	int matcherGroup () default -1;
 	boolean coexistWithJarvis() default false;
 	int securityLevel();
+	boolean requiresToggle() default false;
 }

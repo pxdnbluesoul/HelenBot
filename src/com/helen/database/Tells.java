@@ -17,7 +17,7 @@ public class Tells {
 					message,
 					privateMessage);
 			if (stmt.executeUpdate()) {
-				return "Very well, initiating communication protocols...";
+				return "*Jots that down on her clipboard* Got it, I'll let them know...";
 			}
 		} catch (Exception e) {
 			logger.error("Exception sending tell", e);

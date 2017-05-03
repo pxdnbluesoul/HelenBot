@@ -7,6 +7,8 @@ import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 
+import com.helen.commands.CommandData;
+
 public class Configs {
 
 	private static final Logger logger = Logger.getLogger(Configs.class);
@@ -206,6 +208,57 @@ public class Configs {
 
 		return keyValues;
 
+	}
+	
+	public static boolean commandEnabled(CommandData data, String command){
+		boolean result = false;
+		try{
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("commandEnabled"),
+					data.getChannel(),
+					data.getCommand());
+			ResultSet rs = stmt.getResultSet();
+			if(rs != null && rs.next()){
+				result = rs.getBoolean("enabled");
+			}
+			rs.close();
+			stmt.close();
+		}catch(Exception e){
+			logger.error("Couldn't get toggle",e);
+			result = false;
+		}
+		return result;
+		
+	}
+	
+	public static String insertToggle(CommandData data, String command, boolean enabled){
+		try{
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertToggle"),
+					data.getChannel().toLowerCase(),
+					command.toLowerCase(),
+					enabled);
+			stmt.executeUpdate();
+		}catch(Exception e){
+			if(e.getMessage().contains("channel_unique")){
+				return updateToggle(data, command, enabled);
+			}
+		}
+		return "Set " + data.getCommand() + " to " + enabled + " for " + data.getChannel();
+		
+	}
+	
+	public static String updateToggle(CommandData data,String command, boolean enabled){
+		try{
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("updateToggle"),
+					enabled,
+					data.getChannel().toLowerCase(),
+					command.toLowerCase());
+			stmt.executeUpdate();
+		}catch(Exception e){
+			logger.error("Couldn't get toggle",e);
+			return "There was an error attempting to update toggle";
+		}
+		return "Updated " + data.getCommand() + " to " + enabled + " for " + data.getChannel();
+		
 	}
 
 }

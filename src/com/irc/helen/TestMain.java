@@ -1,11 +1,6 @@
 package com.irc.helen;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-
 import org.apache.xmlrpc.XmlRpcException;
-
-import com.helen.database.Connector;
 
 public class TestMain {
 
@@ -20,7 +15,7 @@ public class TestMain {
 				if(j != indexOffset){
 					query +=" and";
 				}
-				query += " lower(coalesce(scptitle, title)) like ?";
+				query += " lower(coalesce(scptitle, title)) like '?";
 			}
 			
 			System.out.println(query);

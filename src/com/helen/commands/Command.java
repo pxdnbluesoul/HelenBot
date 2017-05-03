@@ -2,6 +2,7 @@ package com.helen.commands;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.rmi.activation.ActivationGroupDesc.CommandEnvironment;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -268,7 +269,7 @@ public class Command {
 			helen.sendMessage(data.getResponseTarget(), buildResponse(rolls));
 		} else {
 			helen.sendMessage(data.getResponseTarget(),
-					data.getSender() + ": Apologies, I do not have any saved rolls for you at this time.");
+					data.getSender() + ": *Checks her clipboard* Apologies, I do not have any saved rolls for you at this time.");
 		}
 
 	}
@@ -336,7 +337,7 @@ public class Command {
 	
 	@IRCCommand(command = ".help", startOfLine = true, securityLevel = 1)
 	public void help(CommandData data){
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": http://home.helenbot.com/usage.html");
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": You can find a list of my job responsibilities here:  http://home.helenbot.com/usage.html");
 	}
 
 	@IRCCommand(command = ".seen", startOfLine = true, securityLevel = 1)
@@ -355,7 +356,7 @@ public class Command {
 		ArrayList<String> infoz = new ArrayList<String>();
 		if (pages != null) {
 			for (String str : pages) {
-				infoz.add(Pages.getPageInfo(str));
+				infoz.add(Pages.getPageInfo(str,data));
 			}
 			for(String str: infoz){
 				helen.sendMessage(data.getResponseTarget(), data.getSender()
@@ -398,6 +399,15 @@ public class Command {
 	@IRCCommand(command = ".myPronouns", startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
 	public void myPronouns(CommandData data) {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.getPronouns(data.getSender()));
+	}
+	//TODO make this less stupid
+	@IRCCommand(command = ".configure", startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
+	public void configure(CommandData data) {
+		if(data.getSplitMessage().length == 1){
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + "{shoot|lcratings}");
+		}else{
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Configs.insertToggle(data, data.getTarget(), !Configs.commandEnabled(data, data.getTarget())));
+		}
 	}
 
 	@IRCCommand(command = ".setPronouns", startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
@@ -505,20 +515,22 @@ public class Command {
 	
 	@IRCCommand(command = ".shoot", startOfLine = true, securityLevel = 4)
 	public void shootUser(CommandData data) {
-		if(data.getTarget().equalsIgnoreCase("Secretary_Helen")){
-			bullets--;
-			helen.sendAction(data.getChannel(), "shoots " + data.getSender());
-			if(bullets < 1){
-				reload(data);
+		if(Configs.commandEnabled(data, "shoot")){
+			if(data.getTarget().equalsIgnoreCase("Secretary_Helen")){
+				bullets--;
+				helen.sendAction(data.getChannel(), "shoots " + data.getSender());
+				if(bullets < 1){
+					reload(data);
+				}
+			}else{
+				helen.sendAction(data.getChannel(), "shoots " + data.getTarget());
+				bullets--;
+				if(bullets < 1){
+					reload(data);
+				}
+				helen.sendMessage(data.getChannel(), "Be careful " + data.getTarget() + ". I still have " + 
+				(bullets > 1 ? bullets + " bullets left." : "one in the chamber."));
 			}
-		}else{
-			helen.sendAction(data.getChannel(), "shoots " + data.getTarget());
-			bullets--;
-			if(bullets < 1){
-				reload(data);
-			}
-			helen.sendMessage(data.getChannel(), "Be careful " + data.getTarget() + ". I still have " + 
-			(bullets > 1 ? bullets + " bullets left." : "one in the chamber."));
 		}
 	}
 	

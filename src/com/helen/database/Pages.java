@@ -22,6 +22,8 @@ import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.apache.xmlrpc.client.XmlRpcSun15HttpTransportFactory;
 import org.jibble.pircbot.Colors;
 
+import com.helen.commands.CommandData;
+
 public class Pages {
 
 	private static final Logger logger = Logger.getLogger(Pages.class);
@@ -130,8 +132,16 @@ public class Pages {
 		return pageName;
 
 	}
+	
+	public static String getPageInfo(String pagename,CommandData data){
+		return getPageInfo(pagename, Configs.commandEnabled(data, "lcratings"));
+	}
+	
+	public static String getPageInfo(String pagename){
+		return getPageInfo(pagename, true);
+	}
 
-	public static String getPageInfo(String pagename) {
+	public static String getPageInfo(String pagename, boolean ratingEnabled) {
 		String targetName = pagename.toLowerCase();
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("site", Configs.getSingleProperty("site").getValue());
@@ -161,12 +171,14 @@ public class Pages {
 				returnString.append(title);
 			}
 			returnString.append(Colors.NORMAL);
-			returnString.append(" (Rating: ");
-			Integer rating = (Integer) result.get(targetName).get("rating");
-			if (rating > 0) {
-				returnString.append("+");
+			if(ratingEnabled){
+				returnString.append(" (Rating: ");
+				Integer rating = (Integer) result.get(targetName).get("rating");
+				if (rating > 0) {
+					returnString.append("+");
+				}
+				returnString.append(rating);
 			}
-			returnString.append(rating);
 			returnString.append(". By: ");
 			returnString.append(result.get(targetName).get("created_by"));
 			returnString.append(")");
