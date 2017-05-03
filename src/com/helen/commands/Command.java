@@ -406,7 +406,8 @@ public class Command {
 		if(data.getSplitMessage().length == 1){
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + "{shoot|lcratings}");
 		}else{
-			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Configs.insertToggle(data, data.getTarget(), !Configs.commandEnabled(data, data.getTarget())));
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Configs.insertToggle(data, data.getTarget(), 
+					data.getSplitMessage()[2].equalsIgnoreCase("true") ? true : false));
 		}
 	}
 
