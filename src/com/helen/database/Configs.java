@@ -242,7 +242,7 @@ public class Configs {
 				return updateToggle(data, command, enabled);
 			}
 		}
-		return "Set " + data.getCommand() + " to " + enabled + " for " + data.getChannel();
+		return "Set " + command + " to " + enabled + " for " + data.getChannel();
 		
 	}
 	

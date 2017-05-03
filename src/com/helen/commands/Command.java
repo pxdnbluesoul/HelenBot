@@ -540,20 +540,22 @@ public class Command {
 		bullets = 6;
 	}
 	
-	@IRCCommand(command = ".unload", startOfLine = true, securityLevel = 4)
+	@IRCCommand(command = ".unload", startOfLine = true, securityLevel = 4, coexistWithJarvis = true)
 	public void unload(CommandData data) {
-		if(data.getTarget().equalsIgnoreCase("Secretary_Helen")){
-			bullets--;
-			helen.sendAction(data.getChannel(), "shoots " + data.getSender());
-			if(bullets < 1){
+		if(Configs.commandEnabled(data, "shoot")){
+			if(data.getTarget().equalsIgnoreCase("Secretary_Helen")){
+				bullets--;
+				helen.sendAction(data.getChannel(), "shoots " + data.getSender());
+				if(bullets < 1){
+					reload(data);
+				}
+			}else{
+				helen.sendAction(data.getChannel(), "calmly thumbs back the hammer and unleashes"
+						+ (bullets == 6 ? " all six barrels on " : " the remaining " + bullets + " chambers on ")
+				+ data.getTarget() + ".");
+				helen.sendMessage(data.getChannel(), "Stay out of the revolver's sights.");
 				reload(data);
 			}
-		}else{
-			helen.sendAction(data.getChannel(), "calmly thumbs back the hammer and unleashes"
-					+ (bullets == 6 ? " all six barrels on " : " the remaining " + bullets + " chambers on ")
-			+ data.getTarget() + ".");
-			helen.sendMessage(data.getChannel(), "Stay out of the revolver's sights.");
-			reload(data);
 		}
 	}
 
