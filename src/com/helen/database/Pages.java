@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,11 @@ import com.helen.commands.CommandData;
 
 public class Pages {
 
+	
+	private static final Long YEARS = 1000 * 60 * 60 * 24 * 365l;
+	private static final Long DAYS = 1000 * 60 * 60 * 24l;
+	private static final Long HOURS = 1000 * 60l * 60;
+	private static final Long MINUTES = 1000 * 60l;
 	private static final Logger logger = Logger.getLogger(Pages.class);
 	private static XmlRpcClientConfigImpl config;
 	private static XmlRpcClient client;
@@ -142,6 +148,7 @@ public class Pages {
 	}
 
 	public static String getPageInfo(String pagename, boolean ratingEnabled) {
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		String targetName = pagename.toLowerCase();
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("site", Configs.getSingleProperty("site").getValue());
@@ -171,6 +178,7 @@ public class Pages {
 				returnString.append(title);
 			}
 			returnString.append(Colors.NORMAL);
+			returnString.append("(");
 			if(ratingEnabled){
 				returnString.append(" (Rating: ");
 				Integer rating = (Integer) result.get(targetName).get("rating");
@@ -178,9 +186,14 @@ public class Pages {
 					returnString.append("+");
 				}
 				returnString.append(rating);
+				returnString.append(". ");
 			}
-			returnString.append(". By: ");
+			returnString.append("Written ");
+			returnString.append(findTime(df.parse((String) result.get(targetName)
+					.get("created_at")).getTime()));
+			returnString.append("By: ");
 			returnString.append(result.get(targetName).get("created_by"));
+			returnString.append(" On: ");
 			returnString.append(")");
 			returnString.append(" - ");
 			returnString.append("http://www.scp-wiki.net/");
@@ -399,4 +412,41 @@ public class Pages {
 		return "Either the command was malformed, or I have nothing for you to get.";
 	}
 
+	
+	public static String findTime(Long time){
+		time = System.currentTimeMillis() - time;
+		Long diff = 0l;
+		if(time >= YEARS){
+			diff = time/YEARS;
+			return (time/YEARS) + " year" + (diff > 1 ? "s" : "") + " ago by ";
+		}else if( time >= DAYS){
+			diff = time/DAYS;
+			return (time/DAYS) + " day" + (diff > 1 ? "s" : "") + " ago by ";
+		}else if(time >= HOURS){
+			diff = (time/HOURS);
+			return (time/HOURS) + " hour" + (diff > 1 ? "s" : "") + " ago by ";
+		}else if( time >= MINUTES){
+			diff = time/MINUTES;
+			return (time/MINUTES) + " minute" + (diff > 1 ? "s" : "") + " ago by ";
+		}else{
+			return "A few seconds ago ";
+		}
+	
+	}
+	
+	
+		
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
