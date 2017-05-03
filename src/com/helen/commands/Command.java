@@ -254,6 +254,17 @@ public class Command {
 		helen.sendMessage(target, data.getSender() + " said:" + payload);
 	}
 
+	
+	
+	@IRCCommand(command = { "rollTest" }, startOfLine = true, securityLevel = 1, reg = true,
+			regex = {"([0-9]+)(d|f)([0-9]+)([+|-]?[0-9]+)?(\\s-e|-s)?\\s?(-e|-s)?\\s?(.+)?"})
+	public void regexRoll(CommandData data) {
+		Roll roll = new Roll(".roll " + data.getMessage(),
+				data.getSender(),
+				"([0-9]+)(d|f)([0-9]+)([+|-]?[0-9]+)?(\\s-e|-s)?\\s?(-e|-s)?\\s?(.+)?");
+		Rolls.insertRoll(roll);
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + roll.toString());
+	}
 	@IRCCommand(command = { ".roll" }, startOfLine = true, securityLevel = 1)
 	public void roll(CommandData data) {
 		Roll roll = new Roll(data.getMessage(), data.getSender());
@@ -551,7 +562,7 @@ public class Command {
 				}
 			}else{
 				helen.sendAction(data.getChannel(), "calmly thumbs back the hammer and unleashes"
-						+ (bullets == 6 ? " all six barrels on " : " the remaining " + bullets + " chambers on ")
+						+ (bullets == 6 ? " all six cylinders on " : " the remaining " + bullets + " cylinders on ")
 				+ data.getTarget() + ".");
 				helen.sendMessage(data.getChannel(), "Stay out of the revolver's sights.");
 				reload(data);

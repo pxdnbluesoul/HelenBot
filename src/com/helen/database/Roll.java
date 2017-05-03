@@ -6,8 +6,7 @@ import java.util.regex.Pattern;
 
 public class Roll implements DatabaseObject {
 
-	final static String regex = ".roll\\s([0-9]+)(d|f)([0-9]+)(\\s[+|-]?[0-9]+)?(\\s-e|-s)?\\s?(-e|-s)?\\s?(.+)?";
-	private final static Pattern r = Pattern.compile(regex);
+	private String regex = ".roll\\s([0-9]+)(d|f)([0-9]+)(\\s[+|-]?[0-9]+)?(\\s-e|-s)?\\s?(-e|-s)?\\s?(.+)?";
 	private String diceString = null;
 	private boolean expand = false;
 	private Integer diceSize = null;
@@ -19,6 +18,14 @@ public class Roll implements DatabaseObject {
 	private String username = null;
 
 	public Roll(String diceCommand, String username) {
+		diceString = diceCommand;
+		parse();
+		computeRoll();
+		this.username = username;
+	}
+	
+	public Roll(String diceCommand, String username, String regex) {
+		this.regex = regex;
 		diceString = diceCommand;
 		parse();
 		computeRoll();
@@ -115,7 +122,7 @@ public class Roll implements DatabaseObject {
 	}
 
 	private void parse() {
-
+		Pattern r = Pattern.compile(regex);
 		Matcher m = r.matcher(diceString);
 
 		if (m.find()) {
