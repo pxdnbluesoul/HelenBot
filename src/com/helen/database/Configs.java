@@ -214,7 +214,7 @@ public class Configs {
 		boolean result = false;
 		try{
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("commandEnabled"),
-					data.getChannel(),
+					data.getChannel().toLowerCase(),
 					command);
 			ResultSet rs = stmt.getResultSet();
 			if(rs != null && rs.next()){
