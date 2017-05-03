@@ -193,7 +193,6 @@ public class Pages {
 					.get("created_at")).getTime()));
 			returnString.append("By: ");
 			returnString.append(result.get(targetName).get("created_by"));
-			returnString.append(" On: ");
 			returnString.append(")");
 			returnString.append(" - ");
 			returnString.append("http://www.scp-wiki.net/");
