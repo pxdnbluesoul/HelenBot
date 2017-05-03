@@ -2,7 +2,6 @@ package com.helen.commands;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.rmi.activation.ActivationGroupDesc.CommandEnvironment;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -401,7 +400,7 @@ public class Command {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.getPronouns(data.getSender()));
 	}
 	//TODO make this less stupid
-	@IRCCommand(command = ".configure", startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
+	@IRCCommand(command = ".helenconf", startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
 	public void configure(CommandData data) {
 		if(data.getSplitMessage().length == 1){
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + "{shoot|lcratings}");
@@ -514,7 +513,7 @@ public class Command {
 		Pronouns.reload();
 	}
 	
-	@IRCCommand(command = ".shoot", startOfLine = true, securityLevel = 4)
+	@IRCCommand(command = ".shoot", startOfLine = true, securityLevel = 4, coexistWithJarvis = true)
 	public void shootUser(CommandData data) {
 		if(Configs.commandEnabled(data, "shoot")){
 			if(data.getTarget().equalsIgnoreCase("Secretary_Helen")){
