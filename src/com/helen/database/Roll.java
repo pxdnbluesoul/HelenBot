@@ -112,13 +112,17 @@ public class Roll implements DatabaseObject {
 					sum += i;
 				}
 				str.append("=");
+				str.append(Colors.BOLD);
 				str.append(sum);
+				str.append(Colors.NORMAL);
 				if (bonus != 0) {
 					str.append(" ");
 					str.append(bonus > 0 ? ("+" + bonus) : "");
 
-					str.append(" =");
+					str.append("= ");
+					str.append(Colors.BOLD);
 					str.append(sum + bonus);
+					str.append(Colors.NORMAL);
 				}
 				str.append(")");
 			}
