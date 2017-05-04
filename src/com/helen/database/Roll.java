@@ -97,9 +97,30 @@ public class Roll implements DatabaseObject {
 			str.append(Colors.BOLD);
 			str.append(getComputedRoll());
 			str.append(Colors.NORMAL);
+			
+			
 			if (expand) {
 				str.append(" Expanded:");
 				str.append(getExpanded());
+			}else{
+				str.append(" (");
+				str.append(getDiceThrows());
+				str.append(dicetype);
+				str.append(diceSize);
+				Integer sum = 0;
+				for (Integer i : values) {
+					sum += i;
+				}
+				str.append("=");
+				str.append(sum);
+				if (bonus != 0) {
+					str.append(" ");
+					str.append(bonus > 0 ? ("+" + bonus) : "");
+
+					str.append(" =");
+					str.append(sum + bonus);
+				}
+				str.append(")");
 			}
 
 			return str.toString();
