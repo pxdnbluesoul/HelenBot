@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jibble.pircbot.Colors;
+
 public class Roll implements DatabaseObject {
 
 	private String regex = ".roll\\s([0-9]+)(d|f)([0-9]+)(\\s[+|-]?[0-9]+)?(\\s-e|-s)?\\s?(-e|-s)?\\s?(.+)?";
@@ -92,16 +94,9 @@ public class Roll implements DatabaseObject {
 				str.append(diceMessage);
 				str.append(": ");
 			}
-			str.append(getDiceThrows());
-			str.append(dicetype);
-			str.append(diceSize);
-			if (bonus != 0) {
-				str.append(" ");
-				str.append(bonus > 0 ? ("+" + bonus) : "");
-			}
-			str.append(", total: ");
+			str.append(Colors.BOLD);
 			str.append(getComputedRoll());
-			str.append(".");
+			str.append(Colors.NORMAL);
 			if (expand) {
 				str.append(" Expanded:");
 				str.append(getExpanded());
@@ -182,9 +177,13 @@ public class Roll implements DatabaseObject {
 			expandedString.append(dicetype);
 			expandedString.append(diceSize);
 			expandedString.append("=");
+			expandedString.append(Colors.BOLD);
 			expandedString.append(rollString.toString());
+			expandedString.append(Colors.NORMAL);
 			expandedString.append("|Bonus=");
+			expandedString.append(Colors.BOLD);
 			expandedString.append(bonus);
+			expandedString.append(Colors.NORMAL);
 			expandedString.append("]");
 		}
 		return expandedString.toString();
