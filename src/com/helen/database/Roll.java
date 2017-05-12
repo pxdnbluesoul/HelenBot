@@ -174,7 +174,7 @@ public class Roll implements DatabaseObject {
 	private Integer computeRoll() {
 		Integer rollSum = 0;
 		for (int i = 0; i < diceThrows; i++) {
-			int roll = (int) (Math.random() * (diceSize - 1)) + 1;
+			int roll = (int) (Math.random() * (diceSize)) + 1;
 			values.add(roll);
 			rollSum += roll;
 		}
