@@ -235,7 +235,7 @@ public class Pages {
 				str.append("?");
 				return str.toString();
 			}else{
-				return getAuthorDetailsPages(user);
+				return getAuthorDetailsPages(((Author)authors.get(0)).getAuthor());
 			}
 			
 			
@@ -460,7 +460,7 @@ public class Pages {
 		} catch (Exception e) {
 			logger.error("There was an exception getting stored info", e);
 		}
-
+ 
 		return "Either the command was malformed, or I have nothing for you to get.";
 	}
 
