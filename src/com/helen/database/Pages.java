@@ -36,7 +36,7 @@ public class Pages {
 	private static XmlRpcClientConfigImpl config;
 	private static XmlRpcClient client;
 	private static Long lastLc = System.currentTimeMillis() - 20000;
-	private static HashMap<String, ArrayList<Page>> storedEvents = new HashMap<String, ArrayList<Page>>();
+	private static HashMap<String, ArrayList<Selectable>> storedEvents = new HashMap<String, ArrayList<Selectable>>();
 
 	static {
 		config = new XmlRpcClientConfigImpl();
@@ -207,110 +207,37 @@ public class Pages {
 		return "I couldn't find anything matching that, apologies.";
 	}
 	
-	public static String getAuthorDetail(String user){
+	public static String getAuthorDetail(CommandData data, String user){
 		user = user.toLowerCase();
-		Page authorPage = null;
 		try{
-			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findAuthorPage"), user);
+			
+			ArrayList<Selectable> authors = new ArrayList<Selectable>();
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findAuthors"), user);
 			ResultSet rs = stmt.getResultSet();
 			if(rs != null && rs.next()){
-				authorPage = new Page(rs.getString("pagename"),
-						rs.getString("title"),
-						rs.getBoolean("scppage"),
-						rs.getString("scptitle"));
+				authors.add(new Author(rs.getString("created_by")));
 			}
 			rs.close();
 			stmt.close();
 			
-			ArrayList<Page> pages = new ArrayList<Page>();
-			stmt = Connector.getStatement(Queries.getQuery("findPagesByAuthor"), user);
-			rs = stmt.getResultSet();
-			while(rs != null && rs.next()){
-				pages.add( new Page(rs.getString("pagename"),
-						rs.getString("title"),
-						rs.getInt("rating"),
-						rs.getString("created_by"),
-						rs.getTimestamp("created_on"),
-						rs.getBoolean("scppage"),
-						rs.getString("scptitle")));
-			}
-			
-			if(pages.size() == 0){
-				return "I'm sorry, I don't think that author exists.  Check your spelling?";
-			}
-			
-			StringBuilder str = new StringBuilder();
-			str.append(Colors.BOLD);
-			str.append(user);
-			str.append(Colors.NORMAL);
-			str.append(" - ");
-			
-			if(authorPage != null){
-				str.append("(");
-				str.append("www.scp-wiki.net/");
-				str.append(authorPage.getPageLink());
-				str.append(") ");
-			}
-			String authorPageName = authorPage == null ? "null" : authorPage.getPageLink();
-			int scps = 0;
-			int tales = 0;
-			int rating = 0;
-			Timestamp ts = new java.sql.Timestamp(0l);
-			Page latest = null;
-			for(Page p: pages){
-				if(!p.getPageLink().equals(authorPageName)){
-					if(p.getScpPage()){
-						scps++;
-					}else{
-						tales++;
-					}
-					rating += p.getRating();
-					
-					if(p.getCreatedAt().compareTo(ts) > 0){
-						ts = p.getCreatedAt();
-						latest = p;
-					}
+			if(authors.size() > 1){
+				storedEvents.put(data.getSender(), authors);
+				StringBuilder str = new StringBuilder();
+				str.append("Did you mean: ");
+				String prepend = "";
+				for (Selectable author : authors) {
+					str.append(prepend);
+					prepend=",";
+					str.append(Colors.BOLD);
+					str.append(((Author)author).getAuthor());
+					str.append(Colors.NORMAL);
 				}
-			}
-			str.append("has ");
-			str.append(Colors.BOLD);
-			str.append(scps + tales);
-			str.append(Colors.NORMAL);
-			str.append(" pages. (");
-			str.append(Colors.BOLD);
-			str.append(scps);
-			str.append(Colors.NORMAL);
-			str.append(" SCP articles, ");
-			str.append(Colors.BOLD);
-			str.append(tales);
-			str.append(Colors.NORMAL);
-			str.append(" Tales).");
-			str.append(" They have ");
-			str.append(Colors.BOLD);
-			str.append(rating);
-			str.append(Colors.NORMAL);
-			str.append(" net upvotes with an average of ");
-			str.append(Colors.BOLD);
-			double avg = (rating) / (tales + scps);
-			str.append(avg);
-			str.append(Colors.NORMAL);
-			str.append(".  Their latest page is ");
-			str.append(Colors.BOLD);
-			if(latest.getScpPage()){
-				str.append(latest.getTitle());
-				str.append(": ");
-				str.append(latest.getScpTitle());
+				str.append("?");
+				return str.toString();
 			}else{
-				str.append(latest.getTitle());
+				return getAuthorDetailsPages(user);
 			}
-			str.append(Colors.NORMAL);
-			str.append(" at ");
-			str.append(Colors.BOLD);
-			str.append(latest.getRating());
-			str.append(Colors.NORMAL);
-			str.append(".");
 			
-			return str.toString();
 			
 			
 		}catch(Exception e){
@@ -319,6 +246,126 @@ public class Pages {
 		
 		return "I apologize, there's been an error.  Please inform DrMagnus there's an error with author details.";
 	}
+	
+	public static String getAuthorDetailsPages(String user){
+		user = user.toLowerCase();
+		Page authorPage = null;
+		try{
+		CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findAuthorPage"), user);
+		ResultSet rs = stmt.getResultSet();
+		if(rs != null && rs.next()){
+			authorPage = new Page(rs.getString("pagename"),
+					rs.getString("title"),
+					rs.getBoolean("scppage"),
+					rs.getString("scptitle"));
+		}
+		rs.close();
+		stmt.close();
+		
+		ArrayList<Page> pages = new ArrayList<Page>();
+		stmt = Connector.getStatement(Queries.getQuery("findSkips"), user);
+		rs = stmt.getResultSet();
+		while(rs != null && rs.next()){
+			pages.add( new Page(rs.getString("pagename"),
+					rs.getString("title"),
+					rs.getInt("rating"),
+					rs.getString("created_by"),
+					rs.getTimestamp("created_on"),
+					rs.getBoolean("scppage"),
+					rs.getString("scptitle")));
+		}
+		
+		stmt = Connector.getStatement(Queries.getQuery("findTales"), user);
+		rs = stmt.getResultSet();
+		while(rs != null && rs.next()){
+			pages.add( new Page(rs.getString("pagename"),
+					rs.getString("title"),
+					rs.getInt("rating"),
+					rs.getString("created_by"),
+					rs.getTimestamp("created_on"),
+					rs.getBoolean("scppage"),
+					rs.getString("scptitle")));
+		}
+		
+		
+		StringBuilder str = new StringBuilder();
+		str.append(Colors.BOLD);
+		str.append(user);
+		str.append(Colors.NORMAL);
+		str.append(" - ");
+		
+		if(authorPage != null){
+			str.append("(");
+			str.append("www.scp-wiki.net/");
+			str.append(authorPage.getPageLink());
+			str.append(") ");
+		}
+		String authorPageName = authorPage == null ? "null" : authorPage.getPageLink();
+		int scps = 0;
+		int tales = 0;
+		int rating = 0;
+		Timestamp ts = new java.sql.Timestamp(0l);
+		Page latest = null;
+		for(Page p: pages){
+			if(!p.getPageLink().equals(authorPageName)){
+				if(p.getScpPage()){
+					scps++;
+				}else{
+					tales++;
+				}
+				rating += p.getRating();
+				
+				if(p.getCreatedAt().compareTo(ts) > 0){
+					ts = p.getCreatedAt();
+					latest = p;
+				}
+			}
+		}
+		str.append("has ");
+		str.append(Colors.BOLD);
+		str.append(scps + tales);
+		str.append(Colors.NORMAL);
+		str.append(" pages. (");
+		str.append(Colors.BOLD);
+		str.append(scps);
+		str.append(Colors.NORMAL);
+		str.append(" SCP articles, ");
+		str.append(Colors.BOLD);
+		str.append(tales);
+		str.append(Colors.NORMAL);
+		str.append(" Tales).");
+		str.append(" They have ");
+		str.append(Colors.BOLD);
+		str.append(rating);
+		str.append(Colors.NORMAL);
+		str.append(" net upvotes with an average of ");
+		str.append(Colors.BOLD);
+		long avg = Math.round((rating) / (tales + scps));
+		str.append(avg);
+		str.append(Colors.NORMAL);
+		str.append(".  Their latest page is ");
+		str.append(Colors.BOLD);
+		if(latest.getScpPage()){
+			str.append(latest.getTitle());
+			str.append(": ");
+			str.append(latest.getScpTitle());
+		}else{
+			str.append(latest.getTitle());
+		}
+		str.append(Colors.NORMAL);
+		str.append(" at ");
+		str.append(Colors.BOLD);
+		str.append(latest.getRating());
+		str.append(Colors.NORMAL);
+		str.append(".");
+		
+		return str.toString();
+		} catch (Exception e){
+			logger.error("There was an exception retreiving author pages stuff",e);
+		}
+		
+		return "I'm sorry there was some kind of error";
+	}
 
 	public static String getPotentialTargets(String[] terms, String username) {
 		Boolean exact = terms[1].equalsIgnoreCase("-e");
@@ -326,7 +373,7 @@ public class Pages {
 		if(exact){
 			indexOffset = 2;
 		}
-		ArrayList<Page> potentialPages = new ArrayList<Page>();
+		ArrayList<Selectable> potentialPages = new ArrayList<Selectable>();
 		String[] lowerterms = new String[terms.length - indexOffset];
 		for (int i = indexOffset ; i < terms.length; i++) {
 			lowerterms[i - indexOffset] = terms[i].toLowerCase();
@@ -382,7 +429,8 @@ public class Pages {
 			StringBuilder str = new StringBuilder();
 			str.append("Did you mean : ");
 
-			for (Page page : potentialPages) {
+			for (Selectable p : potentialPages) {
+				Page page = (Page)p; 
 				str.append(Colors.BOLD);
 				str.append(page.getScpPage() ? page.getTitle()
 						+ ": " + page.getScpTitle()  : page.getTitle());
@@ -393,7 +441,7 @@ public class Pages {
 			return str.toString();
 		} else {
 			if (potentialPages.size() == 1) {
-				return getPageInfo(potentialPages.get(0).getPageLink());
+				return getPageInfo(((Page)potentialPages.get(0)).getPageLink());
 			} else {
 				return "I couldn't find anything.";
 			}
@@ -402,8 +450,13 @@ public class Pages {
 
 	public static String getStoredInfo(String index, String username) {
 		try {
-			return getPageInfo(storedEvents.get(username)
-					.get(Integer.parseInt(index) - 1).getPageLink());
+			Selectable s = storedEvents.get(username).get(Integer.parseInt(index) - 1);
+			if(s instanceof Page){
+				return getPageInfo((String)s.selectResource());
+			}else if(s instanceof Author){
+				return getAuthorDetailsPages((String)s.selectResource());
+			}
+			
 		} catch (Exception e) {
 			logger.error("There was an exception getting stored info", e);
 		}

@@ -3,7 +3,7 @@ package com.helen.database;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class Page {
+public class Page implements Selectable {
 	
 	
 	private String pageLink;
@@ -126,6 +126,11 @@ public class Page {
 	
 	public ArrayList<Tag> getTags(){
 		return tags;
+	}
+
+	@Override
+	public Object selectResource() {
+		return pageLink;
 	}
 	
 	
