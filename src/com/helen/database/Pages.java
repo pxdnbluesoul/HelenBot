@@ -102,25 +102,6 @@ public class Pages {
 
 	}
 
-	public static void getMethodList() {
-		try {
-			Object[] result = (Object[]) pushToAPI("system.listMethods",
-					(Object[]) null);
-
-			String[] methodList = new String[result.length];
-			for (int i = 0; i < result.length; i++) {
-				methodList[i] = (String) result[i];
-			}
-
-			for (String str : methodList) {
-				logger.info(str);
-			}
-			// return methodList;
-		} catch (Exception e) {
-			logger.error("There was an exception", e);
-		}
-	}
-
 	private static String getTitle(String pagename) {
 		String pageName = null;
 		try {
@@ -180,7 +161,7 @@ public class Pages {
 			returnString.append(Colors.NORMAL);
 			returnString.append("(");
 			if(ratingEnabled){
-				returnString.append(" (Rating: ");
+				returnString.append("Rating: ");
 				Integer rating = (Integer) result.get(targetName).get("rating");
 				if (rating > 0) {
 					returnString.append("+");
