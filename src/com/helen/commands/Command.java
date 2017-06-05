@@ -181,7 +181,7 @@ public class Command {
 
 			// lastly check the string against any regex commands
 			for (String regex : regexCommands.keySet()) {
-				Pattern r = Pattern.compile(regex);
+				Pattern r = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
 
 					Matcher match = r.matcher(data.getSplitMessage()[0]);
 					if (match.matches()) {

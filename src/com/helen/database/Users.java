@@ -76,7 +76,7 @@ public class Users {
 						data.getSplitMessage()[2].toLowerCase(), data.getChannel().toLowerCase());
 				ResultSet rs = stmt.executeQuery();
 				if (rs != null && rs.next()) {
-					return "I first met " + data.getSplitMessage()[2] + findTime(rs.getTimestamp("first_seen").getTime()) + " saying " + rs.getString("first_message");
+					return "I first met " + data.getSplitMessage()[2] + " " + findTime(rs.getTimestamp("first_seen").getTime()) + " saying " + rs.getString("first_message");
 				} else {
 					return "I have never seen someone by that name";
 				}
@@ -85,7 +85,7 @@ public class Users {
 						data.getSplitMessage()[1].toLowerCase(), data.getChannel().toLowerCase());
 				ResultSet rs = stmt.executeQuery();
 				if (rs != null && rs.next()) {
-					return "I last saw " + data.getSplitMessage()[1] + findTime(rs.getTimestamp("last_seen").getTime()) + " saying " +  rs.getString("last_message");
+					return "I last saw " + data.getSplitMessage()[1] + " " + findTime(rs.getTimestamp("last_seen").getTime()) + " saying " +  rs.getString("last_message");
 				} else {
 					return "I have never seen someone by that name";
 				}
