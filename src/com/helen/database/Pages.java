@@ -159,7 +159,7 @@ public class Pages {
 				returnString.append(title);
 			}
 			returnString.append(Colors.NORMAL);
-			returnString.append("(");
+			returnString.append(" (");
 			if(ratingEnabled){
 				returnString.append("Rating: ");
 				Integer rating = (Integer) result.get(targetName).get("rating");

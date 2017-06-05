@@ -1,58 +1,93 @@
 
 package com.irc.helen;
 
+import com.helen.commands.IRCCommand;
+import com.helen.database.Configs;
+import com.helen.database.XmlRpcTypeNil;
 import org.apache.xmlrpc.XmlRpcException;
+import org.apache.xmlrpc.client.XmlRpcClient;
+import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
+import org.apache.xmlrpc.client.XmlRpcSun15HttpTransportFactory;
+import org.jibble.pircbot.Colors;
+
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TestMain {
 
-	private static final Long YEARS = 1000 * 60 * 60 * 24 * 365l;
-	private static final Long DAYS = 1000 * 60 * 60 * 24l;
-	private static final Long HOURS = 1000 * 60l * 60;
-	private static final Long MINUTES = 1000 * 60l;
-	
+	private static XmlRpcClientConfigImpl config;
+	private static XmlRpcClient client;
 
-	public static void main(String args[]){
+	static{
+		config = new XmlRpcClientConfigImpl();
+
 		try {
-			Long t = System.currentTimeMillis();
-			
-			System.out.println(findTime(t - YEARS * 2));
-			System.out.println(findTime(t - DAYS * 4));
-			System.out.println(findTime(t - HOURS * 1));
-			System.out.println(findTime(t - MINUTES * 2));
-			System.out.println(findTime(t - (1000 * 55)));
-			
-			
+			config.setServerURL(new URL("https://www.wikidot.com/xml-rpc-api.php"));
+			config.setBasicUserName("helenBot");
+			config.setBasicPassword("rZzjkX5HuachlDf03DwxUZoY2kjHrHCp");
+			config.setEnabledForExceptions(true);
+			config.setConnectionTimeout(10 * 1000);
+			config.setReplyTimeout(30 * 1000);
+
+			client = new XmlRpcClient();
+			client.setTransportFactory(new XmlRpcSun15HttpTransportFactory(
+					client));
+			client.setTypeFactory(new XmlRpcTypeNil(client));
+			client.setConfig(config);
+
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+
+	}
+	private static Object pushToAPI(String method, Object... params)
+			throws XmlRpcException {
+		return (Object) client.execute(method, params);
+	}
+
+
+	public static void main(String[] args) throws Exception{
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+		String targetName = "decompression";
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("site", "scp-wiki");
+		String[] target = new String[] { targetName.toLowerCase() };
+		params.put("pages", target);
+		ArrayList<String> keyswewant = new ArrayList<String>();
+		keyswewant.add("title_shown");
+		keyswewant.add("rating");
+		keyswewant.add("created_at");
+		keyswewant.add("title");
+		keyswewant.add("created_by");
+		keyswewant.add("tags");
+		try {
+			@SuppressWarnings("unchecked")
+			HashMap<String, HashMap<String, Object>> result = (HashMap<String, HashMap<String, Object>>) pushToAPI(
+					"pages.get_meta", params);
+			System.out.println(result.keySet());
+			for(String s: result.keySet()){
+				for(String j: result.get(s).keySet()){
+					if(j.equals("tags")) {
+						for(Object o: (Object[])result.get(s).get(j)){
+							System.out.println(o.toString());
+						}
+					}else{
+						System.out.println(result.get(s).get(j));
+					}
+				}
+			}
+
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		try {
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
-	
-	public static String findTime(Long time){
-		time = System.currentTimeMillis() - time;
-		Long diff = 0l;
-		if(time >= YEARS){
-			diff = time/YEARS;
-			return (time/YEARS) + " year" + (diff > 1 ? "s" : "") + " ago by ";
-		}else if( time >= DAYS){
-			diff = time/DAYS;
-			return (time/DAYS) + " day" + (diff > 1 ? "s" : "") + " ago by ";
-		}else if(time >= HOURS){
-			diff = (time/HOURS);
-			return (time/HOURS) + " hour" + (diff > 1 ? "s" : "") + " ago by ";
-		}else if( time >= MINUTES){
-			diff = time/MINUTES;
-			return (time/MINUTES) + " minute" + (diff > 1 ? "s" : "") + " ago by ";
-		}else{
-			return "A few seconds ago ";
-		}
-	
-	}
+
 	
 }

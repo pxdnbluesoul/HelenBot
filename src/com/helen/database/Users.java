@@ -13,6 +13,11 @@ public class Users {
 
 	private static final Logger logger = Logger.getLogger(Users.class);
 
+	private static final Long YEARS = 1000 * 60 * 60 * 24 * 365l;
+	private static final Long DAYS = 1000 * 60 * 60 * 24l;
+	private static final Long HOURS = 1000 * 60l * 60;
+	private static final Long MINUTES = 1000 * 60l;
+
 	public static void insertUser(String username, Date date, String hostmask, String message, String channel) {
 		try {
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertUser"),
@@ -71,8 +76,7 @@ public class Users {
 						data.getSplitMessage()[2].toLowerCase(), data.getChannel().toLowerCase());
 				ResultSet rs = stmt.executeQuery();
 				if (rs != null && rs.next()) {
-					return "I first met " + data.getSplitMessage()[2] + " on " + rs.getDate("first_seen").toString()
-							+ " saying: " + rs.getString("first_message");
+					return "I first met " + data.getSplitMessage()[2] + findTime(rs.getTimestamp("first_seen").getTime()) + " saying " + rs.getString("first_message");
 				} else {
 					return "I have never seen someone by that name";
 				}
@@ -81,9 +85,7 @@ public class Users {
 						data.getSplitMessage()[1].toLowerCase(), data.getChannel().toLowerCase());
 				ResultSet rs = stmt.executeQuery();
 				if (rs != null && rs.next()) {
-					return "I last saw " + data.getSplitMessage()[1] + " at "
-							+ new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(rs.getTimestamp("last_seen"))
-							+ " EST saying: " + rs.getString("last_message");
+					return "I last saw " + data.getSplitMessage()[1] + findTime(rs.getTimestamp("last_seen").getTime()) + " saying " +  rs.getString("last_message");
 				} else {
 					return "I have never seen someone by that name";
 				}
@@ -95,6 +97,31 @@ public class Users {
 		}
 		
 		return "There was some kind of error with looking up seen targets.";
+
+	}
+
+	public static String findTime(Long time){
+		time  = System.currentTimeMillis()  - time;
+		Long diff = 0l;
+		if(time >= YEARS){
+			diff = time/YEARS;
+			return (time/YEARS) + " year" + (diff > 1 ? "s" : "") + " ago";
+
+		}else if( time >= DAYS){
+			diff = time/DAYS;
+			return (time/DAYS) + " day" + (diff > 1 ? "s" : "") + " ago";
+
+		}else if(time >= HOURS){
+			diff = (time/HOURS);
+			return (time/HOURS) + " hour" + (diff > 1 ? "s" : "") + " ago";
+
+		}else if( time >= MINUTES){
+			diff = time/MINUTES;
+			return (time/MINUTES) + " minute" + (diff > 1 ? "s" : "") + " ago";
+
+		}else{
+			return "A few seconds ago ";
+		}
 
 	}
 }
