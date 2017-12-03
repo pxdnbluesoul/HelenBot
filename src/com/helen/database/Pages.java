@@ -200,7 +200,11 @@ public class Pages {
 			}
 			rs.close();
 			stmt.close();
-			
+
+			if(authors.isEmpty()){
+				return "I couldn't find any author by that name.";
+			}
+
 			if(authors.size() > 1){
 				storedEvents.put(data.getSender(), authors);
 				StringBuilder str = new StringBuilder();

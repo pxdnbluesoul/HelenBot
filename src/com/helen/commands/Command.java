@@ -458,7 +458,8 @@ public class Command {
 	// Authentication Required Commands
 	@IRCCommand(command = ".join", startOfLine = true, coexistWithJarvis = true, securityLevel = 3)
 	public void enterChannel(CommandData data) {
-		helen.joinChannel(data.getTarget());
+		helen.joinJarvyChannel(data.getTarget());
+
 	}
 
 	@IRCCommand(command = ".leave", startOfLine = true, coexistWithJarvis = true, securityLevel = 3)

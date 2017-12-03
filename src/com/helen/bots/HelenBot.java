@@ -55,6 +55,11 @@ public class HelenBot extends PircBot {
 		}
 	}
 
+	public void joinJarvyChannel(String channel){
+		this.joinChannel(channel);
+		this.sendRawLine("WHO " + channel);
+	}
+
 	public void onMessage(String channel, String sender, String login,
 			String hostname, String message) {
 		Users.insertUser(sender, new Date(), hostname, message, channel.toLowerCase());
@@ -89,6 +94,28 @@ public class HelenBot extends PircBot {
 			}
 		}
 	}
+
+	public void onDisconnect(){
+		int tries = 0;
+		while(!this.isConnected()){
+			try{
+				tries++;
+				this.connect();
+			}catch(Exception e){
+				logger.error(e);
+				if(tries > 10){
+					logger.error("Shutting down HelenBot!");
+					System.exit(1);
+				}
+				try {
+					Thread.sleep(10000);
+				}catch(Exception ex){
+					logger.error(ex);
+				}
+			}
+		}
+	}
+
 
 	public void onPart(String channel, String sender, String login,
 			String hostname) {
