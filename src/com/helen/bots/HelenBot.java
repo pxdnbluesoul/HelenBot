@@ -77,6 +77,7 @@ public class HelenBot extends PircBot {
 		cmd.dispatchTable(new CommandData("", sender, login, hostname, message));
 	}
 
+
 	public void log(String line) {
 		if (!line.contains("PING :") && !line.contains(">>>PONG")) {
 			logger.info(System.currentTimeMillis() + " " + line);
@@ -101,6 +102,9 @@ public class HelenBot extends PircBot {
 			try{
 				tries++;
 				this.connect();
+				if(this.isConnected()){
+					this.joinChannels();
+				}
 			}catch(Exception e){
 				logger.error(e);
 				if(tries > 10){
