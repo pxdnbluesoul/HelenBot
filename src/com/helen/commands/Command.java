@@ -445,9 +445,15 @@ public class Command {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.clearPronouns(data.getSender()));
 	}
 
-	@IRCCommand(command = ".removePronouns", startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
+	@IRCCommand(command = ".deletePronouns", startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
 	public void removePronouns(CommandData data) {
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.clearPronouns(data.getTarget()));
+		if(data.getTarget() != null){
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.clearPronouns(data.getTarget()));
+		}
+		else{
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Please specify the user to delete pronouns for.");
+		}
+
 	}
 	
 	@IRCCommand(command = {".def",".definition"}, startOfLine = true, coexistWithJarvis = false, securityLevel = 1)
@@ -574,6 +580,14 @@ public class Command {
 				reload(data);
 			}
 		}
+	}
+
+	@IRCCommand(command = ".discord", startOfLine = true, securityLevel = 4, coexistWithJarvis = true)
+	public void showDiscordMessage(CommandData data){
+		helen.sendMessage(data.getChannel(), "There are currently no plans for an official SCP Discord." +
+		" Staff feel that, at this time, the benefits of Discord do not outweigh the difficulties of moderation," +
+				" and the resulting fracturing between IRC and Discord. There are also several concerns about " +
+				"the technical and financial viability of discord.");
 	}
 
 	private String buildResponse(ArrayList<? extends DatabaseObject> dbo) {

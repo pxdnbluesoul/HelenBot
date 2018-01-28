@@ -3,11 +3,21 @@ package com.helen.database;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
+import com.helen.commands.CommandData;
 import org.apache.log4j.Logger;
 
 public class Tells {
 
 	private final static Logger logger = Logger.getLogger(Tells.class);
+
+	public static String sendMultitell(CommandData data){
+		String sender = data.getSender();
+		String target = data.getTarget();
+		String message = data.getTellMessage();
+		boolean privateMessage = data.getChannel().isEmpty();
+
+		return "PLACEHOLDER";
+	}
 
 	public static String sendTell(String target, String sender, String message, boolean privateMessage) {
 		try {
