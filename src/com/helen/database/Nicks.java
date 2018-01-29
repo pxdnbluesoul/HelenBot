@@ -14,6 +14,7 @@ public class Nicks {
     public static String addNick(CommandData data) {
         try {
             UserNick nick = new UserNick(data);
+            if(nick.getNickToGroup() != null) {
                 CloseableStatement insertStatement = Connector.getStatement(Queries.getQuery("insert_grouped_nick"),
                         nick.getGroupId(), nick.getNickToGroup().toLowerCase());
                 if (insertStatement.executeUpdate()) {
@@ -21,6 +22,9 @@ public class Nicks {
                 } else {
                     return "Failed to insert grouped nick during final insert, please contact DrMagnus.";
                 }
+            }else{
+                return "Your nick is already grouped with ID: " + nick.getGroupId();
+            }
 
         } catch (Exception e) {
             logger.error("Error inserting in to the database",e);

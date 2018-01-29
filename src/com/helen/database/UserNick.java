@@ -1,10 +1,13 @@
 package com.helen.database;
 
 import com.helen.commands.CommandData;
+import org.apache.log4j.Logger;
 
 import java.sql.ResultSet;
+import java.util.List;
 
 public class UserNick {
+    Logger logger = Logger.getLogger(UserNick.class);
 
     private int groupId;
     private String nickToGroup;
@@ -14,9 +17,15 @@ public class UserNick {
         try {
 
             Integer id = Nicks.getNickGroup(data.getSender());
+
             if(id != null && id != -1){
-                this.groupId = -1;
-                this.nickToGroup = data.getTarget();
+                this.groupId = id;
+                List<String> nicks = Nicks.getNicksByGroup(id);
+                if(!nicks.contains(data.getTarget())) {
+                    this.nickToGroup = data.getTarget();
+                }else{
+                    this.nickToGroup = null;
+                }
             }else {
                 CloseableStatement newStmt = Connector.getStatement(Queries
                         .getQuery("create_nick_group"));
@@ -27,11 +36,14 @@ public class UserNick {
                     this.groupId = -1;
                 }
                 newId.close();
+                newStmt.close();
                 this.nickToGroup = data.getSender();
+
             }
         } catch (Exception e) {
-
+            logger.error("Exception instantiating usernick",e);
         }
+        logger.info("groupid " + groupId + ". NickToGroup: " + nickToGroup);
     }
 
     public int getGroupId() {
