@@ -55,15 +55,17 @@ public class Tells {
 			}
 			stmt.close();
 			rs.close();
-			stmt = Connector.getStatement(Queries.getQuery("searchTells"),
-					id.toString());
-			rs = stmt.executeQuery();
-			while(rs != null && rs.next()){
-				list.add(new Tell(rs.getString("sender"),rs.getString("username")
-						,rs.getTimestamp("tell_time"),rs.getString("message"), rs.getBoolean("privateMessage"), id));
+			if(id != null && id != -1) {
+				stmt = Connector.getStatement(Queries.getQuery("searchTells"),
+						id.toString());
+				rs = stmt.executeQuery();
+				while (rs != null && rs.next()) {
+					list.add(new Tell(rs.getString("sender"), rs.getString("username")
+							, rs.getTimestamp("tell_time"), rs.getString("message"), rs.getBoolean("privateMessage"), id));
+				}
+				stmt.close();
+				rs.close();
 			}
-			stmt.close();
-			rs.close();
 			return list;
 		}catch (Exception e){
 			logger.error("Exception retreiving tells",e);
