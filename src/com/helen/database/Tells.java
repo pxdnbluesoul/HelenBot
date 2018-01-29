@@ -11,8 +11,8 @@ public class Tells {
 	private final static Logger logger = Logger.getLogger(Tells.class);
 
 	public static String sendMultitell(CommandData data){
-		String sender = data.getSender();
-		String target = data.getTarget();
+		String sender = data.getSender().toLowerCase();
+		String target = data.getTarget().toLowerCase();
 		String message = data.getTellMessage();
 		boolean privateMessage = data.getChannel().isEmpty();
 
@@ -44,7 +44,7 @@ public class Tells {
 		ArrayList<Tell> list = new ArrayList<Tell>();
 		try{
 
-			Integer id = Nicks.getNickGroup(username);
+			Integer id = Nicks.getNickGroup(username.toLowerCase());
 
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("searchTells"),
 					username.toLowerCase());
