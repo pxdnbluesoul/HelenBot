@@ -9,6 +9,7 @@ public class Tell {
 	private java.sql.Timestamp tell_time;
 	private String message;
 	private boolean privateMessage = true;
+	private Integer nickGroupId = null;
 	
 	
 	public Tell(String sender, String target, java.sql.Timestamp tell_time, String message, boolean privateMessage){
@@ -17,6 +18,15 @@ public class Tell {
 		this.tell_time = tell_time;
 		this.message = message;
 		this.privateMessage = privateMessage;
+	}
+
+	public Tell(String sender, String target, java.sql.Timestamp tell_time, String message, boolean privateMessage, Integer id){
+		this.sender = sender;
+		this.target = target;
+		this.tell_time = tell_time;
+		this.message = message;
+		this.privateMessage = privateMessage;
+		this.nickGroupId = id;
 	}
 	
 	public String toString(){
@@ -29,6 +39,10 @@ public class Tell {
 		str.append(": ");
 		str.append(message);
 		return str.toString();
+	}
+
+	public Integer getNickGroupId() {
+		return nickGroupId;
 	}
 	
 	public String getSender(){

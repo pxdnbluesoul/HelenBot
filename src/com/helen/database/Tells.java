@@ -16,7 +16,12 @@ public class Tells {
 		String message = data.getTellMessage();
 		boolean privateMessage = data.getChannel().isEmpty();
 
-		return "PLACEHOLDER";
+		Integer id = Nicks.getNickGroup(target);
+		if(id == null || id == -1){
+			return sendTell(target, sender, message, privateMessage);
+		}else{
+			return sendTell(id.toString(),sender,message,privateMessage);
+		}
 	}
 
 	public static String sendTell(String target, String sender, String message, boolean privateMessage) {
@@ -38,6 +43,9 @@ public class Tells {
 	public static ArrayList<Tell> getTells(String username){
 		ArrayList<Tell> list = new ArrayList<Tell>();
 		try{
+
+			Integer id = Nicks.getNickGroup(username);
+
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("searchTells"),
 					username.toLowerCase());
 			ResultSet rs = stmt.executeQuery();
@@ -46,6 +54,16 @@ public class Tells {
 						,rs.getTimestamp("tell_time"),rs.getString("message"), rs.getBoolean("privateMessage")));
 			}
 			stmt.close();
+			rs.close();
+			stmt = Connector.getStatement(Queries.getQuery("searchTells"),
+					id.toString());
+			rs = stmt.executeQuery();
+			while(rs != null && rs.next()){
+				list.add(new Tell(rs.getString("sender"),rs.getString("username")
+						,rs.getTimestamp("tell_time"),rs.getString("message"), rs.getBoolean("privateMessage"), id));
+			}
+			stmt.close();
+			rs.close();
 			return list;
 		}catch (Exception e){
 			logger.error("Exception retreiving tells",e);

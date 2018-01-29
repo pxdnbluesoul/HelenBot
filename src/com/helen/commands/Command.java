@@ -7,22 +7,11 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.helen.database.*;
 import org.apache.log4j.Logger;
 import org.jibble.pircbot.User;
 
 import com.helen.bots.HelenBot;
-import com.helen.database.Config;
-import com.helen.database.Configs;
-import com.helen.database.DatabaseObject;
-import com.helen.database.Hugs;
-import com.helen.database.Pages;
-import com.helen.database.Pronouns;
-import com.helen.database.Queries;
-import com.helen.database.Roll;
-import com.helen.database.Rolls;
-import com.helen.database.Tell;
-import com.helen.database.Tells;
-import com.helen.database.Users;
 import com.helen.search.WebSearch;
 import com.helen.search.WebsterSearch;
 import com.helen.search.YouTubeSearch;
@@ -80,7 +69,7 @@ public class Command {
 			helen.sendNotice(data.getSender(), "You have " + tells.size() + " pending tell(s).");
 		}
 		for (Tell tell : tells) {
-			Tells.clearTells(tell.getTarget());
+			Tells.clearTells(tell.getNickGroupId() != null ? tell.getNickGroupId().toString() : tell.getTarget());
 			helen.sendMessage(tell.getTarget(), tell.toString());
 
 		}
@@ -255,7 +244,15 @@ public class Command {
 		helen.sendMessage(target, data.getSender() + " said:" + payload);
 	}
 
-	
+	@IRCCommand(command = {".addNick"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
+	public void addNick(CommandData data){
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Nicks.addNick(data));
+	}
+
+	@IRCCommand(command = {".deleteNick"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
+	public void deleteNick(CommandData data){
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Nicks.deleteNick(data));
+	}
 	
 	@IRCCommand(command = { "rollTest" }, startOfLine = true, securityLevel = 1, reg = true,
 			regex = {"([0-9]+)(d|f)([0-9]+)([+|-]?[0-9]+)?(\\s-e|-s)?\\s?(-e|-s)?\\s?(.+)?"})
@@ -477,6 +474,12 @@ public class Command {
 	public void tell(CommandData data) {
 		String str = Tells.sendTell(data.getTarget(), data.getSender(), data.getTellMessage(),
 				(data.getChannel().isEmpty() ? true : false));
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + str);
+	}
+
+	@IRCCommand(command = ".mtell", startOfLine = true, securityLevel = 1)
+	public void multiTell(CommandData data) {
+		String str = Tells.sendMultitell(data);
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + str);
 	}
 
