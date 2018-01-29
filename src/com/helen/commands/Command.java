@@ -253,6 +253,17 @@ public class Command {
 	public void deleteNick(CommandData data){
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Nicks.deleteNick(data));
 	}
+
+	@IRCCommand(command = {".deleteAllNicks"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
+	public void deleteAllNicks(CommandData data){
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Nicks.deleteAllNicks(data, true));
+	}
+
+	@IRCCommand(command = {".deleteNicksAdmin"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
+	public void deleteNicksAdmin(CommandData data){
+
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Nicks.deleteAllNicks(data, false));
+	}
 	
 	@IRCCommand(command = { "rollTest" }, startOfLine = true, securityLevel = 1, reg = true,
 			regex = {"([0-9]+)(d|f)([0-9]+)([+|-]?[0-9]+)?(\\s-e|-s)?\\s?(-e|-s)?\\s?(.+)?"})

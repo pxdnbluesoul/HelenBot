@@ -46,6 +46,34 @@ public class Nicks {
         }
     }
 
+    private static boolean deleteNick(String data){
+            try {
+                return Connector.getStatement(Queries.getQuery("deleteGroupedNick"), data.toLowerCase()).executeUpdate();
+            }catch(Exception e){
+                logger.error("Exception trying to delete nick.",e);
+            }
+            return false;
+    }
+
+    public static String deleteAllNicks(CommandData data, boolean admin){
+        Integer id = getNickGroup(admin ? data.getTarget() : data.getSender());
+        if(id != null && id != -1) {
+            List<String> nicks = getNicksByGroup(id);
+            boolean flag = true;
+            for (String nick : nicks) {
+                flag = deleteNick(nick);
+                if (flag) {
+                    continue;
+                } else {
+                    return "There was a problem deleting nicks.";
+                }
+            }
+            return "Deleted all nicks for your group.";
+        }else{
+            return "Your nick is not grouped";
+        }
+    }
+
     public static List<String> getNicksByGroup(Integer id){
         try {
             CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getNicks"),
