@@ -477,7 +477,7 @@ public class Command {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + str);
 	}
 
-	@IRCCommand(command = ".mtell", startOfLine = true, securityLevel = 1)
+	@IRCCommand(command = ".mtell", startOfLine = true, securityLevel = 1,coexistWithJarvis = true)
 	public void multiTell(CommandData data) {
 		String str = Tells.sendMultitell(data);
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + str);
