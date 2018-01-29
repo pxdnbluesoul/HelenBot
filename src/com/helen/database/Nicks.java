@@ -13,22 +13,17 @@ public class Nicks {
 
     public static String addNick(CommandData data) {
         try {
-
             UserNick nick = new UserNick(data);
-            if (nick.getGroupId()!= -1) {
                 CloseableStatement insertStatement = Connector.getStatement(Queries.getQuery("insert_grouped_nick"),
                         nick.getGroupId(), nick.getNickToGroup().toLowerCase());
                 if (insertStatement.executeUpdate()) {
                     return "Inserted " + nick.getNickToGroup() + " for user " + data.getSender() + ".";
                 } else {
-                    return "Failed to insert grouped nick, please contact DrMagnus.";
+                    return "Failed to insert grouped nick during final insert, please contact DrMagnus.";
                 }
 
-            } else {
-                return "Failed to insert grouped nick, please contact DrMagnus.";
-            }
         } catch (Exception e) {
-            //TODO figure this out
+            logger.error("Error inserting in to the database",e);
         }
         return "Failed to insert grouped nick, please contact DrMagnus.";
     }

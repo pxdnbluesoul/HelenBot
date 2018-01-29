@@ -15,7 +15,7 @@ public class UserNick {
 
             Integer id = Nicks.getNickGroup(data.getSender());
             if(id != null && id != -1){
-                this.groupId = id;
+                this.groupId = -1;
                 this.nickToGroup = data.getTarget();
             }else {
                 CloseableStatement newStmt = Connector.getStatement(Queries
