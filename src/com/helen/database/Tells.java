@@ -60,7 +60,7 @@ public class Tells {
 						id.toString());
 				rs = stmt.executeQuery();
 				while (rs != null && rs.next()) {
-					list.add(new Tell(rs.getString("sender"), rs.getString("username")
+					list.add(new Tell(rs.getString("sender"), username
 							, rs.getTimestamp("tell_time"), rs.getString("message"), rs.getBoolean("privateMessage"), id));
 				}
 				stmt.close();
