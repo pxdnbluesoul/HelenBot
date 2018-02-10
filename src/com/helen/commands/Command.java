@@ -218,7 +218,13 @@ public class Command {
 		adminMode = !adminMode;
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + " I am now in " + (adminMode ? "Admin Only" : "Any User") + " mode.");
 	}
-	
+
+	@IRCCommand(command = { ".checkJarvis" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
+	public void findJarvisInChannel(CommandData data) {
+		helen.sendWho(data.getChannel());
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Checking channel members...");
+	}
+
 	@IRCCommand(command = { ".jarvistest" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
 	public void listTest(CommandData data) {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + helen.jarvisCheck(data.getTarget()));

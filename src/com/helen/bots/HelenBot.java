@@ -51,13 +51,13 @@ public class HelenBot extends PircBot {
 
 		for (Config channel : Configs.getProperty("autojoin")) {
 			this.joinChannel(channel.getValue());
-			this.sendRawLine("WHO " + channel.getValue());
+			sendWho(channel.getValue());
 		}
 	}
 
 	public void joinJarvyChannel(String channel){
 		this.joinChannel(channel);
-		this.sendRawLine("WHO " + channel);
+		sendWho(channel);
 	}
 
 	public void onMessage(String channel, String sender, String login,
@@ -75,6 +75,10 @@ public class HelenBot extends PircBot {
 	private void dispatchTable(String sender, String login, String hostname,
 			String message) {
 		cmd.dispatchTable(new CommandData("", sender, login, hostname, message));
+	}
+
+	public void sendWho(String channel){
+		this.sendRawLine("WHO " + channel);
 	}
 
 
