@@ -233,10 +233,10 @@ public class Pages {
 	}
 	
 	public static String getAuthorDetailsPages(String user){
-		user = user.toLowerCase();
+		String lowerUser = user.toLowerCase();
 		Page authorPage = null;
 		try{
-		CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findAuthorPage"), user);
+		CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findAuthorPage"), lowerUser);
 		ResultSet rs = stmt.getResultSet();
 		if(rs != null && rs.next()){
 			authorPage = new Page(rs.getString("pagename"),
@@ -248,7 +248,7 @@ public class Pages {
 		stmt.close();
 		
 		ArrayList<Page> pages = new ArrayList<Page>();
-		stmt = Connector.getStatement(Queries.getQuery("findSkips"), user);
+		stmt = Connector.getStatement(Queries.getQuery("findSkips"), lowerUser);
 		rs = stmt.getResultSet();
 		while(rs != null && rs.next()){
 			pages.add( new Page(rs.getString("pagename"),
@@ -260,7 +260,7 @@ public class Pages {
 					rs.getString("scptitle")));
 		}
 		
-		stmt = Connector.getStatement(Queries.getQuery("findTales"), user);
+		stmt = Connector.getStatement(Queries.getQuery("findTales"), lowerUser);
 		rs = stmt.getResultSet();
 		while(rs != null && rs.next()){
 			pages.add( new Page(rs.getString("pagename"),
@@ -371,7 +371,7 @@ public class Pages {
 			Connection conn = null;
 			if(exact){
 				stmt = Connector.getArrayStatement(
-						Queries.getQuery("findSCPS"), lowerterms);
+						Queries.getQuery("findskips"), lowerterms);
 				logger.info(stmt.toString());
 				rs = stmt.getResultSet();
 			}else{

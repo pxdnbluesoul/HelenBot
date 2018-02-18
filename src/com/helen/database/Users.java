@@ -18,54 +18,37 @@ public class Users {
 	private static final Long HOURS = 1000 * 60l * 60;
 	private static final Long MINUTES = 1000 * 60l;
 
-	public static void insertUser(String username, Date date, String hostmask, String message, String channel) {
+	private static final String query_text = "insert into hostmasks (username, hostmask, established) values (?,?,?);\n" +
+			" on conflict (username, hostmask) \n" +
+			"do update set (username, hostmask, established) = (?,?,?) where username = ?;";
+
+	public static void insertUser(String username, String hostmask, String message, String channel) {
 		try {
+			java.sql.Timestamp time = new java.sql.Timestamp(System.currentTimeMillis());
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertUser"),
 					username.toLowerCase(),
-					new java.sql.Date(date.getTime()),
-					new java.sql.Timestamp(System.currentTimeMillis()),
+					time,
+					time,
 					message,
 					message,
+					channel,
+					time,
+					message,
+					username.toLowerCase(),
 					channel);
 			if (stmt.executeUpdate()) {
 				CloseableStatement hostStatement = Connector.getStatement(Queries.getQuery("insertHostmask"),
 						username.toLowerCase(),
 						hostmask,
-						new java.sql.Date(new Date().getTime()));
+						time,
+						username.toLowerCase(),
+						hostmask,
+						time);
 				hostStatement.executeUpdate();
 			}
 
-		} catch (SQLException e) {
-			if (!e.getMessage().contains("user_unique")) {
-				logger.error("Error code " + e.getErrorCode() + e.getMessage() + " Insertion exception for " + username,
-						e);
-			} else {
-				updateUserSeen(username, message, hostmask, channel);
-			}
-		}
-	}
-
-	private static void updateUserSeen(String username, String message, String hostmask, String channel) {
-		try {
-			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("updateUser"),
-					new java.sql.Timestamp(System.currentTimeMillis()),
-					message,
-					username.toLowerCase(),
-					channel);
-			stmt.executeUpdate();
-			
-			CloseableStatement hostStatement = Connector.getStatement(Queries.getQuery("insertHostmask"),
-					username.toLowerCase(),
-					hostmask,
-					new java.sql.Date(new Date().getTime()));
-			hostStatement.executeUpdate();
-		} catch (SQLException e) {
-			if (!e.getMessage().contains("user_unique") && !e.getMessage().contains("host_unique")) {
-				logger.error("Error code " + e.getErrorCode() + e.getMessage() + " Insertion exception for " + username,
-						e);
-			} else {
-
-			}
+		} catch (Exception e) {
+				logger.error("Exception updating users",e);
 		}
 	}
 

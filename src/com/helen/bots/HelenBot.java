@@ -62,7 +62,7 @@ public class HelenBot extends PircBot {
 
 	public void onMessage(String channel, String sender, String login,
 			String hostname, String message) {
-		Users.insertUser(sender, new Date(), hostname, message, channel.toLowerCase());
+		Users.insertUser(sender, hostname, message, channel.toLowerCase());
 		cmd.dispatchTable(new CommandData(channel, sender, login, hostname,
 				message));
 	}

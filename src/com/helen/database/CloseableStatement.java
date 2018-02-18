@@ -43,7 +43,8 @@ public class CloseableStatement {
 
 	public Boolean executeUpdate() throws SQLException {
 		if (stmt != null) {
-			Boolean result = stmt.executeUpdate() > 0;
+			Boolean result = false;
+			result = stmt.executeUpdate() > 0;
 			close();
 			return result;
 		} else {

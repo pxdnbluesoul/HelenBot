@@ -47,25 +47,13 @@ public class Tells {
 			Integer id = Nicks.getNickGroup(username.toLowerCase());
 
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("searchTells"),
-					username.toLowerCase());
+					username.toLowerCase(), username.toLowerCase());
 			ResultSet rs = stmt.executeQuery();
 			while(rs != null && rs.next()){
-				list.add(new Tell(rs.getString("sender"),rs.getString("username")
+				list.add(new Tell(rs.getString("sender"),username
 						,rs.getTimestamp("tell_time"),rs.getString("message"), rs.getBoolean("privateMessage")));
 			}
 			stmt.close();
-			rs.close();
-			if(id != null && id != -1) {
-				stmt = Connector.getStatement(Queries.getQuery("searchTells"),
-						id.toString());
-				rs = stmt.executeQuery();
-				while (rs != null && rs.next()) {
-					list.add(new Tell(rs.getString("sender"), username
-							, rs.getTimestamp("tell_time"), rs.getString("message"), rs.getBoolean("privateMessage"), id));
-				}
-				stmt.close();
-				rs.close();
-			}
 			return list;
 		}catch (Exception e){
 			logger.error("Exception retreiving tells",e);

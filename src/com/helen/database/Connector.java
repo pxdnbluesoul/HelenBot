@@ -17,7 +17,8 @@ public class Connector {
 			return DriverManager.getConnection(
 					"jdbc:postgresql://127.0.0.1/helen_db", "helen_bot",
 					"helenrevolver");
-		} catch (SQLException e) {
+		} catch (Exception e) {
+			logger.error("Exception getting connection.",e);
 			return null;
 		}
 	}
@@ -67,9 +68,18 @@ public class Connector {
 	public static CloseableStatement getArrayStatement(String queryString,
 			String[] args) {
 		try {
+			String s = "'%";
+			for(int i = 0; i < args.length; i++){
+				s = s + args[i] + '%';
+				if((i + 1) < args.length ){
+					s = s + ",";
+				}
+			}
+
 			Connection conn = getConnection();
 			PreparedStatement stmt = conn.prepareStatement(queryString);
-			stmt.setArray(1, conn.createArrayOf("text", (Object[])args));
+			stmt.setString(1, s);
+			stmt.setString(2, s);
 			return new CloseableStatement(stmt, conn);
 		} catch (Exception e) {
 			logger.error("Error constructing statement.", e);
