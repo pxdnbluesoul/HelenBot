@@ -110,6 +110,11 @@ public class Pages {
 			ResultSet rs = stmt.getResultSet();
 			if (rs != null && rs.next()) {
 				pageName = rs.getString("title");
+				if(rs.getBoolean("scppage")){
+					if(!rs.getString("scpttile").equalsIgnoreCase("[ACCESS DENIED]")){
+						pageName = rs.getString("scptitle");
+					}
+				}
 			}
 			rs.close();
 			stmt.close();
