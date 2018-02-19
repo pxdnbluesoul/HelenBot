@@ -111,7 +111,7 @@ public class Pages {
 			if (rs != null && rs.next()) {
 				pageName = rs.getString("title");
 				if(rs.getBoolean("scppage")){
-					if(!rs.getString("scpttile").equalsIgnoreCase("[ACCESS DENIED]")){
+					if(!rs.getString("scptile").equalsIgnoreCase("[ACCESS DENIED]")){
 						pageName = rs.getString("scptitle");
 					}
 				}
