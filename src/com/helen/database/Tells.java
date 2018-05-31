@@ -63,7 +63,7 @@ public class Tells {
 	
 	public static void clearTells(String username){
 		try{
-			Connector.getStatement(Queries.getQuery("clearTells"),username.toLowerCase()).executeUpdate();
+			Connector.getStatement(Queries.getQuery("clearTells"),username.toLowerCase(), username.toLowerCase()).executeUpdate();
 		}catch (Exception e){
 			logger.error("Exception clearing tells",e);
 		}
