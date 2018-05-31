@@ -47,5 +47,5 @@ Temporary Items
 .apdisk
 /bin/
 /target/
-
+.idea/*
 dependency-reduced-pom.xml

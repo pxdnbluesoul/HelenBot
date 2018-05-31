@@ -18,6 +18,9 @@ public class Nicks {
                 CloseableStatement insertStatement = Connector.getStatement(Queries.getQuery("insert_grouped_nick"),
                         nick.getGroupId(), nick.getNickToGroup().toLowerCase());
                 if (insertStatement.executeUpdate()) {
+                    if (nick.isNewNick()) {
+                        return "Established a new nickgroup under " + data.getSender() + " and added the nick " + nick.getNickToGroup() + " as a grouped nick.";
+                    }
                     return "Inserted " + nick.getNickToGroup() + " for user " + data.getSender() + ".";
                 } else {
                     return "Failed to insert grouped nick during final insert, please contact DrMagnus.";

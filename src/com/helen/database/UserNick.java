@@ -11,6 +11,7 @@ public class UserNick {
 
     private int groupId;
     private String nickToGroup;
+    private boolean newNick = false;
 
 
     public UserNick(CommandData data) {
@@ -37,7 +38,8 @@ public class UserNick {
                 }
                 newId.close();
                 newStmt.close();
-                this.nickToGroup = data.getSender();
+                newNick = true;
+                this.nickToGroup = data.getTarget();
 
             }
         } catch (Exception e) {
@@ -52,5 +54,9 @@ public class UserNick {
 
     public String getNickToGroup() {
         return nickToGroup;
+    }
+
+    public boolean isNewNick() {
+        return newNick;
     }
 }

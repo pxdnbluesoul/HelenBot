@@ -1,21 +1,6 @@
 package com.helen.database;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.InputStream;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.helen.commands.CommandData;
 import org.apache.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
@@ -23,7 +8,17 @@ import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.apache.xmlrpc.client.XmlRpcSun15HttpTransportFactory;
 import org.jibble.pircbot.Colors;
 
-import com.helen.commands.CommandData;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.InputStream;
+import java.net.URL;
+import java.sql.*;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Pages {
 
@@ -95,6 +90,7 @@ public class Pages {
 						"There was an exception attempting to grab last created",
 						e);
 			}
+			lastLc = System.currentTimeMillis();
 			return pagelist;
 		}
 
@@ -159,9 +155,11 @@ public class Pages {
 			if (title == null || title.isEmpty() || title.equals("[ACCESS DENIED]")) {
 				returnString.append(result.get(targetName).get("title_shown"));
 			} else {
-				returnString.append(result.get(targetName).get("title_shown"));
-				returnString.append(": ");
-				returnString.append(title);
+				if (!title.equalsIgnoreCase((String) result.get(targetName).get("title_shown"))) {
+					returnString.append(result.get(targetName).get("title_shown"));
+					returnString.append(": ");
+					returnString.append(title);
+				}
 			}
 			returnString.append(Colors.NORMAL);
 			returnString.append(" (");
@@ -286,7 +284,7 @@ public class Pages {
 		
 		if(authorPage != null){
 			str.append("(");
-			str.append("www.scp-wiki.net/");
+			str.append("http://www.scp-wiki.net/");
 			str.append(authorPage.getPageLink());
 			str.append(") ");
 		}
