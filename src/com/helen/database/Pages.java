@@ -156,9 +156,10 @@ public class Pages {
 				returnString.append(result.get(targetName).get("title_shown"));
 			} else {
 				returnString.append(result.get(targetName).get("title_shown"));
+				if (!title.equalsIgnoreCase((String) result.get(targetName).get("title_shown"))) {
 					returnString.append(": ");
 					returnString.append(title);
-				
+				}
 			}
 			returnString.append(Colors.NORMAL);
 			returnString.append(" (");
