@@ -155,11 +155,10 @@ public class Pages {
 			if (title == null || title.isEmpty() || title.equals("[ACCESS DENIED]")) {
 				returnString.append(result.get(targetName).get("title_shown"));
 			} else {
-				if (!title.equalsIgnoreCase((String) result.get(targetName).get("title_shown"))) {
-					returnString.append(result.get(targetName).get("title_shown"));
+				returnString.append(result.get(targetName).get("title_shown"));
 					returnString.append(": ");
 					returnString.append(title);
-				}
+				
 			}
 			returnString.append(Colors.NORMAL);
 			returnString.append(" (");
@@ -292,9 +291,11 @@ public class Pages {
 		int scps = 0;
 		int tales = 0;
 		int rating = 0;
+			int total = 0;
 		Timestamp ts = new java.sql.Timestamp(0l);
 		Page latest = null;
 		for(Page p: pages){
+			total++;
 			if(!p.getPageLink().equals(authorPageName)){
 				if(p.getScpPage()){
 					scps++;
@@ -311,7 +312,7 @@ public class Pages {
 		}
 		str.append("has ");
 		str.append(Colors.BOLD);
-		str.append(scps + tales);
+			str.append(total);
 		str.append(Colors.NORMAL);
 		str.append(" pages. (");
 		str.append(Colors.BOLD);
