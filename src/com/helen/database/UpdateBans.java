@@ -14,7 +14,7 @@ import org.jsoup.select.Elements;
 
 public class UpdateBans {
 
-	public void updateBans() throws IOException {
+	public static void updateBans() throws IOException {
 		
 		URL url = new URL("http://05command.wikidot.com/chat-ban-page");
 		Document result = Jsoup.parse(url, 3000);

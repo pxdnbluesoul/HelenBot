@@ -609,6 +609,16 @@ public class Command {
 				" and the resulting fracturing between IRC and Discord. There are also several concerns about " +
 				"the technical and financial viability of discord.");
 	}
+	
+	@IRCCommand(command = ".updateBans", startOfLine = true, securityLevel = 4, coexistWithJarvis = true)
+	public void updateBans(CommandData data) {
+		try {
+			UpdateBans.updateBans();
+		} catch (IOException e) {
+			helen.sendMessage(data.getChannel(), "Error prasing chat ban page. Please check the page for correct syntax.");
+		}
+		helen.sendMessage(data.getChannel(), "Ban List successfully updated.");
+	}
 
 	private String buildResponse(ArrayList<? extends DatabaseObject> dbo) {
 		StringBuilder str = new StringBuilder();
