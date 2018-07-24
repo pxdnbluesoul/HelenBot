@@ -614,8 +614,8 @@ public class Command {
 	public void updateBans(CommandData data) {
 		try {
 			UpdateBans.updateBans();
-		} catch (IOException e) {
-			helen.sendMessage(data.getChannel(), "Error prasing chat ban page. Please check the page for correct syntax.");
+		} catch (Exception e) {
+			helen.sendMessage(data.getChannel(), "Error parsing chat ban page. Please check the page for correct syntax.");
 		}
 		helen.sendMessage(data.getChannel(), "Ban List successfully updated.");
 	}

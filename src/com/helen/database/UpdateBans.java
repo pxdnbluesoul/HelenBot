@@ -2,6 +2,8 @@ package com.helen.database;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -11,6 +13,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import javafx.util.converter.LocalDateStringConverter;
 
 public class UpdateBans {
 
@@ -22,6 +26,8 @@ public class UpdateBans {
 		Element table = result.select("table").get(0);
 		Elements rows = table.select("tr");
 		HashSet<BanInfo> bannedUsers = new HashSet<BanInfo>();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+		LocalDateStringConverter conv = new LocalDateStringConverter(formatter, null);
 		for(int i = 0; i < rows.size(); i++) {
 			Element row = rows.get(i);
 			//skip first two rows
@@ -34,13 +40,14 @@ public class UpdateBans {
 				
 				List<String> nameList = Arrays.asList(names.split(" "));
 				List<String> ipList = Arrays.asList(ips.split(" "));
-				Date bdate;
+				LocalDate bdate;
+				//TODO replace this with regex
 				if(date.contains("/")) {
-					String[] split = date.split("/");
-					bdate = new Date(Integer.parseInt(split[3]), Integer.parseInt(split[0]), Integer.parseInt(split[1]));
+					bdate = conv.fromString(date);
 					
 				} else {
-					bdate = new Date(30, 12, 2999);
+
+					bdate = conv.fromString("12/31/2999");
 				}
 				
 				BanInfo info = new BanInfo(nameList, ipList, reason, bdate);
