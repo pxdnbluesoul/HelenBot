@@ -11,6 +11,7 @@ import org.jibble.pircbot.PircBot;
 
 import com.helen.commands.Command;
 import com.helen.commands.CommandData;
+import com.helen.database.BanUser;
 import com.helen.database.Config;
 import com.helen.database.Configs;
 import com.helen.database.Users;
@@ -157,10 +158,17 @@ public class HelenBot extends PircBot {
 	public void onJoin(String channel, String sender, String login,
 			String hostname) {
 		if (sender.equalsIgnoreCase("jarvis")) {
-			if (jarvisPresent.containsKey(channel.toLowerCase())) {
-				jarvisPresent.put(channel.toLowerCase(), true);
-			}
+			jarvisPresent.put(channel.toLowerCase(), true);
+
 		}
+		logger.info("JOINED: " + sender + " LOGIN: " + login + " HOSTNAME: " + hostname + " CHANNEL: " + channel);
+		//Preparation for later
+		/*if (channel.equals("#site19") && !jarvisPresent.get((channel.toLowerCase()))) {
+			if(BanUser.checkIfBanned(sender, hostname, channel)) {
+				kick(sender, channel);
+				ban(hostname, channel);
+			} 
+		} */
 	}
 
 }
