@@ -162,13 +162,13 @@ public class HelenBot extends PircBot {
 
 		}
 		logger.info("JOINED: " + sender + " LOGIN: " + login + " HOSTNAME: " + hostname + " CHANNEL: " + channel);
-		//Preparation for later
-		/*if (channel.equals("#site19") && !jarvisPresent.get((channel.toLowerCase()))) {
-			if(BanUser.checkIfBanned(sender, hostname, channel)) {
+		//Testing in seperate channel
+		if (channel.equals("#helenTest") && !jarvisPresent.get((channel.toLowerCase()))) {
+			if(BanUser.checkIfBanned(sender, login + "@" + hostname, channel)) {
 				kick(sender, channel);
 				ban(hostname, channel);
 			} 
-		} */
+		} 
 	}
 
 }
