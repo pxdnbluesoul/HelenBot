@@ -1,20 +1,19 @@
 package com.helen.commands;
 
+import com.helen.bots.HelenBot;
+import com.helen.database.*;
+import com.helen.search.WebSearch;
+import com.helen.search.WebsterSearch;
+import com.helen.search.YouTubeSearch;
+import org.apache.log4j.Logger;
+import org.jibble.pircbot.User;
+
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.helen.database.*;
-import org.apache.log4j.Logger;
-import org.jibble.pircbot.User;
-
-import com.helen.bots.HelenBot;
-import com.helen.search.WebSearch;
-import com.helen.search.WebsterSearch;
-import com.helen.search.YouTubeSearch;
 
 public class Command {
 	private static final Logger logger = Logger.getLogger(Command.class);
@@ -374,7 +373,7 @@ public class Command {
 	public void selectResult(CommandData data){
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getStoredInfo(data.getTarget(), data.getSender()));
 	}
-	
+
 	@IRCCommand(command = {".lc",".l"}, startOfLine = true, securityLevel = 1)
 	public void lastCreated(CommandData data){
 		ArrayList<String> pages = Pages.lastCreated();
@@ -387,11 +386,29 @@ public class Command {
 				helen.sendMessage(data.getResponseTarget(), data.getSender()
 						+ ": " + str);
 			}
-			
+
 		}else{
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I can't do that yet.");
 		}
 	}
+
+    @IRCCommand(command = {".hlc", ".hl"}, coexistWithJarvis = true, startOfLine = true, securityLevel = 1)
+    public void lastCreatedHelen(CommandData data) {
+        ArrayList<String> pages = Pages.lastCreated();
+        ArrayList<String> infoz = new ArrayList<String>();
+        if (pages != null) {
+            for (String str : pages) {
+                infoz.add(Pages.getPageInfo(str, data));
+            }
+            for (String str : infoz) {
+                helen.sendMessage(data.getResponseTarget(), data.getSender()
+                        + ": " + str);
+            }
+
+        } else {
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I can't do that yet.");
+        }
+    }
 	
 	@IRCCommand(command = ".au", startOfLine = true, securityLevel = 1)
 	public void authorDetail(CommandData data){
@@ -410,11 +427,16 @@ public class Command {
 	public void scpSearch(CommandData data) {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getCommand()));
 	}
-	
-	@IRCCommand(command = {".s",".sea"}, startOfLine = true, securityLevel = 1)
+
+    @IRCCommand(command = {".s",".sea"}, startOfLine = true, securityLevel = 1)
 	public void findSkip(CommandData data){
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPotentialTargets(data.getSplitMessage(), data.getSender()));
 	}
+
+    @IRCCommand(command = {".hs", ".hsea"}, coexistWithJarvis = true, startOfLine = true, securityLevel = 1)
+    public void findSkipHelen(CommandData data) {
+        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPotentialTargets(data.getSplitMessage(), data.getSender()));
+    }
 
 	@IRCCommand(command = {".pronouns", ".pronoun"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
 	public void getPronouns(CommandData data) {
