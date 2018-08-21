@@ -179,7 +179,7 @@ public class Pages {
 			returnString.append(result.get(targetName).get("created_by"));
 			returnString.append(")");
 			returnString.append(" - ");
-			returnString.append("http://www.scp-wiki.net/");
+            returnString.append("http://scp-wiki.net/");
 			returnString.append(targetName);
 
 			return returnString.toString();
