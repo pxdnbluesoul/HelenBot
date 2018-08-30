@@ -1,19 +1,17 @@
 package com.helen.bots;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-
-import org.apache.log4j.Logger;
-import org.jibble.pircbot.IrcException;
-import org.jibble.pircbot.NickAlreadyInUseException;
-import org.jibble.pircbot.PircBot;
-
 import com.helen.commands.Command;
 import com.helen.commands.CommandData;
 import com.helen.database.Config;
 import com.helen.database.Configs;
 import com.helen.database.Users;
+import org.apache.log4j.Logger;
+import org.jibble.pircbot.IrcException;
+import org.jibble.pircbot.NickAlreadyInUseException;
+import org.jibble.pircbot.PircBot;
+
+import java.io.IOException;
+import java.util.HashMap;
 
 public class HelenBot extends PircBot {
 
@@ -94,6 +92,7 @@ public class HelenBot extends PircBot {
 
 	public void onServerResponse(int code, String response) {
 		if (code == 352) {
+			logger.info(response);
 			if(response.split(" ")[5].equalsIgnoreCase("jarvis")){
 				jarvisPresent.put(response.split(" ")[1].toLowerCase(), true);
 			}
