@@ -99,6 +99,10 @@ public class HelenBot extends PircBot {
 		}
 	}
 
+	public void jarvisReset(String channel){
+		jarvisPresent.remove(channel.toLowerCase());
+	}
+
 	public void onDisconnect(){
 		int tries = 0;
 		while(!this.isConnected()){
@@ -128,7 +132,7 @@ public class HelenBot extends PircBot {
 			String hostname) {
 		if (sender.equalsIgnoreCase("jarvis")) {
 			if (jarvisPresent.containsKey(channel.toLowerCase())) {
-				jarvisPresent.put(channel.toLowerCase(), false);
+				jarvisPresent.remove(channel.toLowerCase());
 			}
 		}
 	}

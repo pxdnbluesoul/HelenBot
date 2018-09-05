@@ -220,6 +220,7 @@ public class Command {
 
 	@IRCCommand(command = { ".checkJarvis" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
 	public void findJarvisInChannel(CommandData data) {
+		helen.jarvisReset(data.getChannel());
 		helen.sendWho(data.getChannel());
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Checking channel members...");
 	}
