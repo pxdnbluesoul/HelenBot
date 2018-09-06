@@ -424,11 +424,6 @@ public class Command {
 		}
 	}
 
-	@IRCCommand(command = "!h", startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
-	public void scpHelenSearch(CommandData data) {
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getTarget()));
-	}
-
 	@IRCCommand(command = "SCP", startOfLine = true, reg = true, regex = { "(scp|SCP)-([0-9]+)(-(ex|EX|j|J|arc|ARC))?" }, securityLevel = 1)
 	public void scpSearch(CommandData data) {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getCommand()));
@@ -439,9 +434,14 @@ public class Command {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPotentialTargets(data.getSplitMessage(), data.getSender()));
 	}
 
+	Pattern p = Pattern.compile("(scp|SCP)-([0-9]+)(-(ex|EX|j|J|arc|ARC))?");
     @IRCCommand(command = {".hs", ".hsea"}, coexistWithJarvis = true, startOfLine = true, securityLevel = 1)
     public void findSkipHelen(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPotentialTargets(data.getSplitMessage(), data.getSender()));
+	    if(p.matcher(data.getTarget()).matches()){
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getTarget()));
+        }else {
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPotentialTargets(data.getSplitMessage(), data.getSender()));
+        }
     }
 
 	@IRCCommand(command = {".pronouns", ".pronoun"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
