@@ -1,20 +1,15 @@
 package com.helen.bots;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-
+import com.helen.commands.Command;
+import com.helen.commands.CommandData;
+import com.helen.database.*;
 import org.apache.log4j.Logger;
 import org.jibble.pircbot.IrcException;
 import org.jibble.pircbot.NickAlreadyInUseException;
 import org.jibble.pircbot.PircBot;
 
-import com.helen.commands.Command;
-import com.helen.commands.CommandData;
-import com.helen.database.BanUser;
-import com.helen.database.Config;
-import com.helen.database.Configs;
-import com.helen.database.Users;
+import java.io.IOException;
+import java.util.HashMap;
 
 public class HelenBot extends PircBot {
 
@@ -148,25 +143,23 @@ public class HelenBot extends PircBot {
 	}
 
 	public Boolean jarvisCheck(String channel) {
-		if (jarvisPresent.containsKey(channel.toLowerCase())) {
-			return jarvisPresent.get(channel.toLowerCase());
-		} else {
-			return false;
-		}
+		return jarvisPresent.getOrDefault(channel.toLowerCase(), false);
 	}
 
 	public void onJoin(String channel, String sender, String login,
-			String hostname) {
+			String hostmask) {
 		if (sender.equalsIgnoreCase("jarvis")) {
 			jarvisPresent.put(channel.toLowerCase(), true);
 
 		}
-		logger.info("JOINED: " + sender + " LOGIN: " + login + " HOSTNAME: " + hostname + " CHANNEL: " + channel);
-		//Testing in seperate channel
+		//removing extraneous logging
+		//logger.info("JOINED: " + sender + " LOGIN: " + login + " HOSTNAME: " + hostname + " CHANNEL: " + channel);
+		//Testing in separate channel
 		if (channel.equals("#helenTest") && !jarvisPresent.get((channel.toLowerCase()))) {
-			if(BanUser.checkIfBanned(sender, login + "@" + hostname, channel)) {
-				kick(sender, channel);
-				ban(hostname, channel);
+			BanInfo info = Bans.getUserBan(sender, hostmask);
+			if(info != null) {
+				kick(sender, channel, info.getBanReason());
+				ban(hostmask, channel);
 			} 
 		} 
 	}

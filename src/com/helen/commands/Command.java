@@ -613,7 +613,7 @@ public class Command {
 	@IRCCommand(command = ".updateBans", startOfLine = true, securityLevel = 4, coexistWithJarvis = true)
 	public void updateBans(CommandData data) {
 		try {
-			UpdateBans.updateBans();
+			Bans.updateBans();
 		} catch (Exception e) {
 			helen.sendMessage(data.getChannel(), "Error parsing chat ban page. Please check the page for correct syntax.");
 		}
