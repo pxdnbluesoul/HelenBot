@@ -5,31 +5,32 @@ import java.util.Date;
 import java.util.List;
 
 public class BanInfo {
-	public List<String> userNames;
-	public List<String> IPs;
-	public String banReason;
-	public LocalDate banEnd;
+	List<String> userNames;
+	List<String> IPs;
+
+	public List<String> getUserNames() {
+		return userNames;
+	}
+
+	public List<String> getIPs() {
+		return IPs;
+	}
+
+	public String getBanReason() {
+		return banReason;
+	}
+
+	public LocalDate getBanEnd() {
+		return banEnd;
+	}
+
+	private String banReason;
+	private LocalDate banEnd;
 	
-	public BanInfo (List<String> userNames, List<String> IPs, String banReason, LocalDate bdate) {
+	BanInfo(List<String> userNames, List<String> IPs, String banReason, LocalDate bdate) {
 		this.userNames = userNames;
 		this.IPs = IPs;
 		this.banReason = banReason;
 		this.banEnd = bdate;
-	}
-	
-	@Override
-	public boolean equals (Object compare) {
-		if(!(compare instanceof BanInfo)) {
-			return false;
-		}
-		BanInfo temp = (BanInfo)compare;
-		if(userNames.contains(temp.userNames.get(0))) {
-			return true;
-		}
-		if(IPs.contains(temp.IPs.get(0))) {
-			return true;
-		}
-		
-		return false;
 	}
 }
