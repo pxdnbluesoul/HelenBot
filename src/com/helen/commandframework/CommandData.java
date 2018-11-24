@@ -1,14 +1,14 @@
-package com.helen.commands;
+package com.helen.commandframework;
 
-import com.helen.database.Config;
+import com.helen.database.entities.Config;
 import com.helen.database.Configs;
 
 public class CommandData {
-	private String channel;
-	private String sender;
-	private String login;
-	private String hostname;
-	private String message;
+	private final String channel;
+	private final String sender;
+	private final String login;
+	private final String hostname;
+	private final String message;
 	private String regexTarget;
 
 	
@@ -22,7 +22,7 @@ public class CommandData {
 	
 	
 
-	public boolean isPrivate(){
+	private boolean isPrivate(){
 		return getChannel() == null || getChannel().isEmpty();
 	}
 	
@@ -42,7 +42,7 @@ public class CommandData {
 		return channel;
 	}
 	
-	public String[] getSplitMessage(){
+	public String[] getCommandAsParameters(){
 		return getMessage().split(" ");
 	}
 
@@ -67,7 +67,7 @@ public class CommandData {
 	}
 	
 	public String getCommand() {
-		return message.split(" ")[0];
+		return message.split(" ")[0].toLowerCase();
 	}
 	
 	public String getTarget() {
@@ -75,11 +75,11 @@ public class CommandData {
 	}
 	
 	public String getMessageWithoutCommand() {
-		return message.substring((message.split(" ")[0].length() + 1),message.length());
+		return message.substring((message.split(" ")[0].length() + 1));
 	}
 	
 	public String getTellMessage() {
-		return message.substring((message.split(" ")[0].length() + message.split(" ")[1].length() + 2),message.length());
+		return message.substring((message.split(" ")[0].length() + message.split(" ")[1].length() + 2));
 	}
 	
 	public String getPayload() {

@@ -1,6 +1,10 @@
 package com.helen.database;
 
-import com.helen.commands.CommandData;
+import com.helen.commandframework.CommandData;
+import com.helen.database.entities.UserNick;
+import com.helen.database.framework.CloseableStatement;
+import com.helen.database.framework.Connector;
+import com.helen.database.framework.Queries;
 import org.apache.log4j.Logger;
 
 import java.sql.ResultSet;
@@ -9,7 +13,7 @@ import java.util.List;
 
 public class Nicks {
 
-    final static Logger logger = Logger.getLogger(Nicks.class);
+    private final static Logger logger = Logger.getLogger(Nicks.class);
 
     public static String addNick(CommandData data) {
         try {
@@ -62,12 +66,10 @@ public class Nicks {
         Integer id = getNickGroup(admin ? data.getTarget() : data.getSender());
         if(id != null && id != -1) {
             List<String> nicks = getNicksByGroup(id);
-            boolean flag = true;
+            boolean flag;
             for (String nick : nicks) {
                 flag = deleteNick(nick);
-                if (flag) {
-                    continue;
-                } else {
+                if (!flag) {
                     return "There was a problem deleting nicks.";
                 }
             }

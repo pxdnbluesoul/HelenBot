@@ -1,4 +1,6 @@
-package com.helen.database;
+package com.helen.database.entities;
+
+import com.helen.database.framework.Selectable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,13 +8,13 @@ import java.util.Arrays;
 public class Page implements Selectable {
 	
 	
-	private String pageLink;
-	private String title;
+	private final String pageLink;
+	private final String title;
 	private Integer rating;
 	private String createdBy;
 	private java.sql.Timestamp createdAt;
 	
-	private Boolean scpPage = false;
+	private Boolean scpPage;
 	private String scpTitle;
 	
 	private ArrayList<Tag> tags;
@@ -59,7 +61,7 @@ public class Page implements Selectable {
 	
 	
 	public boolean searchTest(String[] terms){
-		String search = null;
+		String search;
 		if(scpPage){
 			search = scpTitle;
 		}else{
@@ -67,8 +69,7 @@ public class Page implements Selectable {
 		}
 		
 		String strLow = search.toLowerCase();
-		ArrayList<String> words = new ArrayList<String>();
-		words.addAll(Arrays.asList(strLow.split(" ")));
+		ArrayList<String> words = new ArrayList<>(Arrays.asList(strLow.split(" ")));
 		for(int i = 1; i < terms.length; i++){
 			if(!words.contains(terms[i].toLowerCase())){
 				return false;

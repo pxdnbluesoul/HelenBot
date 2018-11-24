@@ -4,6 +4,10 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.helen.database.entities.Roll;
+import com.helen.database.framework.CloseableStatement;
+import com.helen.database.framework.Connector;
+import com.helen.database.framework.Queries;
 import org.apache.log4j.Logger;
 
 public class Rolls {
@@ -35,7 +39,7 @@ public class Rolls {
 
 	public static String getAverage(String size, String username) {
 		String average = null;
-		Integer diceSize = 0;
+		int diceSize;
 		try {
 			diceSize = Integer.parseInt(size);
 		} catch (Exception e) {
@@ -59,13 +63,13 @@ public class Rolls {
 	}
 
 	public static ArrayList<Roll> getRolls(String username) {
-		ArrayList<Roll> rolls = new ArrayList<Roll>();
+		ArrayList<Roll> rolls = new ArrayList<>();
 		try {
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getRolls"),username.toLowerCase(), username.toLowerCase());
 			ResultSet rs = stmt.getResultSet();
 
 			if (rs != null) {
-				HashMap<Integer, Roll> rollMap = new HashMap<Integer, Roll>();
+				HashMap<Integer, Roll> rollMap = new HashMap<>();
 				while (rs.next()) {
 					if (!rollMap.containsKey(rs.getInt("rollId"))) {
 						rollMap.put(rs.getInt("rollId"), new Roll("d", rs.getInt("size"), rs.getInt("bonus"),

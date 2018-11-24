@@ -9,7 +9,7 @@ import org.jibble.pircbot.User;
 
 import com.helen.database.Configs;
 
-public class TestBot extends PircBot {
+class TestBot extends PircBot {
 	
 	
 	public TestBot(String bot_name) throws IOException, IrcException, InterruptedException{
@@ -23,7 +23,7 @@ public class TestBot extends PircBot {
 		this.setVerbose(true);
 		
 		this.identify("password");
-		Thread.sleep(3000l);
+		Thread.sleep(3000L);
 		this.joinChannel("#magnusteaparty");
 	}
 	

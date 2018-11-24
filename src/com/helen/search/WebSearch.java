@@ -20,7 +20,7 @@ public class WebSearch {
 	
 	
 	public static GoogleResults search(String searchTerm) throws IOException {
-		searchTerm = searchTerm.substring(3, searchTerm.length()).replace(" ", "+");
+		searchTerm = searchTerm.substring(3).replace(" ", "+");
 		URL url = new URL(Configs.getSingleProperty("googleurl").getValue()
 				+ Configs.getSingleProperty("apiKey").getValue()
 				+ "&cx="

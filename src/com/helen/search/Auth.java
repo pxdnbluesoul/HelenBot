@@ -19,7 +19,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.DataStore;
 import com.google.api.client.util.store.FileDataStoreFactory;
 
-public class Auth {
+class Auth {
 	  /**
      * Define a global instance of the HTTP transport.
      */

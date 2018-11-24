@@ -5,26 +5,26 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.helen.database.entities.Config;
+import com.helen.database.framework.CloseableStatement;
+import com.helen.database.framework.Connector;
+import com.helen.database.framework.Queries;
 import org.apache.log4j.Logger;
 
-import com.helen.commands.CommandData;
+import com.helen.commandframework.CommandData;
 
 public class Configs {
 
 	private static final Logger logger = Logger.getLogger(Configs.class);
 
-	private static HashMap<String, ArrayList<Config>> cachedProperties = new HashMap<String, ArrayList<Config>>();
+	private static HashMap<String, ArrayList<Config>> cachedProperties = new HashMap<>();
 	private static Boolean cacheValid = false;
 	
 	public static ArrayList<Config> getProperty(String key) {
 		if (!cacheValid) {
 			loadProperties();
 		}
-		if (cachedProperties.containsKey(key)) {
-			return cachedProperties.get(key);
-		} else {
-			return null;
-		}
+		return cachedProperties.getOrDefault(key, null);
 	}
 	
 	public static void clear(){
@@ -58,7 +58,7 @@ public class Configs {
 		try {
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("propertySet"), key, value,
 					new java.sql.Date(System.currentTimeMillis()),
-					publicFlag.equals("t") ? true : false);
+					publicFlag.equals("t"));
 
 			if (stmt.executeUpdate()) {
 				cacheValid = false;
@@ -88,7 +88,7 @@ public class Configs {
 					stmt.close();
 					CloseableStatement updateStatement = Connector
 							.getStatement(Queries.getQuery("updatePush"), value,
-									publicFlag.equals("t") ? true : false, key);
+									publicFlag.equals("t"), key);
 
 					if (updateStatement.executeUpdate()) {
 						cacheValid = false;
@@ -144,14 +144,14 @@ public class Configs {
 	}
 
 	private static void loadProperties() {
-			cachedProperties = new HashMap<String, ArrayList<Config>>();
+			cachedProperties = new HashMap<>();
 			try {
 				CloseableStatement stmt = Connector.getStatement(Queries.getQuery("kvQuery"));
 				ResultSet rs = stmt.executeQuery();
 				while (rs != null && rs.next()) {
 					if (!cachedProperties.containsKey(rs.getString("key"))) {
 						cachedProperties.put(rs.getString("key"),
-								new ArrayList<Config>());
+								new ArrayList<>());
 					}
 					cachedProperties.get(rs.getString("key")).add(
 							new Config(rs.getString("key"), rs
@@ -169,7 +169,7 @@ public class Configs {
 	}
 
 	public static ArrayList<Config> getConfiguredProperties(boolean showPublic) {
-		ArrayList<Config> keyValues = new ArrayList<Config>();
+		ArrayList<Config> keyValues = new ArrayList<>();
 		if (!cacheValid) {
 			loadProperties();
 		} 
@@ -193,7 +193,7 @@ public class Configs {
 		if(!cacheValid){
 			loadProperties();
 		}
-		ArrayList<String> keyValues = new ArrayList<String>();
+		ArrayList<String> keyValues = new ArrayList<>();
 		try {
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("keysQuery"));
 
@@ -246,7 +246,7 @@ public class Configs {
 		
 	}
 	
-	public static String updateToggle(CommandData data,String command, boolean enabled){
+	private static String updateToggle(CommandData data, String command, boolean enabled){
 		try{
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("updateToggle"),
 					enabled,

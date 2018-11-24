@@ -1,13 +1,17 @@
-package com.helen.database;
+package com.helen.database.entities;
 
-import com.helen.commands.CommandData;
+import com.helen.commandframework.CommandData;
+import com.helen.database.framework.CloseableStatement;
+import com.helen.database.framework.Connector;
+import com.helen.database.Nicks;
+import com.helen.database.framework.Queries;
 import org.apache.log4j.Logger;
 
 import java.sql.ResultSet;
 import java.util.List;
 
 public class UserNick {
-    Logger logger = Logger.getLogger(UserNick.class);
+    private final Logger logger = Logger.getLogger(UserNick.class);
 
     private int groupId;
     private String nickToGroup;

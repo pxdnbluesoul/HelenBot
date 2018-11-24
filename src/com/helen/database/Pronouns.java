@@ -3,15 +3,19 @@ package com.helen.database;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
+import com.helen.database.entities.Config;
+import com.helen.database.framework.CloseableStatement;
+import com.helen.database.framework.Connector;
+import com.helen.database.framework.Queries;
 import org.apache.log4j.Logger;
 
-import com.helen.commands.CommandData;
+import com.helen.commandframework.CommandData;
 
 public class Pronouns {
 
 	private static final Logger logger = Logger.getLogger(Pronouns.class);
 
-	private static ArrayList<String> bannedNouns = new ArrayList<String>();
+	private static ArrayList<String> bannedNouns = new ArrayList<>();
 
 	static {
 		reload();
@@ -58,8 +62,7 @@ public class Pronouns {
 					}
 					str.append(".");
 				} else {
-					str.append("I'm sorry, I don't have any record of pronouns for "
-							+ user);
+					str.append("I'm sorry, I don't have any record of pronouns for ").append(user);
 				}
 			} else {
 				str.append("I'm sorry there was an error.  Please inform Dr Magnus.");
@@ -72,18 +75,18 @@ public class Pronouns {
 	}
 
 	public static String insertPronouns(CommandData data) {
-		if (data.getSplitMessage().length > 1) {
+		if (data.getCommandAsParameters().length > 1) {
 			try {
 				StringBuilder str = new StringBuilder();
 				CloseableStatement stmt = Connector.getStatement(Queries
 						.getQuery("establishPronoun"), data.getSender()
-						.toLowerCase(), data.getSplitMessage()[1]
-						.equalsIgnoreCase("accepted") ? true : false);
+						.toLowerCase(), data.getCommandAsParameters()[1]
+						.equalsIgnoreCase("accepted"));
 				ResultSet rs = stmt.execute();
 
 				String nounData = data.getMessage().substring(
-						data.getMessage().split(" ")[0].length(),
-						data.getMessage().length());
+						data.getMessage().split(" ")[0].length()
+				);
 
 				String[] nouns = nounData.replace(",", " ").replace("/", " ")
 						.replace("\\", " ").trim().replaceAll(" +", " ")
@@ -118,7 +121,7 @@ public class Pronouns {
 				return "Inserted the following pronouns: "
 						+ str.toString()
 						+ " as "
-						+ (data.getSplitMessage()[1]
+						+ (data.getCommandAsParameters()[1]
 								.equalsIgnoreCase("accepted") ? "accepted pronouns."
 								: "pronouns");
 			} catch (Exception e) {
@@ -148,7 +151,7 @@ public class Pronouns {
 	}
 
 	public static void reload() {
-		bannedNouns = new ArrayList<String>();
+		bannedNouns = new ArrayList<>();
 		// Just a couple examples.
 		bannedNouns.add("apache");
 		bannedNouns.add("helicopter");

@@ -1,6 +1,9 @@
 package com.helen.database;
 
-import com.helen.commands.CommandData;
+import com.helen.commandframework.CommandData;
+import com.helen.database.framework.CloseableStatement;
+import com.helen.database.framework.Connector;
+import com.helen.database.framework.Queries;
 import org.apache.log4j.Logger;
 
 import java.sql.ResultSet;
@@ -9,10 +12,10 @@ public class Users {
 
 	private static final Logger logger = Logger.getLogger(Users.class);
 
-	private static final Long YEARS = 1000 * 60 * 60 * 24 * 365l;
-	private static final Long DAYS = 1000 * 60 * 60 * 24l;
-	private static final Long HOURS = 1000 * 60l * 60;
-	private static final Long MINUTES = 1000 * 60l;
+	private static final Long YEARS = 1000 * 60 * 60 * 24 * 365L;
+	private static final Long DAYS = 1000 * 60 * 60 * 24L;
+	private static final Long HOURS = 1000 * 60L * 60;
+	private static final Long MINUTES = 1000 * 60L;
 
 	private static final String query_text = "insert into hostmasks (username, hostmask, established) values (?,?,?);\n" +
 			" on conflict (username, hostmask) \n" +
@@ -50,21 +53,21 @@ public class Users {
 
 	public static String seen(CommandData data) {
 		try {
-			if (data.getSplitMessage()[1].equals("-f")) {
+			if (data.getCommandAsParameters()[1].equals("-f")) {
 				CloseableStatement stmt = Connector.getStatement(Queries.getQuery("seenFirst"),
-						data.getSplitMessage()[2].toLowerCase(), data.getChannel().toLowerCase());
+						data.getCommandAsParameters()[2].toLowerCase(), data.getChannel().toLowerCase());
 				ResultSet rs = stmt.executeQuery();
 				if (rs != null && rs.next()) {
-					return "I first met " + data.getSplitMessage()[2] + " " + findTime(rs.getTimestamp("first_seen").getTime()) + " saying: " + rs.getString("first_message");
+					return "I first met " + data.getCommandAsParameters()[2] + " " + findTime(rs.getTimestamp("first_seen").getTime()) + " saying: " + rs.getString("first_message");
 				} else {
 					return "I have never seen someone by that name";
 				}
 			} else {
 				CloseableStatement stmt = Connector.getStatement(Queries.getQuery("seen"),
-						data.getSplitMessage()[1].toLowerCase(), data.getChannel().toLowerCase());
+						data.getCommandAsParameters()[1].toLowerCase(), data.getChannel().toLowerCase());
 				ResultSet rs = stmt.executeQuery();
 				if (rs != null && rs.next()) {
-					return "I last saw " + data.getSplitMessage()[1] + " " + findTime(rs.getTimestamp("last_seen").getTime()) + " saying: " + rs.getString("last_message");
+					return "I last saw " + data.getCommandAsParameters()[1] + " " + findTime(rs.getTimestamp("last_seen").getTime()) + " saying: " + rs.getString("last_message");
 				} else {
 					return "I have never seen someone by that name";
 				}
@@ -79,9 +82,9 @@ public class Users {
 
 	}
 
-	public static String findTime(Long time){
+	private static String findTime(Long time){
 		time  = System.currentTimeMillis()  - time;
-		Long diff = 0l;
+		long diff;
 		if(time >= YEARS){
 			diff = time/YEARS;
 			return (time/YEARS) + " year" + (diff > 1 ? "s" : "") + " ago";

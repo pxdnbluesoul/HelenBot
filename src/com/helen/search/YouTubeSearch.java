@@ -22,9 +22,7 @@ public class YouTubeSearch {
 	
 	public static String youtubeSearch(String searchTerm) {
 
-		YouTube youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, new HttpRequestInitializer() {
-			public void initialize(HttpRequest request) throws IOException {
-			}
+		YouTube youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, request -> {
 		}).setApplicationName("youtube-cmdline-search-sample").build();
 
 		YouTube.Search.List search;
@@ -32,10 +30,10 @@ public class YouTubeSearch {
 			search = youtube.search().list("id,snippet");
 
 			search.setKey(Configs.getSingleProperty("apiKey").getValue());
-			search.setQ(searchTerm.substring(3, searchTerm.length()));
+			search.setQ(searchTerm.substring(3));
 			search.setType("video");
 			search.setFields("items(id/kind,id/videoId,snippet/title,snippet/thumbnails/default/url)");
-			search.setMaxResults(1l);
+			search.setMaxResults(1L);
 
 			SearchListResponse searchResponse = search.execute();
 			List<SearchResult> searchResultList = searchResponse.getItems();
@@ -51,15 +49,15 @@ public class YouTubeSearch {
 				List<Video> videoList = listResponse.getItems();
 
 				Video targetVideo = videoList.get(0);
-				BigInteger views = BigInteger.valueOf(0l);;
-				BigInteger rating = BigInteger.valueOf(0l);;
-				BigInteger dislikes = BigInteger.valueOf(0l);;
+				BigInteger views = BigInteger.valueOf(0L);
+				BigInteger rating = BigInteger.valueOf(0L);
+				BigInteger dislikes = BigInteger.valueOf(0L);
 				String time = targetVideo.getContentDetails().getDuration().split("PT")[1].toLowerCase();
 				
 				if(targetVideo.getStatistics() != null){
-					views = targetVideo.getStatistics().getViewCount() == null ? BigInteger.valueOf(0l) : targetVideo.getStatistics().getViewCount();
-					rating = targetVideo.getStatistics().getLikeCount() == null ? BigInteger.valueOf(0l) : targetVideo.getStatistics().getLikeCount();
-					dislikes = targetVideo.getStatistics().getDislikeCount() == null ? BigInteger.valueOf(0l) : targetVideo.getStatistics().getDislikeCount();
+					views = targetVideo.getStatistics().getViewCount() == null ? BigInteger.valueOf(0L) : targetVideo.getStatistics().getViewCount();
+					rating = targetVideo.getStatistics().getLikeCount() == null ? BigInteger.valueOf(0L) : targetVideo.getStatistics().getLikeCount();
+					dislikes = targetVideo.getStatistics().getDislikeCount() == null ? BigInteger.valueOf(0L) : targetVideo.getStatistics().getDislikeCount();
 				}
 				String uploader = targetVideo.getSnippet().getChannelTitle();
 
@@ -85,7 +83,7 @@ public class YouTubeSearch {
 				str.append(uploader);
 				str.append(Colors.NORMAL);
 				str.append(" - ");
-				str.append("https://www.youtube.com/watch?v=" + video.getId().getVideoId());
+				str.append("https://www.youtube.com/watch?v=").append(video.getId().getVideoId());
 				
 				return str.toString();
 			}

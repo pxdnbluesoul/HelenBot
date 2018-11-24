@@ -1,9 +1,8 @@
-package com.helen.database;
+package com.helen.database.framework;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
@@ -68,18 +67,18 @@ public class Connector {
 	public static CloseableStatement getArrayStatement(String queryString,
 			String[] args) {
 		try {
-			String s = "'%";
+			StringBuilder s = new StringBuilder("'%");
 			for(int i = 0; i < args.length; i++){
-				s = s + args[i] + '%';
+				s.append(args[i]).append('%');
 				if((i + 1) < args.length ){
-					s = s + ",";
+					s.append(",");
 				}
 			}
 
 			Connection conn = getConnection();
 			PreparedStatement stmt = conn.prepareStatement(queryString);
-			stmt.setString(1, s);
-			stmt.setString(2, s);
+			stmt.setString(1, s.toString());
+			stmt.setString(2, s.toString());
 			return new CloseableStatement(stmt, conn);
 		} catch (Exception e) {
 			logger.error("Error constructing statement.", e);

@@ -2,12 +2,12 @@ package com.helen.search;
 
 import java.util.ArrayList;
 
-public class Definition {
+class Definition {
 	
 	
 		public String partOfSpeech;
 		
-		public ArrayList<String> definitions = new ArrayList<String>();
+		public final ArrayList<String> definitions = new ArrayList<>();
 	
 
 }

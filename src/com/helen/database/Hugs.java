@@ -2,9 +2,12 @@ package com.helen.database;
 
 import java.sql.ResultSet;
 
+import com.helen.database.framework.CloseableStatement;
+import com.helen.database.framework.Connector;
+import com.helen.database.framework.Queries;
 import org.apache.log4j.Logger;
 
-import com.helen.commands.CommandData;
+import com.helen.commandframework.CommandData;
 
 public class Hugs {
 	
@@ -45,7 +48,7 @@ public class Hugs {
 		return "*Jots that down on her clipboard* Noted, " + data.getSender() + ".";
 	}
 	
-	public static void updateHugMessage(String username, String message){
+	private static void updateHugMessage(String username, String message){
 		try{
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("updateHug"), message,
 					username);

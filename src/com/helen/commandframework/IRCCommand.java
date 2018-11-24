@@ -1,4 +1,4 @@
-package com.helen.commands;
+package com.helen.commandframework;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -7,11 +7,13 @@ import java.lang.annotation.RetentionPolicy;
 public @interface IRCCommand {
 
 	String[] command();
-	boolean startOfLine();
+	boolean startOfLine() default true;
 	boolean reg() default false;
 	String[] regex() default "";
 	int matcherGroup () default -1;
 	boolean coexistWithJarvis() default false;
 	int securityLevel();
 	boolean requiresToggle() default false;
+	String[] arguments() default "";
+	String description() default "";
 }

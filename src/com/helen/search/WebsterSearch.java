@@ -22,7 +22,7 @@ import com.helen.database.Configs;
 
 public class WebsterSearch {
 
-	private static Logger logger = Logger.getLogger(WebsterSearch.class);
+	private static final Logger logger = Logger.getLogger(WebsterSearch.class);
 
 	public static String dictionarySearch(String query) {
 		query = query.toLowerCase();
@@ -80,7 +80,7 @@ public class WebsterSearch {
 	private static String processDocument(Document doc, String keyword) {
 		NodeList list = doc.getElementsByTagName("entry");
 		if(list.getLength() > 0){
-		ArrayList<Node> nodesToAnalyze = new ArrayList<Node>();
+		ArrayList<Node> nodesToAnalyze = new ArrayList<>();
 		try {
 			for (int i = 0; i < list.getLength(); i++) {
 				NodeList nl = ((Element) list.item(i)).getElementsByTagName("ew");
@@ -94,7 +94,7 @@ public class WebsterSearch {
 			e.printStackTrace();
 		}
 
-		ArrayList<Definition> test = new ArrayList<Definition>();
+		ArrayList<Definition> test = new ArrayList<>();
 		for (Node n : nodesToAnalyze) {
 			Definition def = new Definition();
 			Element nodeler = (Element) n;

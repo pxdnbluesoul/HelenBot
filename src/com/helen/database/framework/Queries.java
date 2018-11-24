@@ -1,4 +1,4 @@
-package com.helen.database;
+package com.helen.database.framework;
 
 import java.sql.ResultSet;
 import java.util.HashMap;
@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 
 public class Queries {
 
-	private static HashMap<String, String> queryCache = new HashMap<String, String>();
+	private static final HashMap<String, String> queryCache = new HashMap<>();
 
 	private final static String findQuery = "select * from queries";
 

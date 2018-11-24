@@ -1,8 +1,10 @@
-package com.helen.database;
+package com.helen.database.entities;
+
+import com.helen.database.framework.Selectable;
 
 public class Author implements Selectable {
 
-	private String authorName = null;
+	private String authorName;
 	
 	public Author(String author){
 		authorName = author;

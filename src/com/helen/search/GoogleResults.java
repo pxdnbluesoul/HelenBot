@@ -7,9 +7,9 @@ import com.google.gson.JsonObject;
 public class GoogleResults {
 
    
-    private String title = null;
-    private String link = null;
-    private String snippet = null;
+    private String title;
+    private String link;
+    private String snippet;
     
     
     public GoogleResults(JsonObject object){
@@ -19,15 +19,13 @@ public class GoogleResults {
     }
     @Override
     public String toString(){
-    	StringBuilder str = new StringBuilder();
-    	str.append(Colors.BOLD);
-    	str.append(title);
-    	str.append(Colors.NORMAL);
-    	str.append(" - ");
-    	str.append(link);
-    	str.append(" :");
-    	str.append(snippet);
-    	return str.toString();
+		return Colors.BOLD +
+				title +
+				Colors.NORMAL +
+				" - " +
+				link +
+				" :" +
+				snippet;
     }
     
     

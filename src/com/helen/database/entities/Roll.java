@@ -1,9 +1,11 @@
-package com.helen.database;
+package com.helen.database.entities;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.helen.database.Configs;
+import com.helen.database.framework.DatabaseObject;
 import org.jibble.pircbot.Colors;
 
 public class Roll implements DatabaseObject {
@@ -15,9 +17,9 @@ public class Roll implements DatabaseObject {
 	private Integer bonus = 0;
 	private String diceMessage = "";
 	private String dicetype = "u";
-	private ArrayList<Integer> values = new ArrayList<Integer>();
+	private final ArrayList<Integer> values = new ArrayList<>();
 	private Integer diceThrows = null;
-	private String username = null;
+	private String username;
 
 	public Roll(String diceCommand, String username) {
 		diceString = diceCommand;
@@ -47,7 +49,7 @@ public class Roll implements DatabaseObject {
 		return diceString;
 	}
 
-	public Integer getDiceThrows() {
+	private Integer getDiceThrows() {
 		return values.size();
 	}
 
@@ -75,7 +77,7 @@ public class Roll implements DatabaseObject {
 		return username;
 	}
 
-	public Integer getComputedRoll() {
+	private Integer getComputedRoll() {
 		Integer sum = 0;
 		for (Integer i : values) {
 			sum += i;
@@ -183,7 +185,7 @@ public class Roll implements DatabaseObject {
 
 	}
 
-	public String getExpanded() {
+	private String getExpanded() {
 		StringBuilder rollString = new StringBuilder();
 		int count = 0;
 		for (Integer i : values) {

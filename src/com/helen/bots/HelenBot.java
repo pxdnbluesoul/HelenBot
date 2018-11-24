@@ -1,8 +1,8 @@
 package com.helen.bots;
 
-import com.helen.commands.Command;
-import com.helen.commands.CommandData;
-import com.helen.database.Config;
+import com.helen.commandframework.CommandRegistry;
+import com.helen.commandframework.CommandData;
+import com.helen.database.entities.Config;
 import com.helen.database.Configs;
 import com.helen.database.Users;
 import org.apache.log4j.Logger;
@@ -15,22 +15,22 @@ import java.util.HashMap;
 
 public class HelenBot extends PircBot {
 
-	private static Command cmd = null;
+	private static CommandRegistry cmd = null;
 	
 	private static final Logger logger = Logger.getLogger(HelenBot.class);
-	private static HashMap<String, Boolean> jarvisPresent = new HashMap<String, Boolean>();
+	private static final HashMap<String, Boolean> jarvisPresent = new HashMap<>();
 
-	public HelenBot() throws NickAlreadyInUseException, IOException,
+	public HelenBot() throws IOException,
 			IrcException, InterruptedException {
 		logger.info("Initializing HelenBot v"
 				+ Configs.getSingleProperty("version").getValue());
 		this.setVerbose(true);
 		connect();
 		joinChannels();
-		cmd = new Command(this);
+		cmd = new CommandRegistry(this);
 	}
 
-	private void connect() throws NickAlreadyInUseException, IOException,
+	private void connect() throws IOException,
 			IrcException, InterruptedException {
 
 		this.setLogin(Configs.getSingleProperty("hostname").getValue());
@@ -40,9 +40,9 @@ public class HelenBot extends PircBot {
 		} catch (NickAlreadyInUseException e) {
 			this.identify(Configs.getSingleProperty("pass").getValue());
 		}
-		Thread.sleep(1000l);
+		Thread.sleep(1000L);
 		this.identify(Configs.getSingleProperty("pass").getValue());
-		Thread.sleep(2000l);
+		Thread.sleep(2000L);
 	}
 
 	private void joinChannels() {
@@ -61,19 +61,18 @@ public class HelenBot extends PircBot {
 	public void onMessage(String channel, String sender, String login,
 			String hostname, String message) {
 		Users.insertUser(sender, hostname, message, channel.toLowerCase());
-		cmd.dispatchTable(new CommandData(channel, sender, login, hostname,
+		cmd.handleCommand(new CommandData(channel, sender, login, hostname,
 				message));
 	}
 
+
+
 	public void onPrivateMessage(String sender, String login, String hostname,
 			String message) {
-		dispatchTable(sender, login, hostname, message);
+		cmd.handleCommand(new CommandData("", sender, login, hostname, message));
 	}
 
-	private void dispatchTable(String sender, String login, String hostname,
-			String message) {
-		cmd.dispatchTable(new CommandData("", sender, login, hostname, message));
-	}
+
 
 	public void sendWho(String channel){
 		this.sendRawLine("WHO " + channel);
@@ -131,9 +130,7 @@ public class HelenBot extends PircBot {
 	public void onPart(String channel, String sender, String login,
 			String hostname) {
 		if (sender.equalsIgnoreCase("jarvis")) {
-			if (jarvisPresent.containsKey(channel.toLowerCase())) {
-				jarvisPresent.remove(channel.toLowerCase());
-			}
+			jarvisPresent.remove(channel.toLowerCase());
 		}
 	}
 	
@@ -150,11 +147,7 @@ public class HelenBot extends PircBot {
 	}
 
 	public Boolean jarvisCheck(String channel) {
-		if (jarvisPresent.containsKey(channel.toLowerCase())) {
-			return jarvisPresent.get(channel.toLowerCase());
-		} else {
-			return false;
-		}
+		return jarvisPresent.getOrDefault(channel.toLowerCase(), false);
 	}
 
 	public void onJoin(String channel, String sender, String login,

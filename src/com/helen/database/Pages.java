@@ -1,6 +1,9 @@
 package com.helen.database;
 
-import com.helen.commands.CommandData;
+import com.helen.commandframework.CommandData;
+import com.helen.database.entities.Author;
+import com.helen.database.entities.Page;
+import com.helen.database.framework.*;
 import org.apache.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
@@ -23,18 +26,17 @@ import java.util.regex.Pattern;
 public class Pages {
 
 	
-	private static final Long YEARS = 1000 * 60 * 60 * 24 * 365l;
-	private static final Long DAYS = 1000 * 60 * 60 * 24l;
-	private static final Long HOURS = 1000 * 60l * 60;
-	private static final Long MINUTES = 1000 * 60l;
+	private static final Long YEARS = 1000 * 60 * 60 * 24 * 365L;
+	private static final Long DAYS = 1000 * 60 * 60 * 24L;
+	private static final Long HOURS = 1000 * 60L * 60;
+	private static final Long MINUTES = 1000 * 60L;
 	private static final Logger logger = Logger.getLogger(Pages.class);
-	private static XmlRpcClientConfigImpl config;
 	private static XmlRpcClient client;
 	private static Long lastLc = System.currentTimeMillis() - 20000;
-	private static HashMap<String, ArrayList<Selectable>> storedEvents = new HashMap<String, ArrayList<Selectable>>();
+	private static final HashMap<String, ArrayList<Selectable>> storedEvents = new HashMap<>();
 
 	static {
-		config = new XmlRpcClientConfigImpl();
+		XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
 		try {
 			config.setServerURL(new URL(Configs.getSingleProperty(
 					"wikidotServer").getValue()));
@@ -60,12 +62,12 @@ public class Pages {
 
 	private static Object pushToAPI(String method, Object... params)
 			throws XmlRpcException {
-		return (Object) client.execute(method, params);
+		return client.execute(method, params);
 	}
 
 	public static ArrayList<String> lastCreated() {
 		if (System.currentTimeMillis() - lastLc > 15000) {
-			ArrayList<String> pagelist = new ArrayList<String>();
+			ArrayList<String> pagelist = new ArrayList<>();
 			try {
 				String regex = "<td style=\"vertical-align: top;\"><a href=\"\\/(.+)\">(.+)<\\/a><\\/td>";
 				Pattern r = Pattern.compile(regex);
@@ -129,20 +131,20 @@ public class Pages {
 		return getPageInfo(pagename, true);
 	}
 
-	public static String getPageInfo(String pagename, boolean ratingEnabled) {
+	private static String getPageInfo(String pagename, boolean ratingEnabled) {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		String targetName = pagename.toLowerCase();
-		Map<String, Object> params = new HashMap<String, Object>();
+		Map<String, Object> params = new HashMap<>();
 		params.put("site", Configs.getSingleProperty("site").getValue());
 		String[] target = new String[] { targetName.toLowerCase() };
 		params.put("pages", target);
-		ArrayList<String> keyswewant = new ArrayList<String>();
-		keyswewant.add("title_shown");
-		keyswewant.add("rating");
-		keyswewant.add("created_at");
-		keyswewant.add("title");
-		keyswewant.add("created_by");
-		keyswewant.add("tags");
+		ArrayList<String> keys = new ArrayList<>();
+		keys.add("title_shown");
+		keys.add("rating");
+		keys.add("created_at");
+		keys.add("title");
+		keys.add("created_by");
+		keys.add("tags");
 		try {
 			@SuppressWarnings("unchecked")
 			HashMap<String, HashMap<String, Object>> result = (HashMap<String, HashMap<String, Object>>) pushToAPI(
@@ -195,7 +197,7 @@ public class Pages {
 		user = user.toLowerCase();
 		try{
 			
-			ArrayList<Selectable> authors = new ArrayList<Selectable>();
+			ArrayList<Selectable> authors = new ArrayList<>();
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findAuthors"), "%" + user + "%");
 			ResultSet rs = stmt.getResultSet();
 			while(rs != null && rs.next()){
@@ -235,7 +237,7 @@ public class Pages {
 		return "I apologize, there's been an error.  Please inform DrMagnus there's an error with author details.";
 	}
 	
-	public static String getAuthorDetailsPages(String user){
+	private static String getAuthorDetailsPages(String user){
 		String lowerUser = user.toLowerCase();
 		Page authorPage = null;
 		try{
@@ -250,7 +252,7 @@ public class Pages {
 		rs.close();
 		stmt.close();
 		
-		ArrayList<Page> pages = new ArrayList<Page>();
+		ArrayList<Page> pages = new ArrayList<>();
 		stmt = Connector.getStatement(Queries.getQuery("findSkips"), lowerUser);
 		rs = stmt.getResultSet();
 		while(rs != null && rs.next()){
@@ -293,7 +295,7 @@ public class Pages {
 		int tales = 0;
 		int rating = 0;
 			int total = 0;
-		Timestamp ts = new java.sql.Timestamp(0l);
+		Timestamp ts = new java.sql.Timestamp(0L);
 		Page latest = null;
 		for(Page p: pages){
 			total++;
@@ -358,21 +360,21 @@ public class Pages {
 	}
 
 	public static String getPotentialTargets(String[] terms, String username) {
-		Boolean exact = terms[1].equalsIgnoreCase("-e");
+		boolean exact = terms[1].equalsIgnoreCase("-e");
 		int indexOffset = 1;
 		if(exact){
 			indexOffset = 2;
 		}
-		ArrayList<Selectable> potentialPages = new ArrayList<Selectable>();
+		ArrayList<Selectable> potentialPages = new ArrayList<>();
 		String[] lowerterms = new String[terms.length - indexOffset];
 		for (int i = indexOffset ; i < terms.length; i++) {
 			lowerterms[i - indexOffset] = terms[i].toLowerCase();
 			logger.info(lowerterms[i - indexOffset]);
 		}
 		try {
-			ResultSet rs = null;
+			ResultSet rs;
 			CloseableStatement stmt = null;
-			PreparedStatement state = null;
+			PreparedStatement state;
 			Connection conn = null;
 			if(exact){
 				stmt = Connector.getArrayStatement(
@@ -380,15 +382,15 @@ public class Pages {
 				logger.info(stmt.toString());
 				rs = stmt.getResultSet();
 			}else{
-				String query = "select pagename,title,scptitle,scppage from pages where";
+				StringBuilder query = new StringBuilder("select pagename,title,scptitle,scppage from pages where");
 				for(int j = indexOffset; j < terms.length; j++){
 					if(j != indexOffset){
-						query +=" and";
+						query.append(" and");
 					}
-					query += " lower(coalesce(scptitle, title)) like ?";
+					query.append(" lower(coalesce(scptitle, title)) like ?");
 				}
 				conn = Connector.getConnection();
-				state = conn.prepareStatement(query);
+				state = conn.prepareStatement(query.toString());
 				for(int j = indexOffset; j < terms.length; j++){
 					state.setString(j - (indexOffset - 1), "%"+terms[j].toLowerCase()+"%");
 				}
@@ -455,10 +457,10 @@ public class Pages {
 	}
 
 	
-	public static String findTime(Long time){
+	private static String findTime(Long time){
 		//compensate for EST (helen runs in EST)
 		time = (System.currentTimeMillis() + HOURS * 4) - time;
-		Long diff = 0l;
+		long diff;
 		if(time >= YEARS){
 			diff = time/YEARS;
 			return (time / YEARS) + " year" + (diff > 1 ? "s" : "") + " ago ";

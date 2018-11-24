@@ -3,7 +3,11 @@ package com.helen.database;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
-import com.helen.commands.CommandData;
+import com.helen.commandframework.CommandData;
+import com.helen.database.entities.Tell;
+import com.helen.database.framework.CloseableStatement;
+import com.helen.database.framework.Connector;
+import com.helen.database.framework.Queries;
 import org.apache.log4j.Logger;
 
 public class Tells {
@@ -41,7 +45,7 @@ public class Tells {
 	}
 	
 	public static ArrayList<Tell> getTells(String username){
-		ArrayList<Tell> list = new ArrayList<Tell>();
+		ArrayList<Tell> list = new ArrayList<>();
 		try{
 
 			Integer id = Nicks.getNickGroup(username.toLowerCase());

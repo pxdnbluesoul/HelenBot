@@ -23,15 +23,16 @@ import org.apache.http.util.EntityUtils;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class SendMultiPm {
+class SendMultiPm {
     public static void main(String[] args) throws Exception{
         sendPost(args);
 
     }
     private final String USER_AGENT = "Mozilla/5.0";
-    private static CookieStore cookieStore = new BasicCookieStore();
+    private static final CookieStore cookieStore = new BasicCookieStore();
 
     private static CloseableHttpClient httpclient;
 
@@ -50,20 +51,20 @@ public class SendMultiPm {
             params.put("action", "Login2Action");
             params.put("event", "login");
             HttpResponse response = sendRequest(params, url);
-            Reader in2 = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+            Reader in2 = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8));
 
             for (int c; (c = in2.read()) >= 0; )
                 System.out.print((char) c);
             EntityUtils.consume(response.getEntity());
 
             String s = "https://www.wikidot.com/quickmodule.php?module=UserLookupQModule&q=" + username;
-            response = sendRequest(new HashMap<String, String>(), s);
+            response = sendRequest(new HashMap<>(), s);
 
             BufferedReader r = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 
             StringBuilder total = new StringBuilder();
 
-            String line = null;
+            String line;
             String id = null;
 
             while ((line = r.readLine()) != null) {
@@ -85,7 +86,7 @@ public class SendMultiPm {
             String urlForPm = "https://www.wikidot.com/ajax-module-connector.php";
 
             HttpPost httpPost2 = new HttpPost(urlForPm);
-            Map<String, String> nvps = new HashMap<String, String>();
+            Map<String, String> nvps = new HashMap<>();
             nvps.put("moduleName", "Empty");
             nvps.put("source", "Testing");
             nvps.put("subject", "TestPM");
@@ -98,7 +99,7 @@ public class SendMultiPm {
 
             System.out.println(response.getStatusLine());
             HttpEntity entity4 = response.getEntity();
-            in2 = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+            in2 = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8));
 
             for (int c; (c = in2.read()) >= 0; )
                 System.out.print((char) c);
