@@ -128,7 +128,7 @@ public class Command {
 			try {
 
 				Method m = hashableCommandList.get(data.getCommand().toLowerCase());
-				if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !helen.jarvisCheck(data.getChannel().toLowerCase())) {
+				if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !helen.jarvisIsPresent(data.getChannel().toLowerCase())) {
 					if (securityLevel >= (adminMode
 							? Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity)
 							: m.getAnnotation(IRCCommand.class).securityLevel())) {
@@ -150,7 +150,7 @@ public class Command {
 				if (data.getMessage().toLowerCase().contains(command.toLowerCase())) {
 					try {
 						Method m = slowCommands.get(command);
-						if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !helen.jarvisCheck(data.getChannel())) {
+						if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !helen.jarvisIsPresent(data.getChannel())) {
 							if (securityLevel >= (adminMode
 									? Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity)
 									: m.getAnnotation(IRCCommand.class).securityLevel())) {
@@ -179,7 +179,7 @@ public class Command {
 							if(m.getAnnotation(IRCCommand.class).matcherGroup() != -1){
 								data.setRegexTarget(match.group(m.getAnnotation(IRCCommand.class).matcherGroup()));
 							}
-							if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !helen.jarvisCheck(data.getChannel())) {
+							if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !helen.jarvisIsPresent(data.getChannel())) {
 								if (securityLevel >= (adminMode
 										? Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity)
 										: m.getAnnotation(IRCCommand.class).securityLevel())) {
@@ -227,7 +227,7 @@ public class Command {
 
 	@IRCCommand(command = { ".jarvistest" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
 	public void listTest(CommandData data) {
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + helen.jarvisCheck(data.getTarget()));
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + helen.jarvisIsPresent(data.getTarget()));
 	}
 
 	@IRCCommand(command = { ".ch", ".choose" }, startOfLine = true, securityLevel = 1)

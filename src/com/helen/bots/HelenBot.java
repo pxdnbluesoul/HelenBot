@@ -147,7 +147,7 @@ public class HelenBot extends PircBot {
 		}
 	}
 
-	public Boolean jarvisCheck(String channel) {
+	public Boolean jarvisIsPresent(String channel) {
 		return jarvisPresent.getOrDefault(channel.toLowerCase(), false);
 	}
 
@@ -158,10 +158,10 @@ public class HelenBot extends PircBot {
 
 		}
 		//removing extraneous logging
-		//logger.info("JOINED: " + sender + " LOGIN: " + login + " HOSTNAME: " + hostname + " CHANNEL: " + channel);
+		logger.info("JOINED: " + sender + " LOGIN: " + login + " HOSTNAME: " + hostmask + " CHANNEL: " + channel);
 		//Testing in separate channel
 		try {
-			if (channel.equalsIgnoreCase("#helenTest") && !jarvisCheck(channel)) {
+			if (channel.equalsIgnoreCase("#helenTest") && !jarvisIsPresent(channel)) {
 				BanInfo info = Bans.getUserBan(sender, hostmask);
 				if (info != null) {
 					kick(sender, channel, info.getBanReason());
