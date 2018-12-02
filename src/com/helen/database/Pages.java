@@ -179,7 +179,7 @@ public class Pages {
 			returnString.append(result.get(targetName).get("created_by"));
 			returnString.append(")");
 			returnString.append(" - ");
-			returnString.append("http://www.scp-wiki.net/");
+            returnString.append("http://scp-wiki.net/");
 			returnString.append(targetName);
 
 			return returnString.toString();
@@ -457,23 +457,23 @@ public class Pages {
 	
 	public static String findTime(Long time){
 		//compensate for EST (helen runs in EST)
-		time  = (System.currentTimeMillis() + HOURS * 5) - time;
+		time = (System.currentTimeMillis() + HOURS * 4) - time;
 		Long diff = 0l;
 		if(time >= YEARS){
 			diff = time/YEARS;
-			return (time/YEARS) + " year" + (diff > 1 ? "s" : "") + " ago by ";
+			return (time / YEARS) + " year" + (diff > 1 ? "s" : "") + " ago ";
 			
 		}else if( time >= DAYS){
 			diff = time/DAYS;
-			return (time/DAYS) + " day" + (diff > 1 ? "s" : "") + " ago by ";
+			return (time / DAYS) + " day" + (diff > 1 ? "s" : "") + " ago ";
 			
 		}else if(time >= HOURS){
 			diff = (time/HOURS);
-			return (time/HOURS) + " hour" + (diff > 1 ? "s" : "") + " ago by ";
+			return (time / HOURS) + " hour" + (diff > 1 ? "s" : "") + " ago ";
 			
 		}else if( time >= MINUTES){
 			diff = time/MINUTES;
-			return (time/MINUTES) + " minute" + (diff > 1 ? "s" : "") + " ago by ";
+			return (time / MINUTES) + " minute" + (diff > 1 ? "s" : "") + " ago ";
 			
 		}else{
 			return "A few seconds ago ";

@@ -90,10 +90,15 @@ public class HelenBot extends PircBot {
 
 	public void onServerResponse(int code, String response) {
 		if (code == 352) {
+			logger.info(response);
 			if(response.split(" ")[5].equalsIgnoreCase("jarvis")){
 				jarvisPresent.put(response.split(" ")[1].toLowerCase(), true);
 			}
 		}
+	}
+
+	public void jarvisReset(String channel){
+		jarvisPresent.remove(channel.toLowerCase());
 	}
 
 	public void onDisconnect(){
@@ -125,7 +130,7 @@ public class HelenBot extends PircBot {
 			String hostname) {
 		if (sender.equalsIgnoreCase("jarvis")) {
 			if (jarvisPresent.containsKey(channel.toLowerCase())) {
-				jarvisPresent.put(channel.toLowerCase(), false);
+				jarvisPresent.remove(channel.toLowerCase());
 			}
 		}
 	}
