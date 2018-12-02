@@ -654,9 +654,12 @@ public class Command {
 
 	@IRCCommand(command = ".user", startOfLine = true, securityLevel = 1, coexistWithJarvis = false)
 	public void getUserName(CommandData data){
-    	List<String> comm = Arrays.asList(data.getSplitMessage());
-    	comm.remove(0);
-    	helen.sendMessage(data.getChannel(), data.getSender() + ": http://www.wikidot.com/user:info/" + StringUtils.join(comm,"_"));
+    	List<String> list = new ArrayList<>();
+    	String[] words = data.getSplitMessage();
+    	for(int i = 1; i < words.length; i++){
+    		list.add(words[i]);
+		}
+    	helen.sendMessage(data.getChannel(), data.getSender() + ": http://www.wikidot.com/user:info/" + StringUtils.join(list,"_"));
 	}
 
 	private String buildResponse(ArrayList<? extends DatabaseObject> dbo) {
