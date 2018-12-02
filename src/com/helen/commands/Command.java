@@ -5,13 +5,16 @@ import com.helen.database.*;
 import com.helen.search.WebSearch;
 import com.helen.search.WebsterSearch;
 import com.helen.search.YouTubeSearch;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jibble.pircbot.User;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -651,7 +654,9 @@ public class Command {
 
 	@IRCCommand(command = ".user", startOfLine = true, securityLevel = 1, coexistWithJarvis = false)
 	public void getUserName(CommandData data){
-    	helen.sendMessage(data.getChannel(), data.getSender() + ": http://www.wikidot.com/user:info/" + data.getTarget());
+    	List<String> comm = Arrays.asList(data.getSplitMessage());
+    	comm.remove(0);
+    	helen.sendMessage(data.getChannel(), data.getSender() + ": http://www.wikidot.com/user:info/" + StringUtils.join(comm,"_"));
 	}
 
 	private String buildResponse(ArrayList<? extends DatabaseObject> dbo) {
