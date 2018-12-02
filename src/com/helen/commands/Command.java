@@ -114,7 +114,7 @@ public class Command {
 		return list;
 	}
 
-	
+
 
 	public void dispatchTable(CommandData data) {
 
@@ -175,7 +175,7 @@ public class Command {
 					if (match.matches()) {
 						try {
 							Method m = regexCommands.get(regex);
-							
+
 							if(m.getAnnotation(IRCCommand.class).matcherGroup() != -1){
 								data.setRegexTarget(match.group(m.getAnnotation(IRCCommand.class).matcherGroup()));
 							}
@@ -196,7 +196,7 @@ public class Command {
 									+ regexCommands.get(regex).getAnnotation(IRCCommand.class).command(), e);
 						}
 					}
-				
+
 			}
 		}
 	}
@@ -270,7 +270,7 @@ public class Command {
 
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Nicks.deleteAllNicks(data, false));
 	}
-	
+
 	@IRCCommand(command = { "rollTest" }, startOfLine = true, securityLevel = 1, reg = true,
 			regex = {"([0-9]+)(d|f)([0-9]+)([+|-]?[0-9]+)?(\\s-e|-s)?\\s?(-e|-s)?\\s?(.+)?"})
 	public void regexRoll(CommandData data) {
@@ -298,7 +298,7 @@ public class Command {
 		}
 
 	}
-	
+
 	@IRCCommand(command = {".hugme"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
 	public void hugMe(CommandData data){
 		if(data.isHugList()){
@@ -307,7 +307,7 @@ public class Command {
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": You're not authorized to do that.");
 		}
 	}
-	
+
 	@IRCCommand(command={".hugHelen",".helenhug",".hugsplox"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
 	public void hug(CommandData data){
 		if(data.isHugList()){
@@ -323,7 +323,7 @@ public class Command {
 					"*Sigh* And I just calibrated my sights...",
 					"I'm not sure why you're hugging me but...thank...you?",
 					"Yes...Human emotion.  This is...nice.  Please let go of me."};
-			
+
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + messages[((int) (Math.random() * (messages.length - 1)))]);
 		}
 	}
@@ -354,12 +354,12 @@ public class Command {
 				data.getSender() + ": " + YouTubeSearch.youtubeSearch(data.getMessage()).toString());
 
 	}
-	
+
 	@IRCCommand(command = {".helen",".helenHelp"}, startOfLine = true, securityLevel = 1, coexistWithJarvis = true)
 	public void helenHelp(CommandData data){
 		help(data);
 	}
-	
+
 	@IRCCommand(command = ".help", startOfLine = true, securityLevel = 1)
 	public void help(CommandData data){
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": You can find a list of my job responsibilities here:  http://home.helenbot.com/usage.html");
@@ -369,7 +369,7 @@ public class Command {
 	public void seen(CommandData data) {
 		helen.sendMessage(data.getResponseTarget(), Users.seen(data));
 	}
-	
+
 	@IRCCommand(command = ".sm", startOfLine = true, securityLevel = 1)
 	public void selectResult(CommandData data){
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getStoredInfo(data.getTarget(), data.getSender()));
@@ -410,13 +410,13 @@ public class Command {
             helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I can't do that yet.");
         }
     }
-	
+
 	@IRCCommand(command = ".au", startOfLine = true, securityLevel = 1)
 	public void authorDetail(CommandData data){
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getAuthorDetail(
 				data, data.getSplitMessage().length == 1 ? data.getSender() :  data.getMessageWithoutCommand()));
 	}
-	
+
 	@IRCCommand(command = "SCPPAGEREGEX", startOfLine= true, reg = true, regex = { "http:\\/\\/www.scp-wiki.net\\/(.*)" }, securityLevel = 1, matcherGroup = 1)
 	public void getPageInfo(CommandData data){
 		if(!data.getRegexTarget().contains("/") && !data.getRegexTarget().contains("forum")){
@@ -463,7 +463,7 @@ public class Command {
 		if(data.getSplitMessage().length == 1){
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + "{shoot|lcratings}");
 		}else{
-			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Configs.insertToggle(data, data.getTarget(), 
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Configs.insertToggle(data, data.getTarget(),
 					data.getSplitMessage()[2].equalsIgnoreCase("true") ? true : false));
 		}
 	}
@@ -476,7 +476,7 @@ public class Command {
 				Tells.sendTell(c.getValue(), "Secretary_Helen",
 						"User " + data.getSender() + " attempted to add a banned term:" + response +". Their full message "
 						+ "was: " + data.getMessage(), true);
-				
+
 			}
 		}
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
@@ -497,7 +497,7 @@ public class Command {
 		}
 
 	}
-	
+
 	@IRCCommand(command = {".def",".definition"}, startOfLine = true, coexistWithJarvis = false, securityLevel = 1)
 	public void define(CommandData data){
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + WebsterSearch.dictionarySearch(data.getTarget()));
@@ -583,7 +583,7 @@ public class Command {
 		Configs.clear();
 		Pronouns.reload();
 	}
-	
+
 	@IRCCommand(command = ".shoot", startOfLine = true, securityLevel = 4, coexistWithJarvis = true)
 	public void shootUser(CommandData data) {
 		if(Configs.commandEnabled(data, "shoot")){
@@ -599,18 +599,18 @@ public class Command {
 				if(bullets < 1){
 					reload(data);
 				}
-				helen.sendMessage(data.getChannel(), "Be careful " + data.getTarget() + ". I still have " + 
+				helen.sendMessage(data.getChannel(), "Be careful " + data.getTarget() + ". I still have " +
 				(bullets > 1 ? bullets + " bullets left." : "one in the chamber."));
 			}
 		}
 	}
-	
+
 	@IRCCommand(command = ".reload", startOfLine = true, securityLevel = 4)
 	public void reload(CommandData data) {
 		helen.sendAction(data.getChannel(), "reloads all six cylinders.");
 		bullets = 6;
 	}
-	
+
 	@IRCCommand(command = ".unload", startOfLine = true, securityLevel = 4, coexistWithJarvis = true)
 	public void unload(CommandData data) {
 		if(Configs.commandEnabled(data, "shoot")){
@@ -637,15 +637,15 @@ public class Command {
 				" and the resulting fracturing between IRC and Discord. There are also several concerns about " +
 				"the technical and financial viability of discord.");
 	}
-	
+
 	@IRCCommand(command = ".updateBans", startOfLine = true, securityLevel = 4, coexistWithJarvis = true)
 	public void updateBans(CommandData data) {
 		try {
 			Bans.updateBans();
+			helen.sendMessage(data.getChannel(), "Ban List successfully updated.");
 		} catch (Exception e) {
 			helen.sendMessage(data.getChannel(), "Error parsing chat ban page. Please check the page for correct syntax.");
 		}
-		helen.sendMessage(data.getChannel(), "Ban List successfully updated.");
 	}
 
 	private String buildResponse(ArrayList<? extends DatabaseObject> dbo) {

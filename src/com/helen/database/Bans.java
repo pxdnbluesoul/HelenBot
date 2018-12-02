@@ -17,7 +17,7 @@ import java.util.List;
 public class Bans {
 
 	private static final HashSet<BanInfo> bansIn19 = new HashSet<>();
-	static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/MM/yyyy");
+	static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 	public static void updateBans() throws IOException {
 
 		bansIn19.clear();
