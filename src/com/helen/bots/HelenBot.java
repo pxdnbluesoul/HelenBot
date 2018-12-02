@@ -2,9 +2,7 @@ package com.helen.bots;
 
 import com.helen.commands.Command;
 import com.helen.commands.CommandData;
-import com.helen.database.Config;
-import com.helen.database.Configs;
-import com.helen.database.Users;
+import com.helen.database.*;
 import org.apache.log4j.Logger;
 import org.jibble.pircbot.IrcException;
 import org.jibble.pircbot.NickAlreadyInUseException;
@@ -150,20 +148,25 @@ public class HelenBot extends PircBot {
 	}
 
 	public Boolean jarvisCheck(String channel) {
-		if (jarvisPresent.containsKey(channel.toLowerCase())) {
-			return jarvisPresent.get(channel.toLowerCase());
-		} else {
-			return false;
-		}
+		return jarvisPresent.getOrDefault(channel.toLowerCase(), false);
 	}
 
 	public void onJoin(String channel, String sender, String login,
-			String hostname) {
+			String hostmask) {
 		if (sender.equalsIgnoreCase("jarvis")) {
-			if (jarvisPresent.containsKey(channel.toLowerCase())) {
-				jarvisPresent.put(channel.toLowerCase(), true);
-			}
+			jarvisPresent.put(channel.toLowerCase(), true);
+
 		}
+		//removing extraneous logging
+		//logger.info("JOINED: " + sender + " LOGIN: " + login + " HOSTNAME: " + hostname + " CHANNEL: " + channel);
+		//Testing in separate channel
+		if (channel.equals("#helenTest") && !jarvisPresent.get((channel.toLowerCase()))) {
+			BanInfo info = Bans.getUserBan(sender, hostmask);
+			if(info != null) {
+				kick(sender, channel, info.getBanReason());
+				ban(hostmask, channel);
+			} 
+		} 
 	}
 
 }
