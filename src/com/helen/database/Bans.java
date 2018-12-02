@@ -1,6 +1,6 @@
 package com.helen.database;
 
-import javafx.util.converter.LocalDateStringConverter;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -11,15 +11,13 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
 public class Bans {
 
 	private static final HashSet<BanInfo> bansIn19 = new HashSet<>();
-	private static final LocalDateStringConverter conv = new LocalDateStringConverter(DateTimeFormatter.ofPattern("MM/dd/yyyy"), null);
-
+	static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/MM/yyyy");
 	public static void updateBans() throws IOException {
 
 		bansIn19.clear();
@@ -42,10 +40,12 @@ public class Bans {
 			List<String> ipList = Arrays.asList(ips.split(" "));
 			LocalDate bdate;
 
+
+
 			if(date.contains("/")) {
-				bdate = conv.fromString(date);
+				bdate = LocalDate.parse(date,formatter);
 			} else {
-				bdate = conv.fromString("12/31/2999");
+				bdate = LocalDate.parse("12/31/2999",formatter);
 			}
 
 			bansIn19.add(new BanInfo(nameList, ipList, reason, bdate));
