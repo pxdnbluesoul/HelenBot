@@ -649,6 +649,11 @@ public class Command {
 		}
 	}
 
+	@IRCCommand(command = ".user", startOfLine = true, securityLevel = 1, coexistWithJarvis = false)
+	public void getUserName(CommandData data){
+    	helen.sendMessage(data.getChannel(), data.getSender() + ": http://www.wikidot.com/user:info/" + data.getTarget());
+	}
+
 	private String buildResponse(ArrayList<? extends DatabaseObject> dbo) {
 		StringBuilder str = new StringBuilder();
 		str.append("{");
