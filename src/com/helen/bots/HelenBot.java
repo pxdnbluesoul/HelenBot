@@ -25,6 +25,7 @@ public class HelenBot extends PircBot {
 		this.setVerbose(true);
 		connect();
 		joinChannels();
+		Bans.updateBans();
 		cmd = new Command(this);
 	}
 
@@ -158,14 +159,14 @@ public class HelenBot extends PircBot {
 
 		}
 		//removing extraneous logging
-		logger.info("JOINED: " + sender + " LOGIN: " + login + " HOSTNAME: " + hostmask + " CHANNEL: " + channel);
+		//logger.info("JOINED: " + sender + " LOGIN: " + login + " HOSTNAME: " + hostmask + " CHANNEL: " + channel);
 		//Testing in separate channel
 		try {
 			if (channel.equalsIgnoreCase("#helenTest") && !jarvisIsPresent(channel)) {
 				BanInfo info = Bans.getUserBan(sender, hostmask);
 				if (info != null) {
-					kick(sender, channel, info.getBanReason());
-					ban(hostmask, channel);
+					kick(channel, sender, info.getBanReason());
+					ban(channel, hostmask);
 				}
 			}
 		}catch(Exception e){
