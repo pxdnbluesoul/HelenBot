@@ -645,6 +645,7 @@ public class Command {
 			helen.sendMessage(data.getChannel(), "Ban List successfully updated.");
 		} catch (Exception e) {
 			helen.sendMessage(data.getChannel(), "Error parsing chat ban page. Please check the page for correct syntax.");
+			logger.error("Exception attempting to update bans.",e);
 		}
 	}
 
