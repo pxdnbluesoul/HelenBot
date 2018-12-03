@@ -162,12 +162,10 @@ public class HelenBot extends PircBot {
 		//logger.info("JOINED: " + sender + " LOGIN: " + login + " HOSTNAME: " + hostmask + " CHANNEL: " + channel);
 		//Testing in separate channel
 		try {
-			if (channel.equalsIgnoreCase("#helenTest") && !jarvisIsPresent(channel)) {
-				BanInfo info = Bans.getUserBan(sender, hostmask);
-				if (info != null) {
-					kick(channel, sender, info.getBanReason());
-					ban(channel, hostmask);
-				}
+			BanInfo info = Bans.getUserBan(sender, hostmask, channel);
+			if (info != null) {
+				kick(channel, sender, info.getBanReason());
+				ban(channel, hostmask);
 			}
 		}catch(Exception e){
 			logger.error("Exception attempting onjoin for " + channel + " , " + sender + " " + login + " " + hostmask,e);

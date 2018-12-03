@@ -17,6 +17,7 @@ import java.util.List;
 public class Bans {
 
 	private static final HashSet<BanInfo> bansIn19 = new HashSet<>();
+	private static final HashSet<BanInfo> bansIn17 = new HashSet<>();
 	static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 	public static void updateBans() throws IOException {
 
@@ -24,8 +25,16 @@ public class Bans {
 
 		URL url = new URL("http://05command.wikidot.com/chat-ban-page");
 		Document result = Jsoup.parse(url, 3000);
+		Element table19 = result.select("table").get(0);
+		Element table17 = result.select("table").get(1);
 
-		Element table = result.select("table").get(0);
+		populateBanList(bansIn19, table19);
+		populateBanList(bansIn17, table17);
+
+
+	}
+
+	private static void populateBanList(HashSet<BanInfo> banList, Element table){
 		Elements rows = table.select("tr");
 		for(int i = 2; i < rows.size(); i++) {
 			Element row = rows.get(i);
@@ -48,17 +57,29 @@ public class Bans {
 				bdate = LocalDate.parse("12/31/2999",formatter);
 			}
 
-			bansIn19.add(new BanInfo(nameList, ipList, reason, bdate));
+			banList.add(new BanInfo(nameList, ipList, reason, bdate));
 		}
-
 	}
 
-	public static BanInfo getUserBan(String username, String hostmask){
-		for(BanInfo info : bansIn19){
-			if(info.getIPs().contains(hostmask) || info.getUserNames().contains(username)){
-				return info;
+
+
+	public static BanInfo getUserBan(String username, String hostmask, String channel){
+		if(channel.equalsIgnoreCase("#site17")){
+			for(BanInfo info : bansIn17){
+				if(info.getIPs().contains(hostmask) || info.getUserNames().contains(username)){
+					return info;
+				}
 			}
+		}else if(channel.equalsIgnoreCase("#site19")){
+			for(BanInfo info : bansIn19){
+				if(info.getIPs().contains(hostmask) || info.getUserNames().contains(username)){
+					return info;
+				}
+			}
+		}else{
+			return null;
 		}
+
 
 		return null;
 	}
