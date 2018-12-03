@@ -72,7 +72,7 @@ public class Bans {
 					return info;
 				}
 			}
-		}else if(channel.equalsIgnoreCase("#site19")){
+		}else if(channel.equalsIgnoreCase("#site19") || channel.equalsIgnoreCase("#thecritters") ){
 			for(BanInfo info : bansIn19){
 				if((info.getIPs().contains(hostmask) || info.getUserNames().contains(username)) && info.getBanEnd().isAfter(today)){
 					return info;
