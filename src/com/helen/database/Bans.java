@@ -9,6 +9,7 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.chrono.ChronoLocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -64,15 +65,16 @@ public class Bans {
 
 
 	public static BanInfo getUserBan(String username, String hostmask, String channel){
+		LocalDate today = LocalDate.now();
 		if(channel.equalsIgnoreCase("#site17")){
 			for(BanInfo info : bansIn17){
-				if(info.getIPs().contains(hostmask) || info.getUserNames().contains(username)){
+				if((info.getIPs().contains(hostmask) || info.getUserNames().contains(username)) && info.getBanEnd().isAfter(today)){
 					return info;
 				}
 			}
 		}else if(channel.equalsIgnoreCase("#site19")){
 			for(BanInfo info : bansIn19){
-				if(info.getIPs().contains(hostmask) || info.getUserNames().contains(username)){
+				if((info.getIPs().contains(hostmask) || info.getUserNames().contains(username)) && info.getBanEnd().isAfter(today)){
 					return info;
 				}
 			}
