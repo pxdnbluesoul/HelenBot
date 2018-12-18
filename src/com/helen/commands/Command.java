@@ -4,6 +4,7 @@ import com.helen.bots.HelenBot;
 import com.helen.database.*;
 import com.helen.search.WebSearch;
 import com.helen.search.WebsterSearch;
+import com.helen.search.WikipediaSearch;
 import com.helen.search.YouTubeSearch;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -348,7 +349,16 @@ public class Command {
 		} catch (IOException e) {
 			logger.error("Exception during web search", e);
 		}
+	}
 
+	@IRCCommand(command = { ".w", ".wiki", ".wikipedia" }, startOfLine = true, securityLevel = 1)
+	public void wikipediaSearch(CommandData data) {
+		try {
+			helen.sendMessage(data.getResponseTarget(),
+					data.getSender() + ": " + WikipediaSearch.search(data.getMessage()));
+		} catch (IOException e) {
+			logger.error("Exception during Wikipedia search", e);
+		}
 	}
 
 	@IRCCommand(command = { ".y", ".yt", ".youtube" }, startOfLine = true, securityLevel = 1)
