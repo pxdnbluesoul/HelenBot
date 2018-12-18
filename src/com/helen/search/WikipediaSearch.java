@@ -38,7 +38,6 @@ public class WikipediaSearch {
 
 	private static int getPage(String searchTerm) throws IOException {
 		int page = -1;
-		// https://en.wikipedia.org/w/api.php?format=json&formatversion=2&action=query&list=search&srlimit=1&srprop=&srsearch=
 		URL url = new URL(Configs.getSingleProperty("wikipediaSearchUrl").getValue() + searchTerm);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("GET");
@@ -80,7 +79,6 @@ public class WikipediaSearch {
 		String link = null;
 		String content = null;
 		ArrayList<String> disambiguate = new ArrayList<>();
-		// https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&redirects=1&pageids=
 		URL url = new URL(Configs.getSingleProperty("wikipediaEntryUrl").getValue() + pageString);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("GET");
