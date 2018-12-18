@@ -24,10 +24,12 @@ public class WikipediaSearch {
 	private static String cleanContent(String content) {
 		content = content.replaceAll("\\s*\\([^()]+\\)", "").substring(0, 300);
 		int lastPeriod = content.lastIndexOf('.');
-		if(lastPeriod == -1)
+		if(lastPeriod == -1){
 			return content;
-		else
+		}
+		else {
 			return content.substring(0, lastPeriod + 1);
+		}
 	}
 
 	private static int getPage(String searchTerm) throws IOException {
@@ -43,15 +45,15 @@ public class WikipediaSearch {
 		JsonElement jsonTree = json.parse(br);
 		if(jsonTree != null && jsonTree.isJsonObject()){
 			JsonElement query = jsonTree.getAsJsonObject().get("query");
-			if(query != null && query.isJsonObject()) {
+			if(query != null && query.isJsonObject()){
 				JsonElement search = query.getAsJsonObject().get("search");
-				if (search != null && search.isJsonArray()) {
+				if (search != null && search.isJsonArray()){
 					JsonArray results = search.getAsJsonArray();
-					if (results != null && results.size() > 0) {
+					if (results != null && results.size() > 0){
 						JsonElement result = results.get(0);
-						if (result != null && result.isJsonObject()) {
+						if (result != null && result.isJsonObject()){
 							JsonElement pageid = result.getAsJsonObject().get("pageid");
-							if (pageid != null && pageid.isJsonPrimitive()) {
+							if (pageid != null && pageid.isJsonPrimitive()){
 								page = pageid.getAsInt();
 							}
 						}
@@ -67,8 +69,9 @@ public class WikipediaSearch {
 	public static String search(String searchTerm) throws IOException {
 		searchTerm = wikiEncode(searchTerm.substring(searchTerm.indexOf(' ') + 1));
 		int page = getPage(searchTerm);
-		if(page == -1)
+		if(page == -1){
 			return NOT_FOUND;
+		}
 		String pageString = "" + page;
 		String link = null;
 		String content = null;
@@ -81,19 +84,19 @@ public class WikipediaSearch {
 
 		JsonParser json = new JsonParser();
 		JsonElement jsonTree = json.parse(br);
-		if(jsonTree != null && jsonTree.isJsonObject()) {
+		if(jsonTree != null && jsonTree.isJsonObject()){
 			JsonElement query = jsonTree.getAsJsonObject().get("query");
-			if (query != null && query.isJsonObject()) {
+			if (query != null && query.isJsonObject()){
 				JsonElement search = query.getAsJsonObject().get("pages");
-				if (search != null && search.isJsonObject()) {
+				if (search != null && search.isJsonObject()){
 					JsonElement result = search.getAsJsonObject().get(pageString);
-					if (result != null && result.isJsonObject()) {
+					if (result != null && result.isJsonObject()){
 						JsonElement title = result.getAsJsonObject().get("title");
-						if (title != null && title.isJsonPrimitive()) {
+						if (title != null && title.isJsonPrimitive()){
 							link = "(en.wikipedia.org/wiki/" + wikiEncode(title.getAsString()) + ")";
 						}
 						JsonElement extract = result.getAsJsonObject().get("extract");
-						if (extract != null && extract.isJsonPrimitive()) {
+						if (extract != null && extract.isJsonPrimitive()){
 							content = extract.getAsString();
 						}
 					}
@@ -103,8 +106,9 @@ public class WikipediaSearch {
 
 		conn.disconnect();
 
-		if(content == null)
+		if(content == null){
 			return NOT_FOUND;
+		}
 
 		return link + " " + cleanContent(content);
 	}
