@@ -22,7 +22,8 @@ public class WikipediaSearch {
 	}
 
 	private static String cleanContent(String content) {
-		content = content.replaceAll("\\s*\\([^()]+\\)", "").substring(0, 300);
+		content = content.replaceAll("\\s*\\([^()]+\\)", "");
+		content = content.substring(0, Math.min(300, content.length()));
 		int lastPeriod = content.lastIndexOf('.');
 		if(lastPeriod == -1){
 			return content;
