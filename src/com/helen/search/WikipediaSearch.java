@@ -16,12 +16,12 @@ import java.net.URLEncoder;
 public class WikipediaSearch {
 
 	private final static String NOT_FOUND = "No results found.";
-	final static Logger logger = Logger.getLogger(WikipediaSearch.class);
-	public static String wikiEncode(String unencoded) throws IOException {
+
+	private static String wikiEncode(String unencoded) throws IOException {
 		return URLEncoder.encode(unencoded, "UTF-8").replaceAll("\\+", "%20");
 	}
 
-	public static String cleanContent(String content) {
+	private static String cleanContent(String content) {
 		content = content.replaceAll("\\s*\\([^()]+\\)", "").substring(0, 300);
 		int lastPeriod = content.lastIndexOf('.');
 		if(lastPeriod == -1)
@@ -30,7 +30,7 @@ public class WikipediaSearch {
 			return content.substring(0, lastPeriod + 1);
 	}
 
-	public static int getPage(String searchTerm) throws IOException {
+	private static int getPage(String searchTerm) throws IOException {
 		int page = -1;
 		// https://en.wikipedia.org/w/api.php?format=json&formatversion=2&action=query&list=search&srlimit=1&srprop=&srsearch=
 		URL url = new URL(Configs.getSingleProperty("wikipediaSearchUrl").getValue() + searchTerm);
