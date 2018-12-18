@@ -355,7 +355,7 @@ public class Command {
 	public void wikipediaSearch(CommandData data) {
 		try {
 			helen.sendMessage(data.getResponseTarget(),
-					data.getSender() + ": " + WikipediaSearch.search(data.getMessage()));
+					data.getSender() + ": " + WikipediaSearch.search(data, data.getMessage()));
 		} catch (IOException e) {
 			logger.error("Exception during Wikipedia search", e);
 		}

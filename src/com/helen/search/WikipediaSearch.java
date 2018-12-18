@@ -2,8 +2,11 @@ package com.helen.search;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.helen.commands.CommandData;
 import com.helen.database.Configs;
+import com.helen.database.Pages;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -12,6 +15,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 
 public class WikipediaSearch {
 
@@ -48,13 +52,13 @@ public class WikipediaSearch {
 			JsonElement query = jsonTree.getAsJsonObject().get("query");
 			if(query != null && query.isJsonObject()){
 				JsonElement search = query.getAsJsonObject().get("search");
-				if (search != null && search.isJsonArray()){
+				if(search != null && search.isJsonArray()){
 					JsonArray results = search.getAsJsonArray();
-					if (results != null && results.size() > 0){
+					if(results != null && results.size() > 0){
 						JsonElement result = results.get(0);
-						if (result != null && result.isJsonObject()){
+						if(result != null && result.isJsonObject()){
 							JsonElement pageid = result.getAsJsonObject().get("pageid");
-							if (pageid != null && pageid.isJsonPrimitive()){
+							if(pageid != null && pageid.isJsonPrimitive()){
 								page = pageid.getAsInt();
 							}
 						}
@@ -67,15 +71,16 @@ public class WikipediaSearch {
 		return page;
 	}
 
-	public static String search(String searchTerm) throws IOException {
-		searchTerm = wikiEncode(searchTerm.substring(searchTerm.indexOf(' ') + 1));
-		int page = getPage(searchTerm);
+	public static String search(CommandData data, String searchTerm) throws IOException {
+		searchTerm = searchTerm.substring(searchTerm.indexOf(' ') + 1);
+		int page = getPage(wikiEncode(searchTerm));
 		if(page == -1){
 			return NOT_FOUND;
 		}
 		String pageString = "" + page;
 		String link = null;
 		String content = null;
+		ArrayList<String> disambiguate = new ArrayList<>();
 		// https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&redirects=1&pageids=
 		URL url = new URL(Configs.getSingleProperty("wikipediaEntryUrl").getValue() + pageString);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -87,18 +92,35 @@ public class WikipediaSearch {
 		JsonElement jsonTree = json.parse(br);
 		if(jsonTree != null && jsonTree.isJsonObject()){
 			JsonElement query = jsonTree.getAsJsonObject().get("query");
-			if (query != null && query.isJsonObject()){
+			if(query != null && query.isJsonObject()){
 				JsonElement search = query.getAsJsonObject().get("pages");
-				if (search != null && search.isJsonObject()){
+				if(search != null && search.isJsonObject()){
 					JsonElement result = search.getAsJsonObject().get(pageString);
-					if (result != null && result.isJsonObject()){
-						JsonElement title = result.getAsJsonObject().get("title");
-						if (title != null && title.isJsonPrimitive()){
+					if(result != null && result.isJsonObject()){
+						JsonObject resultObj = result.getAsJsonObject();
+						JsonElement title = resultObj.get("title");
+						if(title != null && title.isJsonPrimitive()){
 							link = "(en.wikipedia.org/wiki/" + wikiEncode(title.getAsString()) + ")";
 						}
-						JsonElement extract = result.getAsJsonObject().get("extract");
-						if (extract != null && extract.isJsonPrimitive()){
+						JsonElement extract = resultObj.get("extract");
+						if(extract != null && extract.isJsonPrimitive()){
 							content = extract.getAsString();
+							if(content.endsWith(":") && content.contains("refer")){
+								JsonElement links = resultObj.get("links");
+								if(links != null && links.isJsonArray()){
+									for(JsonElement sublink : links.getAsJsonArray()){
+										if(sublink.isJsonObject()){
+											JsonElement subtitle = sublink.getAsJsonObject().get("title");
+											if(subtitle != null && subtitle.isJsonPrimitive()){
+												String subtitleString = subtitle.getAsString();
+												if(subtitleString != null && !subtitleString.contains("disambiguation")){
+													disambiguate.add(subtitle.getAsString());
+												}
+											}
+										}
+									}
+								}
+							}
 						}
 					}
 				}
@@ -109,8 +131,20 @@ public class WikipediaSearch {
 
 		if(content == null){
 			return NOT_FOUND;
+		} else if(disambiguate.isEmpty()){
+			return link + " " + cleanContent(content);
+		} else{
+			ArrayList<String> verbatim = new ArrayList<>();
+			for(String title : disambiguate){
+				if(title.contains(searchTerm + " (")){
+					verbatim.add(title);
+				}
+			}
+			if(verbatim.isEmpty()){
+				return Pages.disambiguateWikipedia(data, disambiguate);
+			} else{
+				return Pages.disambiguateWikipedia(data, verbatim);
+			}
 		}
-
-		return link + " " + cleanContent(content);
 	}
 }

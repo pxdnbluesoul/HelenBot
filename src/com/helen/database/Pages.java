@@ -1,6 +1,8 @@
 package com.helen.database;
 
+import com.helen.commands.Command;
 import com.helen.commands.CommandData;
+import com.helen.search.WikipediaSearch;
 import org.apache.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
@@ -16,6 +18,7 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -234,6 +237,41 @@ public class Pages {
 		
 		return "I apologize, there's been an error.  Please inform DrMagnus there's an error with author details.";
 	}
+
+	public static String disambiguateWikipedia(CommandData data, List<String> titles){
+		if(titles.isEmpty()){
+			return "I couldn't find any choices.";
+		}
+		try{
+				ArrayList<Selectable> choices = new ArrayList<>();
+				for(String title : titles){
+					choices.add(new WikipediaAmbiguous(data, title));
+				}
+				storedEvents.put(data.getSender(), choices);
+				StringBuilder str = new StringBuilder();
+				str.append("Did you mean: ");
+				String prepend = "";
+				for (Selectable choice : choices) {
+					str.append(prepend);
+					prepend=",";
+					str.append(Colors.BOLD);
+					str.append(((WikipediaAmbiguous)choice).getTitle());
+					str.append(Colors.NORMAL);
+				}
+				str.append("?");
+				String result = str.toString();
+				result = result.substring(0, Math.min(400, result.length()));
+				int lastComma = result.lastIndexOf(',');
+				if(lastComma != -1){
+					result = result.substring(0, lastComma);
+				}
+				return result;
+		}catch(Exception e){
+			logger.error("Error constructing choice",e);
+		}
+
+		return "I apologize, there's been an error.  Please inform DrMagnus there's an error with author details.";
+	}
 	
 	public static String getAuthorDetailsPages(String user){
 		String lowerUser = user.toLowerCase();
@@ -445,6 +483,10 @@ public class Pages {
 				return getPageInfo((String)s.selectResource());
 			}else if(s instanceof Author){
 				return getAuthorDetailsPages((String)s.selectResource());
+			}else if(s instanceof WikipediaAmbiguous){
+				WikipediaAmbiguous choice = (WikipediaAmbiguous) s;
+				CommandData data = choice.getData();
+				return WikipediaSearch.search(data, choice.getTitle());
 			}
 			
 		} catch (Exception e) {
