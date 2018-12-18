@@ -1,6 +1,5 @@
 package com.helen.database;
 
-import com.helen.commands.Command;
 import com.helen.commands.CommandData;
 import com.helen.search.WikipediaSearch;
 import org.apache.log4j.Logger;

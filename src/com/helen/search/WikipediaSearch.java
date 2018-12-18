@@ -7,7 +7,6 @@ import com.google.gson.JsonParser;
 import com.helen.commands.CommandData;
 import com.helen.database.Configs;
 import com.helen.database.Pages;
-import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
