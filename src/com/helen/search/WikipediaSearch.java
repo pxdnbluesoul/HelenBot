@@ -17,7 +17,19 @@ public class WikipediaSearch {
 
 	private final static String NOT_FOUND = "No results found.";
 	final static Logger logger = Logger.getLogger(WikipediaSearch.class);
-	
+	public static String wikiEncode(String unencoded) throws IOException {
+		return URLEncoder.encode(unencoded, "UTF-8").replaceAll("\\+", "%20");
+	}
+
+	public static String cleanContent(String content) {
+		content = content.replaceAll("\\s*\\([^()]+\\)", "").substring(0, 300);
+		int lastPeriod = content.lastIndexOf('.');
+		if(lastPeriod == -1)
+			return content;
+		else
+			return content.substring(0, lastPeriod + 1);
+	}
+
 	public static int getPage(String searchTerm) throws IOException {
 		int page = -1;
 		// https://en.wikipedia.org/w/api.php?format=json&formatversion=2&action=query&list=search&srlimit=1&srprop=&srsearch=
@@ -52,21 +64,13 @@ public class WikipediaSearch {
 		return page;
 	}
 
-	public static String cleanContent(String content) {
-		content = content.replaceAll("\\s*\\([^()]+\\)", "").substring(0, 300);
-		int lastPeriod = content.lastIndexOf('.');
-		if(lastPeriod == -1)
-			return content;
-		else
-			return content.substring(0, lastPeriod + 1);
-	}
-
 	public static String search(String searchTerm) throws IOException {
-		searchTerm = URLEncoder.encode(searchTerm.substring(searchTerm.indexOf(' ') + 1), "UTF-8");
+		searchTerm = wikiEncode(searchTerm.substring(searchTerm.indexOf(' ') + 1));
 		int page = getPage(searchTerm);
 		if(page == -1)
 			return NOT_FOUND;
 		String pageString = "" + page;
+		String link = null;
 		String content = null;
 		// https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&redirects=1&pageids=
 		URL url = new URL(Configs.getSingleProperty("wikipediaEntryUrl").getValue() + pageString);
@@ -84,6 +88,10 @@ public class WikipediaSearch {
 				if (search != null && search.isJsonObject()) {
 					JsonElement result = search.getAsJsonObject().get(pageString);
 					if (result != null && result.isJsonObject()) {
+						JsonElement title = result.getAsJsonObject().get("title");
+						if (title != null && title.isJsonPrimitive()) {
+							link = "(en.wikipedia.org/wiki/" + wikiEncode(title.getAsString()) + ")";
+						}
 						JsonElement extract = result.getAsJsonObject().get("extract");
 						if (extract != null && extract.isJsonPrimitive()) {
 							content = extract.getAsString();
@@ -98,6 +106,6 @@ public class WikipediaSearch {
 		if(content == null)
 			return NOT_FOUND;
 
-		return cleanContent(content);
+		return link + " " + cleanContent(content);
 	}
 }
