@@ -2,10 +2,7 @@ package com.helen.commands;
 
 import com.helen.bots.HelenBot;
 import com.helen.database.*;
-import com.helen.search.WebSearch;
-import com.helen.search.WebsterSearch;
-import com.helen.search.WikipediaSearch;
-import com.helen.search.YouTubeSearch;
+import com.helen.search.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jibble.pircbot.User;
@@ -344,10 +341,24 @@ public class Command {
 	@IRCCommand(command = { ".g", ".google" }, startOfLine = true, securityLevel = 1)
 	public void webSearch(CommandData data) {
 		try {
+			GoogleResults results = WebSearch.search(data.getMessage());
 			helen.sendMessage(data.getResponseTarget(),
-					data.getSender() + ": " + WebSearch.search(data.getMessage()).toString());
+					data.getSender() + ": " + (results == null ? "No results found." : results)
+			);
 		} catch (IOException e) {
 			logger.error("Exception during web search", e);
+		}
+	}
+
+	@IRCCommand(command = { ".gis" }, startOfLine = true, securityLevel = 1)
+	public void imageSearch(CommandData data) {
+		try {
+			GoogleResults results = WebSearch.imageSearch(data.getMessage());
+			helen.sendMessage(data.getResponseTarget(),
+					data.getSender() + ": " + (results == null ? "No results found." : results)
+			);
+		} catch (IOException e) {
+			logger.error("Exception during image search", e);
 		}
 	}
 
