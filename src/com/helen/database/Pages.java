@@ -1,5 +1,6 @@
 package com.helen.database;
 
+import com.helen.commands.Command;
 import com.helen.commands.CommandData;
 import com.helen.search.WikipediaSearch;
 import org.apache.log4j.Logger;
@@ -190,7 +191,7 @@ public class Pages {
 			logger.error("There was an exception retreiving metadata", e);
 		}
 
-		return "I couldn't find anything matching that, apologies.";
+		return Command.NOT_FOUND;
 	}
 	
 	public static String getAuthorDetail(CommandData data, String user){
@@ -470,7 +471,7 @@ public class Pages {
 			if (potentialPages.size() == 1) {
 				return getPageInfo(((Page)potentialPages.get(0)).getPageLink());
 			} else {
-				return "I couldn't find anything.";
+				return Command.NOT_FOUND;
 			}
 		}
 	}
