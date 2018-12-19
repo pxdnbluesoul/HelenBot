@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.helen.commands.Command;
 import com.helen.commands.CommandData;
 import com.helen.database.Configs;
 import com.helen.database.Pages;
@@ -17,8 +18,6 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 
 public class WikipediaSearch {
-
-	private final static String NOT_FOUND = "No results found.";
 
 	private static String wikiEncode(String unencoded) throws IOException {
 		return URLEncoder.encode(unencoded, "UTF-8").replaceAll("\\+", "%20");
@@ -73,7 +72,7 @@ public class WikipediaSearch {
 		searchTerm = searchTerm.substring(searchTerm.indexOf(' ') + 1);
 		int page = getPage(wikiEncode(searchTerm));
 		if(page == -1){
-			return NOT_FOUND;
+			return Command.NOT_FOUND;
 		}
 		String pageString = "" + page;
 		String link = null;
@@ -102,6 +101,10 @@ public class WikipediaSearch {
 						JsonElement extract = resultObj.get("extract");
 						if(extract != null && extract.isJsonPrimitive()){
 							content = extract.getAsString();
+							int newline = content.indexOf('\n');
+							if(newline != -1){
+								content = content.substring(0, newline);
+							}
 							if(content.endsWith(":") && content.contains("refer")){
 								JsonElement links = resultObj.get("links");
 								if(links != null && links.isJsonArray()){
@@ -127,7 +130,7 @@ public class WikipediaSearch {
 		conn.disconnect();
 
 		if(content == null){
-			return NOT_FOUND;
+			return Command.NOT_FOUND;
 		} else if(disambiguate.isEmpty()){
 			return link + " " + cleanContent(content);
 		} else{

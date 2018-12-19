@@ -10,7 +10,6 @@ import org.jibble.pircbot.User;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -18,6 +17,7 @@ import java.util.regex.Pattern;
 
 public class Command {
 	private static final Logger logger = Logger.getLogger(Command.class);
+	public static final String NOT_FOUND = "I'm sorry, I couldn't find anything.";
 
 	private HelenBot helen;
 
@@ -343,7 +343,7 @@ public class Command {
 		try {
 			GoogleResults results = WebSearch.search(data.getMessage());
 			helen.sendMessage(data.getResponseTarget(),
-					data.getSender() + ": " + (results == null ? "No results found." : results)
+					data.getSender() + ": " + (results == null ? NOT_FOUND : results)
 			);
 		} catch (IOException e) {
 			logger.error("Exception during web search", e);
@@ -355,7 +355,7 @@ public class Command {
 		try {
 			GoogleResults results = WebSearch.imageSearch(data.getMessage());
 			helen.sendMessage(data.getResponseTarget(),
-					data.getSender() + ": " + (results == null ? "No results found." : results)
+					data.getSender() + ": " + (results == null ? NOT_FOUND : results)
 			);
 		} catch (IOException e) {
 			logger.error("Exception during image search", e);
