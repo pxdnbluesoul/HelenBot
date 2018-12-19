@@ -19,19 +19,20 @@ import java.util.ArrayList;
 
 public class WikipediaSearch {
 
+	private static final int CHARACTER_LIMIT = 300;
+
 	private static String wikiEncode(String unencoded) throws IOException {
 		return URLEncoder.encode(unencoded, "UTF-8").replaceAll("\\+", "%20");
 	}
 
 	private static String cleanContent(String content) {
 		content = content.replaceAll("\\s*\\([^()]+\\)", "");
-		content = content.substring(0, Math.min(300, content.length()));
-		int lastPeriod = content.lastIndexOf('.');
-		if(lastPeriod == -1){
+		if(content.length() <= CHARACTER_LIMIT){
 			return content;
-		}
-		else {
-			return content.substring(0, lastPeriod + 1);
+		} else {
+			content = content.substring(0, CHARACTER_LIMIT);
+			int lastWord = content.lastIndexOf(' ');
+			return content.substring(0, lastWord != -1 ? lastWord + 1 : CHARACTER_LIMIT - 3) + "[…]";
 		}
 	}
 
@@ -101,11 +102,13 @@ public class WikipediaSearch {
 						JsonElement extract = resultObj.get("extract");
 						if(extract != null && extract.isJsonPrimitive()){
 							content = extract.getAsString();
-							int newline = content.indexOf('\n');
+							String top = content;
+							content = content.replace("\n", " ");
+							int newline = top.indexOf('\n');
 							if(newline != -1){
-								content = content.substring(0, newline);
+								top = top.substring(0, newline);
 							}
-							if(content.endsWith(":") && content.contains("refer")){
+							if(top.endsWith(":") && top.contains("refer")){
 								JsonElement links = resultObj.get("links");
 								if(links != null && links.isJsonArray()){
 									for(JsonElement sublink : links.getAsJsonArray()){
