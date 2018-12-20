@@ -3,6 +3,7 @@ package com.helen.database;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
+import com.helen.commands.Command;
 import org.apache.log4j.Logger;
 
 import com.helen.commands.CommandData;
@@ -62,13 +63,13 @@ public class Pronouns {
 							+ user);
 				}
 			} else {
-				str.append("I'm sorry there was an error.  Please inform Dr Magnus.");
+				str.append(Command.ERROR);
 			}
 			return str.toString();
 		} catch (Exception e) {
 			logger.error("Error retreiving pronouns", e);
 		}
-		return "I'm sorry there was an error.  Please inform Dr Magnus.";
+		return Command.ERROR;
 	}
 
 	public static String insertPronouns(CommandData data) {
@@ -124,7 +125,7 @@ public class Pronouns {
 			} catch (Exception e) {
 				logger.error("Error retreiving pronouns", e);
 			}
-			return "I'm sorry there was an error.  Please inform Dr Magnus.";
+			return Command.ERROR;
 		} else {
 			return "Usage: .setPronouns (accepted) pronoun1 pronoun2 pronoun3 ... pronoun[n]";
 		}
@@ -144,7 +145,7 @@ public class Pronouns {
 		} catch (Exception e) {
 			logger.error("Error retreiving pronouns", e);
 		}
-		return "I'm sorry there was an error.  Please inform Dr Magnus.";
+		return Command.ERROR;
 	}
 
 	public static void reload() {

@@ -26,7 +26,7 @@ public class WikipediaSearch {
 	}
 
 	private static String cleanContent(String content) {
-		content = content.replaceAll("\\s*\\([^()]+\\)", "");
+		content = content.replaceAll("\\s*\\([^()]+\\)", "").replaceAll("  "," ");
 		if(content.length() <= CHARACTER_LIMIT){
 			return content;
 		} else {

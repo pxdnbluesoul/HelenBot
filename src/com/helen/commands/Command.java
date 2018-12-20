@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 public class Command {
 	private static final Logger logger = Logger.getLogger(Command.class);
 	public static final String NOT_FOUND = "I'm sorry, I couldn't find anything.";
+	public static final String ERROR = "I'm sorry, there was an error. Please inform DrMagnus.";
 
 	private HelenBot helen;
 

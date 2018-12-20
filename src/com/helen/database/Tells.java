@@ -3,6 +3,7 @@ package com.helen.database;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
+import com.helen.commands.Command;
 import com.helen.commands.CommandData;
 import org.apache.log4j.Logger;
 
@@ -37,7 +38,7 @@ public class Tells {
 		} catch (Exception e) {
 			logger.error("Exception sending tell", e);
 		}
-		return "There was some sort of error.  Please contact DrMagnus";
+		return Command.ERROR;
 	}
 	
 	public static ArrayList<Tell> getTells(String username){
