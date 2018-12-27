@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -238,7 +239,7 @@ public class Command {
 	public void choose(CommandData data) {
 		String[] choices = data.getMessage().substring(data.getMessage().indexOf(" ")).split(",");
 		helen.sendMessage(data.getResponseTarget(),
-				data.getSender() + ": " + choices[((int) (Math.random() * (choices.length - 1)) + 1)]);
+				data.getSender() + ": " + choices[new Random().nextInt(choices.length)]);
 	}
 
 	@IRCCommand(command = { ".mode" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
