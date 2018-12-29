@@ -97,7 +97,7 @@ public class WikipediaSearch {
 						JsonObject resultObj = result.getAsJsonObject();
 						JsonElement title = resultObj.get("title");
 						if(title != null && title.isJsonPrimitive()){
-							link = "(en.wikipedia.org/wiki/" + wikiEncode(title.getAsString()) + ")";
+							link = "https://en.wikipedia.org/wiki/" + wikiEncode(title.getAsString()) + " -";
 						}
 						JsonElement extract = resultObj.get("extract");
 						if(extract != null && extract.isJsonPrimitive()){

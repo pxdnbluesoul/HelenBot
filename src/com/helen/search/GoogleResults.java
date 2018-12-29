@@ -22,14 +22,13 @@ public class GoogleResults {
     @Override
     public String toString(){
     	StringBuilder str = new StringBuilder();
+    	str.append(link);
+    	str.append(" - ");
     	str.append(Colors.BOLD);
     	str.append(title);
     	str.append(Colors.NORMAL);
-    	str.append(" (");
-    	str.append(link);
-    	str.append(")");
     	if(showSnippet){
-    		str.append(" ");
+    		str.append(" - ");
     		str.append(snippet);
 			}
     	return str.toString();
