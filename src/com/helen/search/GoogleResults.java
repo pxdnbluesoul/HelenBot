@@ -28,7 +28,7 @@ public class GoogleResults {
     	str.append(title);
     	str.append(Colors.NORMAL);
     	if(showSnippet){
-    		str.append(" - ");
+    		str.append(": ");
     		str.append(snippet);
 			}
     	return str.toString();
