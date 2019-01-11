@@ -2,10 +2,7 @@ package com.helen.commands;
 
 import com.helen.bots.HelenBot;
 import com.helen.database.*;
-import com.helen.search.WebSearch;
-import com.helen.search.WebsterSearch;
-import com.helen.search.WikipediaSearch;
-import com.helen.search.YouTubeSearch;
+import com.helen.search.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jibble.pircbot.User;
@@ -13,7 +10,6 @@ import org.jibble.pircbot.User;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -22,6 +18,8 @@ import java.util.regex.Pattern;
 
 public class Command {
 	private static final Logger logger = Logger.getLogger(Command.class);
+	public static final String NOT_FOUND = "I'm sorry, I couldn't find anything.";
+	public static final String ERROR = "I'm sorry, there was an error. Please inform DrMagnus.";
 
 	private HelenBot helen;
 
@@ -345,10 +343,24 @@ public class Command {
 	@IRCCommand(command = { ".g", ".google" }, startOfLine = true, securityLevel = 1)
 	public void webSearch(CommandData data) {
 		try {
+			GoogleResults results = WebSearch.search(data.getMessage());
 			helen.sendMessage(data.getResponseTarget(),
-					data.getSender() + ": " + WebSearch.search(data.getMessage()).toString());
+					data.getSender() + ": " + (results == null ? NOT_FOUND : results)
+			);
 		} catch (IOException e) {
 			logger.error("Exception during web search", e);
+		}
+	}
+
+	@IRCCommand(command = { ".gis" }, startOfLine = true, securityLevel = 1)
+	public void imageSearch(CommandData data) {
+		try {
+			GoogleResults results = WebSearch.imageSearch(data.getMessage());
+			helen.sendMessage(data.getResponseTarget(),
+					data.getSender() + ": " + (results == null ? NOT_FOUND : results)
+			);
+		} catch (IOException e) {
+			logger.error("Exception during image search", e);
 		}
 	}
 
@@ -356,7 +368,7 @@ public class Command {
 	public void wikipediaSearch(CommandData data) {
 		try {
 			helen.sendMessage(data.getResponseTarget(),
-					data.getSender() + ": " + WikipediaSearch.search(data.getMessage()));
+					data.getSender() + ": " + WikipediaSearch.search(data, data.getMessage()));
 		} catch (IOException e) {
 			logger.error("Exception during Wikipedia search", e);
 		}
