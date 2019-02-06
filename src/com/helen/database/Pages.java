@@ -196,6 +196,7 @@ public class Pages {
 	
 	public static String getAuthorDetail(CommandData data, String user){
 		user = user.toLowerCase();
+		user = user.trim();
 		try{
 			
 			ArrayList<Selectable> authors = new ArrayList<Selectable>();
