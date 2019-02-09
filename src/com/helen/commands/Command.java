@@ -656,7 +656,7 @@ public class Command {
 		}
 	}
 
-	@IRCCommand(command = ".discord", startOfLine = true, securityLevel = 4, coexistWithJarvis = true)
+	@IRCCommand(command = ".discord", startOfLine = true, securityLevel = 2, coexistWithJarvis = true)
 	public void showDiscordMessage(CommandData data){
 		helen.sendMessage(data.getChannel(), "There are currently no plans for an official SCP Discord." +
 		" Staff feel that, at this time, the benefits of Discord do not outweigh the difficulties of moderation," +
