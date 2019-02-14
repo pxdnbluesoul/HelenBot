@@ -664,7 +664,7 @@ public class Command {
 				"the technical and financial viability of discord.");
 	}
 
-	@IRCCommand(command = ".updateBans", startOfLine = true, securityLevel = 4, coexistWithJarvis = true)
+	@IRCCommand(command = ".updateBans", startOfLine = true, securityLevel = 2, coexistWithJarvis = true)
 	public void updateBans(CommandData data) {
 		try {
 			Bans.updateBans();
