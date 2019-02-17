@@ -291,8 +291,8 @@ public class Pages {
                     rs.getString("scptitle"));
 
 			rating =+ rs.getInt("rating");
-			pagecount ++;
-			if(authorPage.getCreatedAt().compareTo(ts) > 0){
+			pagecount++;
+			if(authorPage.getCreatedAt() != null && authorPage.getCreatedAt().compareTo(ts) > 0){
 				ts = authorPage.getCreatedAt();
 				 latest = authorPage;
 			}
@@ -316,7 +316,7 @@ public class Pages {
 			pagecount++;
 			rating =+ p.getRating();
 
-			if(p.getCreatedAt().compareTo(ts) > 0){
+			if(p.getCreatedAt() != null && p.getCreatedAt().compareTo(ts) > 0){
 				ts = p.getCreatedAt();
 				latest = p;
 			}
@@ -338,7 +338,7 @@ public class Pages {
 			pagecount++;
 			tales.add(p);
 
-			if(p.getCreatedAt().compareTo(ts) > 0){
+			if(p.getCreatedAt() != null && p.getCreatedAt().compareTo(ts) > 0){
 				ts = p.getCreatedAt();
 				latest = p;
 			}
@@ -360,7 +360,7 @@ public class Pages {
 			pagecount++;
 			rating += p.getRating();
 
-			if(p.getCreatedAt().compareTo(ts) > 0){
+			if(p.getCreatedAt() != null && p.getCreatedAt().compareTo(ts) > 0){
 				ts = p.getCreatedAt();
 				latest = p;
 			}
@@ -380,7 +380,7 @@ public class Pages {
 				others.add(p);
 				pagecount++;
 				rating += p.getRating();
-				if(p.getCreatedAt().compareTo(ts) > 0){
+				if(p.getCreatedAt() != null && p.getCreatedAt().compareTo(ts) > 0){
 					ts = p.getCreatedAt();
 					latest = p;
 				}
@@ -402,7 +402,7 @@ public class Pages {
 					metaPages.add(p);
 					pagecount++;
 					rating += p.getRating();
-					if (p.getCreatedAt().compareTo(ts) > 0) {
+					if(p.getCreatedAt() != null && p.getCreatedAt().compareTo(ts) > 0){
 						ts = p.getCreatedAt();
 						latest = p;
 					}
