@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.sql.*;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -175,8 +176,32 @@ public class Pages {
 			returnString.append("Written ");
 			returnString.append(findTime(df.parse((String) result.get(targetName)
 					.get("created_at")).getTime()));
+
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findRewrite"),targetName);
+			ResultSet rs = stmt.getResultSet();
+			LocalDate date = null;
+			Metadata meta = null;
+			while(rs != null && rs.next()){
+				Metadata m = new Metadata(rs.getString("pagename"),
+						rs.getString("username"),
+						rs.getString("metadata_type"),
+						rs.getString("authorage_date"));
+
+				LocalDate newDate = LocalDate.parse(m.getDate());
+				if(meta == null || LocalDate.parse(meta.getDate()).compareTo(newDate) <= 0){
+					meta = m;
+				}
+			}
+
+
 			returnString.append("By: ");
 			returnString.append(result.get(targetName).get("created_by"));
+			if(meta != null){
+				returnString.append(" rewritten on: ");
+				returnString.append(meta.getDate());
+				returnString.append( " by ");
+				returnString.append(meta.getUsername());
+			}
 			returnString.append(")");
 			returnString.append(" - ");
             returnString.append("http://scp-wiki.net/");
@@ -420,7 +445,7 @@ public class Pages {
 		str.append(Colors.BOLD);
 		str.append(others.size());
 		str.append(Colors.NORMAL);
-		str.append(" others.");
+		str.append(" others.)");
 		str.append(" They have ");
 		str.append(Colors.BOLD);
 		str.append(rating);
