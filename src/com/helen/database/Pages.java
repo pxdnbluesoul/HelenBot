@@ -16,10 +16,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.sql.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -276,44 +273,144 @@ public class Pages {
 	
 	public static String getAuthorDetailsPages(String user){
 		String lowerUser = user.toLowerCase();
+		Timestamp ts = new java.sql.Timestamp(0l);
+		int rating = 0;
+		Page latest = null;
+		int pagecount = 0;
 		Page authorPage = null;
 		try{
 		CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findAuthorPage"), lowerUser);
 		ResultSet rs = stmt.getResultSet();
 		if(rs != null && rs.next()){
 			authorPage = new Page(rs.getString("pagename"),
-					rs.getString("title"),
-					rs.getBoolean("scppage"),
-					rs.getString("scptitle"));
+                    rs.getString("title"),
+                    rs.getInt("rating"),
+                    rs.getString("created_by"),
+                    rs.getTimestamp("created_on"),
+                    rs.getBoolean("scppage"),
+                    rs.getString("scptitle"));
+
+			rating =+ rs.getInt("rating");
+			pagecount ++;
+			if(authorPage.getCreatedAt().compareTo(ts) > 0){
+				ts = authorPage.getCreatedAt();
+				 latest = authorPage;
+			}
+
 		}
 		rs.close();
 		stmt.close();
 		
-		ArrayList<Page> pages = new ArrayList<Page>();
-		stmt = Connector.getStatement(Queries.getQuery("findSkips"), lowerUser);
+		ArrayList<Page> pages = new ArrayList<>();
+		stmt = Connector.getStatement(Queries.getQuery("findAllSkips"), lowerUser, lowerUser);
 		rs = stmt.getResultSet();
 		while(rs != null && rs.next()){
-			pages.add( new Page(rs.getString("pagename"),
+			Page p = new Page(rs.getString("pagename"),
 					rs.getString("title"),
 					rs.getInt("rating"),
 					rs.getString("created_by"),
 					rs.getTimestamp("created_on"),
 					rs.getBoolean("scppage"),
-					rs.getString("scptitle")));
+					rs.getString("scptitle"));
+			pages.add(p);
+			pagecount++;
+			rating =+ p.getRating();
+
+			if(p.getCreatedAt().compareTo(ts) > 0){
+				ts = p.getCreatedAt();
+				latest = p;
+			}
 		}
 		
-		stmt = Connector.getStatement(Queries.getQuery("findTales"), lowerUser);
+		stmt = Connector.getStatement(Queries.getQuery("findAllTales"), lowerUser, lowerUser);
 		rs = stmt.getResultSet();
+		List<Page> tales = new LinkedList<>();
 		while(rs != null && rs.next()){
-			pages.add( new Page(rs.getString("pagename"),
+			Page p = new Page(rs.getString("pagename"),
 					rs.getString("title"),
 					rs.getInt("rating"),
 					rs.getString("created_by"),
 					rs.getTimestamp("created_on"),
 					rs.getBoolean("scppage"),
-					rs.getString("scptitle")));
+					rs.getString("scptitle"));
+
+			rating += p.getRating();
+			pagecount++;
+			tales.add(p);
+
+			if(p.getCreatedAt().compareTo(ts) > 0){
+				ts = p.getCreatedAt();
+				latest = p;
+			}
 		}
-		
+
+
+		stmt = Connector.getStatement(Queries.getQuery("findAllGoi"), lowerUser, lowerUser);
+		rs = stmt.getResultSet();
+		List<Page> gois = new LinkedList<>();
+		while(rs != null && rs.next()){
+			Page p = new Page(rs.getString("pagename"),
+					rs.getString("title"),
+					rs.getInt("rating"),
+					rs.getString("created_by"),
+					rs.getTimestamp("created_on"),
+					rs.getBoolean("scppage"),
+					rs.getString("scptitle"));
+			gois.add(p);
+			pagecount++;
+			rating += p.getRating();
+
+			if(p.getCreatedAt().compareTo(ts) > 0){
+				ts = p.getCreatedAt();
+				latest = p;
+			}
+		}
+
+			stmt = Connector.getStatement(Queries.getQuery("findAllOthers"), lowerUser, lowerUser);
+			rs = stmt.getResultSet();
+			List<Page> others = new LinkedList<>();
+			while(rs != null && rs.next()){
+				Page p = new Page(rs.getString("pagename"),
+						rs.getString("title"),
+						rs.getInt("rating"),
+						rs.getString("created_by"),
+						rs.getTimestamp("created_on"),
+						rs.getBoolean("scppage"),
+						rs.getString("scptitle"));
+				others.add(p);
+				pagecount++;
+				rating += p.getRating();
+				if(p.getCreatedAt().compareTo(ts) > 0){
+					ts = p.getCreatedAt();
+					latest = p;
+				}
+
+			}
+
+			stmt = Connector.getStatement(Queries.getQuery("findMetaPages"), lowerUser);
+			rs = stmt.getResultSet();
+			List<Page> metaPages = new LinkedList<>();
+			if(rs != null && rs.next()){
+				Page p = new Page(rs.getString("pagename"),
+						rs.getString("title"),
+						rs.getInt("rating"),
+						rs.getString("created_by"),
+						rs.getTimestamp("created_on"),
+						rs.getBoolean("scppage"),
+						rs.getString("scptitle"));
+				if(!gois.contains(p) && !pages.contains(p) && !tales.contains(p)) {
+					metaPages.add(p);
+					pagecount++;
+					rating += p.getRating();
+					if (p.getCreatedAt().compareTo(ts) > 0) {
+						ts = p.getCreatedAt();
+						latest = p;
+					}
+				}
+
+			}
+			rs.close();
+			stmt.close();
 		
 		StringBuilder str = new StringBuilder();
 		str.append(Colors.BOLD);
@@ -327,49 +424,35 @@ public class Pages {
 			str.append(authorPage.getPageLink());
 			str.append(") ");
 		}
-		String authorPageName = authorPage == null ? "null" : authorPage.getPageLink();
-		int scps = 0;
-		int tales = 0;
-		int rating = 0;
-			int total = 0;
-		Timestamp ts = new java.sql.Timestamp(0l);
-		Page latest = null;
-		for(Page p: pages){
-			total++;
-			if(!p.getPageLink().equals(authorPageName)){
-				if(p.getScpPage()){
-					scps++;
-				}else{
-					tales++;
-				}
-				rating += p.getRating();
-				
-				if(p.getCreatedAt().compareTo(ts) > 0){
-					ts = p.getCreatedAt();
-					latest = p;
-				}
-			}
-		}
+
 		str.append("has ");
 		str.append(Colors.BOLD);
-			str.append(total);
+		str.append(pagecount);
 		str.append(Colors.NORMAL);
 		str.append(" pages. (");
 		str.append(Colors.BOLD);
-		str.append(scps);
+		str.append(pages.size());
 		str.append(Colors.NORMAL);
 		str.append(" SCP articles, ");
 		str.append(Colors.BOLD);
-		str.append(tales);
+		str.append(tales.size());
 		str.append(Colors.NORMAL);
-		str.append(" Tales).");
+		str.append(" Tales, ");
+		str.append(Colors.BOLD);
+		str.append(gois.size());
+		str.append(Colors.NORMAL);
+		str.append(" GoI Formats, ");
+		str.append(Colors.BOLD);
+		str.append(others.size());
+		str.append(Colors.NORMAL);
+		str.append(" others.");
 		str.append(" They have ");
 		str.append(Colors.BOLD);
 		str.append(rating);
 		str.append(Colors.NORMAL);
 		str.append(" net upvotes with an average of ");
 		str.append(Colors.BOLD);
-		long avg = Math.round((rating) / (tales + scps));
+		long avg = Math.round((rating) / (pagecount));
 		str.append(avg);
 		str.append(Colors.NORMAL);
 		str.append(".  Their latest page is ");

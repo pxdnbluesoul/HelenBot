@@ -132,7 +132,18 @@ public class Page implements Selectable {
 	public Object selectResource() {
 		return pageLink;
 	}
-	
-	
-	
+
+	@Override
+	public String toString() {
+		return "Page{" +
+				"pageLink='" + pageLink + '\'' +
+				", title='" + title + '\'' +
+				", rating=" + rating +
+				", createdBy='" + createdBy + '\'' +
+				", createdAt=" + createdAt +
+				", scpPage=" + scpPage +
+				", scpTitle='" + scpTitle + '\'' +
+				", tags=" + tags +
+				'}';
+	}
 }
