@@ -290,7 +290,7 @@ public class Pages {
                     rs.getBoolean("scppage"),
                     rs.getString("scptitle"));
 
-			rating =+ rs.getInt("rating");
+			rating = rating + authorPage.getRating();
 			pagecount++;
 			if(authorPage.getCreatedAt() != null && authorPage.getCreatedAt().compareTo(ts) > 0){
 				ts = authorPage.getCreatedAt();
@@ -314,7 +314,7 @@ public class Pages {
 					rs.getString("scptitle"));
 			pages.add(p);
 			pagecount++;
-			rating =+ p.getRating();
+			rating = rating + p.getRating();
 
 			if(p.getCreatedAt() != null && p.getCreatedAt().compareTo(ts) > 0){
 				ts = p.getCreatedAt();
@@ -334,7 +334,7 @@ public class Pages {
 					rs.getBoolean("scppage"),
 					rs.getString("scptitle"));
 
-			rating += p.getRating();
+			rating = rating + p.getRating();
 			pagecount++;
 			tales.add(p);
 
@@ -358,7 +358,7 @@ public class Pages {
 					rs.getString("scptitle"));
 			gois.add(p);
 			pagecount++;
-			rating += p.getRating();
+			rating = rating + p.getRating();
 
 			if(p.getCreatedAt() != null && p.getCreatedAt().compareTo(ts) > 0){
 				ts = p.getCreatedAt();
@@ -379,38 +379,13 @@ public class Pages {
 						rs.getString("scptitle"));
 				others.add(p);
 				pagecount++;
-				rating += p.getRating();
+				rating = rating + p.getRating();
 				if(p.getCreatedAt() != null && p.getCreatedAt().compareTo(ts) > 0){
 					ts = p.getCreatedAt();
 					latest = p;
 				}
 
 			}
-
-			stmt = Connector.getStatement(Queries.getQuery("findMetaPages"), lowerUser);
-			rs = stmt.getResultSet();
-			List<Page> metaPages = new LinkedList<>();
-			if(rs != null && rs.next()){
-				Page p = new Page(rs.getString("pagename"),
-						rs.getString("title"),
-						rs.getInt("rating"),
-						rs.getString("created_by"),
-						rs.getTimestamp("created_on"),
-						rs.getBoolean("scppage"),
-						rs.getString("scptitle"));
-				if(!gois.contains(p) && !pages.contains(p) && !tales.contains(p)) {
-					metaPages.add(p);
-					pagecount++;
-					rating += p.getRating();
-					if(p.getCreatedAt() != null && p.getCreatedAt().compareTo(ts) > 0){
-						ts = p.getCreatedAt();
-						latest = p;
-					}
-				}
-
-			}
-			rs.close();
-			stmt.close();
 		
 		StringBuilder str = new StringBuilder();
 		str.append(Colors.BOLD);
