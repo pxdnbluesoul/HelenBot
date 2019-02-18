@@ -450,7 +450,7 @@ public class Command {
 				data, data.getSplitMessage().length == 1 ? data.getSender() :  data.getMessageWithoutCommand()));
 	}
 
-	@IRCCommand(command = "SCPPAGEREGEX", startOfLine= true, reg = true, regex = { "http:\\/\\/www.scp-wiki.net\\/(.*)" }, securityLevel = 1, matcherGroup = 1)
+	@IRCCommand(command = "SCPPAGEREGEX", startOfLine= true, reg = true, regex = { "http(?:s?):\\/\\/(?:www\\.)?scp-wiki\\.net\\/(.*)" }, securityLevel = 1, matcherGroup = 1)
 	public void getPageInfo(CommandData data){
 		if(!data.getRegexTarget().contains("/") && !data.getRegexTarget().contains("forum")){
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getRegexTarget()));
