@@ -23,6 +23,7 @@ public class Bans {
 	public static void updateBans() throws IOException {
 
 		bansIn19.clear();
+		bansIn17.clear();
 
 		URL url = new URL("http://05command.wikidot.com/chat-ban-page");
 		Document result = Jsoup.parse(url, 3000);

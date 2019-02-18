@@ -10,11 +10,14 @@ import org.jibble.pircbot.PircBot;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class HelenBot extends PircBot {
 
 	private static Command cmd = null;
-	
+	private static Timer timer = new Timer();
+
 	private static final Logger logger = Logger.getLogger(HelenBot.class);
 	private static HashMap<String, Boolean> jarvisPresent = new HashMap<String, Boolean>();
 
@@ -166,6 +169,12 @@ public class HelenBot extends PircBot {
 			if (info != null) {
 				kick(channel, sender, info.getBanReason());
 				ban(channel, hostmask);
+				timer.schedule(new TimerTask() {
+					@Override
+					public void run() {
+						unBan(channel,hostmask);
+					}
+				},900000);
 			}
 		}catch(Exception e){
 			logger.error("Exception attempting onjoin for " + channel + " , " + sender + " " + login + " " + hostmask,e);

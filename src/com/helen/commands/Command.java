@@ -378,6 +378,13 @@ public class Command {
 	public void youtubeSearch(CommandData data) {
 		helen.sendMessage(data.getResponseTarget(),
 				data.getSender() + ": " + YouTubeSearch.youtubeSearch(data.getMessage()).toString());
+	}
+
+	@IRCCommand(command="YTREGEX",reg = true, securityLevel = 1, startOfLine = true, matcherGroup = 1,
+	regex = "http(?:s?):\\/\\/(?:www\\.)?youtu(?:be\\.com\\/watch\\?v=|\\.be\\/)([\\w\\-\\_]*)(&(amp;)?[\\w\\?‌​=]*)?")
+	public void youtubeFind(CommandData data){
+		helen.sendMessage(data.getResponseTarget(),
+				data.getSender() + ": " + YouTubeSearch.youtubeFind(data.getRegexTarget()));
 
 	}
 
