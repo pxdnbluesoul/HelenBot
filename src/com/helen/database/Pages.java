@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Pages {
 
@@ -181,6 +182,7 @@ public class Pages {
 			ResultSet rs = stmt.getResultSet();
 			LocalDate date = null;
 			Metadata meta = null;
+			List<Metadata> finalMetas = new LinkedList<>();
 			while(rs != null && rs.next()){
 				Metadata m = new Metadata(rs.getString("pagename"),
 						rs.getString("username"),
@@ -188,19 +190,34 @@ public class Pages {
 						rs.getString("authorage_date"));
 
 				LocalDate newDate = LocalDate.parse(m.getDate());
-				if(meta == null || LocalDate.parse(meta.getDate()).compareTo(newDate) <= 0){
+				if(meta == null || LocalDate.parse(meta.getDate()).compareTo(newDate) < 0){
 					meta = m;
+				}else if(LocalDate.parse(meta.getDate()).compareTo(newDate) == 0){
+					finalMetas.clear();
+					finalMetas.add(meta);
+					finalMetas.add(m);
 				}
+			}
+
+			if(finalMetas.isEmpty() && meta != null){
+				finalMetas.add(meta);
 			}
 
 
 			returnString.append("By: ");
 			returnString.append(result.get(targetName).get("created_by"));
 			if(meta != null){
+
 				returnString.append(" rewritten on: ");
 				returnString.append(meta.getDate());
 				returnString.append( " by ");
-				returnString.append(meta.getUsername());
+				if(finalMetas.size() == 1) {
+					returnString.append(finalMetas.get(0).getUsername());
+				}else if(finalMetas.size() == 2){
+					returnString.append(finalMetas.get(0).getUsername() + " and " + finalMetas.get(1).getUsername());
+				}else{
+					returnString.append(finalMetas.stream().map(metadata -> metadata.getUsername()).collect(Collectors.joining(", ")));
+				}
 			}
 			returnString.append(")");
 			returnString.append(" - ");
