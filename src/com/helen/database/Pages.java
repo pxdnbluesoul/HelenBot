@@ -203,9 +203,33 @@ public class Pages {
 				finalMetas.add(meta);
 			}
 
+            stmt = Connector.getStatement(Queries.getQuery("findAuthors"),targetName);
+            rs = stmt.getResultSet();
+            Metadata metaAuthor = null;
+            List<Metadata> authorFinalMetas = new LinkedList<>();
+            while(rs != null && rs.next()){
+                Metadata m = new Metadata(rs.getString("pagename"),
+                        rs.getString("username"),
+                        rs.getString("metadata_type"),
+                        rs.getString("authorage_date"));
+
+                authorFinalMetas.add(m);
+            }
 
 			returnString.append("By: ");
-			returnString.append(result.get(targetName).get("created_by"));
+            if(!authorFinalMetas.isEmpty()){
+
+                if(authorFinalMetas.size() == 1) {
+                    returnString.append(authorFinalMetas.get(0).getUsername());
+                }else if(authorFinalMetas.size() == 2){
+                    returnString.append(authorFinalMetas.get(0).getUsername() + " and " + authorFinalMetas.get(1).getUsername());
+                }else{
+                    returnString.append(authorFinalMetas.stream().map(metadata -> metadata.getUsername()).collect(Collectors.joining(", ")));
+                }
+            }else {
+
+                returnString.append(result.get(targetName).get("created_by"));
+            }
 			if(meta != null){
 
 				returnString.append(" rewritten on: ");
