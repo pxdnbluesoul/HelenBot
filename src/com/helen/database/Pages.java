@@ -493,8 +493,12 @@ public class Pages {
 		str.append(Colors.NORMAL);
 		str.append(" net upvotes with an average of ");
 		str.append(Colors.BOLD);
-		long avg = Math.round((rating) / (pagecount));
-		str.append(avg);
+		if(pagecount > 0) {
+			long avg = Math.round((rating) / (pagecount));
+			str.append(avg);
+		}else{
+			str.append("apparently zero? (contact magnus.) ");
+		}
 		str.append(Colors.NORMAL);
 		str.append(".  Their latest page is ");
 		str.append(Colors.BOLD);
