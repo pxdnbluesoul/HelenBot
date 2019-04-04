@@ -548,14 +548,14 @@ public class Command {
 		helen.partChannel(data.getTarget());
 	}
 
-	@IRCCommand(command = ".tell", startOfLine = true, securityLevel = 1)
+	/*@IRCCommand(command = ".tell", startOfLine = true, securityLevel = 1)
 	public void tell(CommandData data) {
 		String str = Tells.sendTell(data.getTarget(), data.getSender(), data.getTellMessage(),
 				(data.getChannel().isEmpty() ? true : false));
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + str);
-	}
+	}*/
 
-	@IRCCommand(command = ".mtell", startOfLine = true, securityLevel = 1,coexistWithJarvis = true)
+	@IRCCommand(command = {".tell",".mtell"}, startOfLine = true, securityLevel = 1,coexistWithJarvis = true)
 	public void multiTell(CommandData data) {
 		String str = Tells.sendMultitell(data);
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + str);
