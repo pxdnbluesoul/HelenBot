@@ -95,9 +95,12 @@ public class HelenBot extends PircBot {
 	public void onServerResponse(int code, String response) {
 		if (code == 352) {
 			logger.info(response);
-			if(response.split(" ")[5].equalsIgnoreCase("jarvis")){
+                        String[] tokens = response.split(" ");
+                        for(int i = 0; i < tokens.length; i++){
+			if(tokens[i].equalsIgnoreCase("jarvis")){
 				jarvisPresent.put(response.split(" ")[1].toLowerCase(), true);
 			}
+                         }
 		}
 	}
 
