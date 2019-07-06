@@ -160,7 +160,7 @@ public class HelenBot extends PircBot {
 	}
 
 	public Boolean toggleJarvis(String channel, Boolean status){
-		return jarvisPresent.computeIfAbsent(channel, ch -> status);
+		return jarvisPresent.put(channel, status);
 	}
 
 	public Boolean jarvisIsPresent(String channel) {
