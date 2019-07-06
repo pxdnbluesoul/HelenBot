@@ -228,6 +228,13 @@ public class Command {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Checking channel members...");
 	}
 
+	@IRCCommand(command = { ".jt" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
+	public void toggleJarvis(CommandData data) {
+		Boolean status = data.getSplitMessage().length > 1 ? Boolean.valueOf(data.getSplitMessage()[1]) : false;
+		boolean returnedStatus = helen.toggleJarvis(data.getChannel(), status);
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Jarvis present set to: " + returnedStatus);
+	}
+
 	@IRCCommand(command = { ".jarvistest" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
 	public void listTest(CommandData data) {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + helen.jarvisIsPresent(data.getTarget()));

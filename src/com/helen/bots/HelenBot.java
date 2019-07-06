@@ -62,6 +62,11 @@ public class HelenBot extends PircBot {
 
 	public void onMessage(String channel, String sender, String login,
 			String hostname, String message) {
+	    if(channel != null){
+	        if(sender.equalsIgnoreCase("jarvis")){
+	            jarvisPresent.put(channel, true);
+            }
+        }
 		Users.insertUser(sender, hostname, message, channel.toLowerCase());
 		cmd.dispatchTable(new CommandData(channel, sender, login, hostname,
 				message));
@@ -95,12 +100,12 @@ public class HelenBot extends PircBot {
 	public void onServerResponse(int code, String response) {
 		if (code == 352) {
 			logger.info(response);
-                        String[] tokens = response.split(" ");
-                        for(int i = 0; i < tokens.length; i++){
-			if(tokens[i].equalsIgnoreCase("jarvis")){
-				jarvisPresent.put(response.split(" ")[1].toLowerCase(), true);
-			}
-                         }
+            String[] tokens = response.split(" ");
+            for (int i = 0; i < tokens.length; i++) {
+                if (tokens[i].equalsIgnoreCase("jarvis")) {
+                    jarvisPresent.put(response.split(" ")[1].toLowerCase(), true);
+                }
+            }
 		}
 	}
 
@@ -152,6 +157,10 @@ public class HelenBot extends PircBot {
 				jarvisPresent.put(channel, false);
 			}
 		}
+	}
+
+	public Boolean toggleJarvis(String channel, Boolean status){
+		return jarvisPresent.computeIfAbsent(channel, ch -> status);
 	}
 
 	public Boolean jarvisIsPresent(String channel) {
