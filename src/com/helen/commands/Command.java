@@ -230,12 +230,8 @@ public class Command {
 
 	@IRCCommand(command = { ".jt" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
 	public void toggleJarvis(CommandData data) {
-		logger.info("Jarvis toggle, this is what I got: " + data.getMessage());
-		logger.info(data.toString());
 		Boolean status = data.getSplitMessage().length > 1 ? Boolean.valueOf(data.getSplitMessage()[1]) : false;
-		logger.info("Jarvis toggle, this is what I saw for the status: " + status);
 		boolean returnedStatus = helen.toggleJarvis(data.getChannel(), status);
-		logger.info("Jarvis toggle, this is what I got for the return value: " + returnedStatus);
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Jarvis present set to: " + returnedStatus);
 	}
 
@@ -560,14 +556,8 @@ public class Command {
 		helen.partChannel(data.getTarget());
 	}
 
-	/*@IRCCommand(command = ".tell", startOfLine = true, securityLevel = 1)
-	public void tell(CommandData data) {
-		String str = Tells.sendTell(data.getTarget(), data.getSender(), data.getTellMessage(),
-				(data.getChannel().isEmpty() ? true : false));
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + str);
-	}*/
 
-	@IRCCommand(command = {".tell",".mtell"}, startOfLine = true, securityLevel = 1,coexistWithJarvis = true)
+	@IRCCommand(command = {".tell",".mtell"}, startOfLine = true, securityLevel = 1)
 	public void multiTell(CommandData data) {
 		String str = Tells.sendMultitell(data);
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + str);

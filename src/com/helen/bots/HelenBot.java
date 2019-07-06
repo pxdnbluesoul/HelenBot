@@ -161,7 +161,8 @@ public class HelenBot extends PircBot {
 	}
 
 	public Boolean toggleJarvis(String channel, Boolean status){
-		return jarvisPresent.put(channel, status);
+		jarvisPresent.put(channel, status);
+		return jarvisPresent.get(channel);
 	}
 
 	public Boolean jarvisIsPresent(String channel) {
