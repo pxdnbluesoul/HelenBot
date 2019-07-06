@@ -230,8 +230,12 @@ public class Command {
 
 	@IRCCommand(command = { ".jt" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
 	public void toggleJarvis(CommandData data) {
+		logger.info("Jarvis toggle, this is what I got: " + data.getMessage());
+		logger.info(data.toString());
 		Boolean status = data.getSplitMessage().length > 1 ? Boolean.valueOf(data.getSplitMessage()[1]) : false;
+		logger.info("Jarvis toggle, this is what I saw for the status: " + status);
 		boolean returnedStatus = helen.toggleJarvis(data.getChannel(), status);
+		logger.info("Jarvis toggle, this is what I got for the return value: " + returnedStatus);
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Jarvis present set to: " + returnedStatus);
 	}
 
