@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class HelenBot extends PircBot {
 
@@ -19,7 +20,7 @@ public class HelenBot extends PircBot {
 	private static Timer timer = new Timer();
 
 	private static final Logger logger = Logger.getLogger(HelenBot.class);
-	private static HashMap<String, Boolean> jarvisPresent = new HashMap<String, Boolean>();
+	private static ConcurrentHashMap<String, Boolean> jarvisPresent = new ConcurrentHashMap<String, Boolean>();
 
 	public HelenBot() throws NickAlreadyInUseException, IOException,
 			IrcException, InterruptedException {

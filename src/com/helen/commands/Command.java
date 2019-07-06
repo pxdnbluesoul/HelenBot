@@ -237,7 +237,8 @@ public class Command {
 
 	@IRCCommand(command = { ".jarvistest" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
 	public void listTest(CommandData data) {
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + helen.jarvisIsPresent(data.getTarget()));
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": "
+				+ helen.jarvisIsPresent(data.getSplitMessage().length > 1 ? data.getTarget() : data.getChannel()));
 	}
 
 	@IRCCommand(command = { ".ch", ".choose" }, startOfLine = true, securityLevel = 1)
