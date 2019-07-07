@@ -221,7 +221,7 @@ public class Command {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + " I am now in " + (adminMode ? "Admin Only" : "Any User") + " mode.");
 	}
 
-	@IRCCommand(command = { ".checkJarvis" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
+	@IRCCommand(command = { ".checkJarvis" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
 	public void findJarvisInChannel(CommandData data) {
 		helen.jarvisReset(data.getChannel());
 		helen.sendWho(data.getChannel());
