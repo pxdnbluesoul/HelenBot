@@ -68,7 +68,7 @@ public class Bans {
 
 
 	public static BanInfo getUserBan(String username, String hostmask, String channel){
-                logger.info("JOINED: " + username + " hostname is exactly: \""+hostname+"\" channel:"+channel);
+                logger.info("JOINED: " + username + " hostname is exactly: \""+hostmask+"\" channel:"+channel);
 		LocalDate today = LocalDate.now();
 		if(channel.equalsIgnoreCase("#site17")){
 			for(BanInfo info : bansIn17){
