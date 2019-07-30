@@ -6,6 +6,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
