@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 
 public class Bans {
+        private static final Logger logger = Logger.getLogger(Bans.class);
 
 	private static final HashSet<BanInfo> bansIn19 = new HashSet<>();
 	private static final HashSet<BanInfo> bansIn17 = new HashSet<>();
@@ -66,6 +67,7 @@ public class Bans {
 
 
 	public static BanInfo getUserBan(String username, String hostmask, String channel){
+                logger.info("JOINED: " + username + " hostname is exactly: \""+hostname+"\" channel:"+channel);
 		LocalDate today = LocalDate.now();
 		if(channel.equalsIgnoreCase("#site17")){
 			for(BanInfo info : bansIn17){
