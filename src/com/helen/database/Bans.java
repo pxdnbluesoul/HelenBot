@@ -10,7 +10,6 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
-import java.time.chrono.ChronoLocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -18,10 +17,9 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Bans {
-        private static final Logger logger = Logger.getLogger(Bans.class);
 
-	private static final HashSet<BanInfo> bansIn19 = new HashSet<>();
-	private static final HashSet<BanInfo> bansIn17 = new HashSet<>();
+	private static final Logger logger = Logger.getLogger(Bans.class);
+	private static ConcurrentHashMap<String, HashSet<BanInfo>> bans = new ConcurrentHashMap<>();
 	static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
 	public static void updateBans() throws IOException {
