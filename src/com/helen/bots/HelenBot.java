@@ -179,7 +179,7 @@ public class HelenBot extends PircBot {
 		//logger.info("JOINED: " + sender + " LOGIN: " + login + " HOSTNAME: " + hostmask + " CHANNEL: " + channel);
 		//Testing in separate channel
 		try {
-			BanInfo info = Bans.getUserBan(sender, hostmask, channel);
+			BanInfo info = Bans.getUserBan(sender, hostmask, channel, login);
 			if (info != null) {
 				kick(channel, sender, info.getBanReason());
 				ban(channel, hostmask);
