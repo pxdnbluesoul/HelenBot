@@ -180,8 +180,20 @@ public class HelenBot extends PircBot {
 		//Testing in separate channel
 		try {
 			BanInfo info = Bans.getUserBan(sender, hostmask, channel, login);
-			if (info != null) {
+			if (info != null) { // We have a match in the ban page that is still active.
+			
+				//Kick them.
 				kick(channel, sender, info.getBanReason());
+				
+				// Look at the hostmask from 05 and determine the appropriate banmask.
+				// We do this because without prepending the mask with the appropriate wildcards,
+				// pircbot sets an invalid mask.
+				if(hostmask.contains("@") { // We have a username to ban as well as a hostmask.
+					hostmask = "*!" + hostmask;
+				}
+				else { // The more usual listing in 05, just the hostmask.
+					hostmask = "*!*@" + hostmask; 
+				} 
 				ban(channel, hostmask);
 				timer.schedule(new TimerTask() {
 					@Override
