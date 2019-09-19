@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 
 import org.apache.log4j.Logger;
 
@@ -17,17 +18,16 @@ import com.helen.database.Configs;
 public class WebSearch {
 
 	final static Logger logger = Logger.getLogger(WebSearch.class);
-	
-	
-	public static GoogleResults search(String searchTerm) throws IOException {
-		searchTerm = searchTerm.substring(3, searchTerm.length()).replace(" ", "+");
+
+	private static GoogleResults eitherSearch(String searchTerm, boolean image) throws IOException {
 		URL url = new URL(Configs.getSingleProperty("googleurl").getValue()
 				+ Configs.getSingleProperty("apiKey").getValue()
 				+ "&cx="
 				+ Configs.getSingleProperty("customEngine").getValue()
 				+ "&q="
-				+ searchTerm +
-				"&alt=json");
+				+ URLEncoder.encode(searchTerm.substring(searchTerm.indexOf(' ') + 1), "UTF-8")
+				+ "&alt=json"
+				+ (image ? "&searchType=image" : ""));
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("GET");
 		conn.setRequestProperty("Accept", "application/json");
@@ -36,25 +36,31 @@ public class WebSearch {
 		GoogleResults searchResult = null;
 		JsonParser json = new JsonParser();
 		JsonElement jsonTree = json.parse(br);
-		if(jsonTree.isJsonObject()){
+		if(jsonTree != null && jsonTree.isJsonObject()){
 			JsonObject jsonObject = jsonTree.getAsJsonObject();
-			
+
 			JsonElement items = jsonObject.get("items");
-			if(items.isJsonArray()){
+			if(items != null && items.isJsonArray()){
 				JsonArray itemsArray = items.getAsJsonArray();
-				
+
 				JsonElement result = itemsArray.get(0);
-				if(result.isJsonObject()){
+				if(result != null && result.isJsonObject()){
 					JsonObject resultMap = result.getAsJsonObject();
-					searchResult = new GoogleResults(resultMap);
+					searchResult = new GoogleResults(resultMap, !image);
 				}
 			}
 		}
-		
-		
-		
+
 		conn.disconnect();
-		
+
 		return searchResult;
+	}
+
+	public static GoogleResults search(String searchTerm) throws IOException {
+		return eitherSearch(searchTerm, false);
+	}
+
+	public static GoogleResults imageSearch(String searchTerm) throws IOException {
+		return eitherSearch(searchTerm, true);
 	}
 }

@@ -2,10 +2,7 @@ package com.helen.commands;
 
 import com.helen.bots.HelenBot;
 import com.helen.database.*;
-import com.helen.search.WebSearch;
-import com.helen.search.WebsterSearch;
-import com.helen.search.WikipediaSearch;
-import com.helen.search.YouTubeSearch;
+import com.helen.search.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jibble.pircbot.User;
@@ -13,14 +10,16 @@ import org.jibble.pircbot.User;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Command {
 	private static final Logger logger = Logger.getLogger(Command.class);
+	public static final String NOT_FOUND = "I'm sorry, I couldn't find anything.";
+	public static final String ERROR = "I'm sorry, there was an error. Please inform DrMagnus.";
 
 	private HelenBot helen;
 
@@ -222,23 +221,31 @@ public class Command {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + " I am now in " + (adminMode ? "Admin Only" : "Any User") + " mode.");
 	}
 
-	@IRCCommand(command = { ".checkJarvis" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
+	@IRCCommand(command = { ".checkJarvis" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
 	public void findJarvisInChannel(CommandData data) {
 		helen.jarvisReset(data.getChannel());
 		helen.sendWho(data.getChannel());
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Checking channel members...");
 	}
 
+	@IRCCommand(command = { ".jt" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
+	public void toggleJarvis(CommandData data) {
+		Boolean status = data.getSplitMessage().length > 1 ? Boolean.valueOf(data.getSplitMessage()[1]) : false;
+		boolean returnedStatus = helen.toggleJarvis(data.getChannel(), status);
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Jarvis present set to: " + returnedStatus);
+	}
+
 	@IRCCommand(command = { ".jarvistest" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
 	public void listTest(CommandData data) {
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + helen.jarvisIsPresent(data.getTarget()));
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": "
+				+ helen.jarvisIsPresent(data.getSplitMessage().length > 1 ? data.getTarget() : data.getChannel()));
 	}
 
 	@IRCCommand(command = { ".ch", ".choose" }, startOfLine = true, securityLevel = 1)
 	public void choose(CommandData data) {
 		String[] choices = data.getMessage().substring(data.getMessage().indexOf(" ")).split(",");
 		helen.sendMessage(data.getResponseTarget(),
-				data.getSender() + ": " + choices[((int) (Math.random() * (choices.length - 1)) + 1)]);
+				data.getSender() + ": " + choices[new Random().nextInt(choices.length)]);
 	}
 
 	@IRCCommand(command = { ".mode" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
@@ -344,10 +351,24 @@ public class Command {
 	@IRCCommand(command = { ".g", ".google" }, startOfLine = true, securityLevel = 1)
 	public void webSearch(CommandData data) {
 		try {
+			GoogleResults results = WebSearch.search(data.getMessage());
 			helen.sendMessage(data.getResponseTarget(),
-					data.getSender() + ": " + WebSearch.search(data.getMessage()).toString());
+					data.getSender() + ": " + (results == null ? NOT_FOUND : results)
+			);
 		} catch (IOException e) {
 			logger.error("Exception during web search", e);
+		}
+	}
+
+	@IRCCommand(command = { ".gis" }, startOfLine = true, securityLevel = 1)
+	public void imageSearch(CommandData data) {
+		try {
+			GoogleResults results = WebSearch.imageSearch(data.getMessage());
+			helen.sendMessage(data.getResponseTarget(),
+					data.getSender() + ": " + (results == null ? NOT_FOUND : results)
+			);
+		} catch (IOException e) {
+			logger.error("Exception during image search", e);
 		}
 	}
 
@@ -355,7 +376,7 @@ public class Command {
 	public void wikipediaSearch(CommandData data) {
 		try {
 			helen.sendMessage(data.getResponseTarget(),
-					data.getSender() + ": " + WikipediaSearch.search(data.getMessage()));
+					data.getSender() + ": " + WikipediaSearch.search(data, data.getMessage()));
 		} catch (IOException e) {
 			logger.error("Exception during Wikipedia search", e);
 		}
@@ -365,6 +386,13 @@ public class Command {
 	public void youtubeSearch(CommandData data) {
 		helen.sendMessage(data.getResponseTarget(),
 				data.getSender() + ": " + YouTubeSearch.youtubeSearch(data.getMessage()).toString());
+	}
+
+	@IRCCommand(command="YTREGEX",reg = true, securityLevel = 1, startOfLine = true, matcherGroup = 1,
+	regex = "http(?:s?):\\/\\/(?:www\\.)?youtu(?:be\\.com\\/watch\\?v=|\\.be\\/)([\\w\\-\\_]*)(&(amp;)?[\\w\\?‌​=]*)?")
+	public void youtubeFind(CommandData data){
+		helen.sendMessage(data.getResponseTarget(),
+				data.getSender() + ": " + YouTubeSearch.youtubeFind(data.getRegexTarget()));
 
 	}
 
@@ -430,7 +458,7 @@ public class Command {
 				data, data.getSplitMessage().length == 1 ? data.getSender() :  data.getMessageWithoutCommand()));
 	}
 
-	@IRCCommand(command = "SCPPAGEREGEX", startOfLine= true, reg = true, regex = { "http:\\/\\/www.scp-wiki.net\\/(.*)" }, securityLevel = 1, matcherGroup = 1)
+	@IRCCommand(command = "SCPPAGEREGEX", startOfLine= true, reg = true, regex = { "http(?:s?):\\/\\/(?:www\\.)?scp-wiki\\.net\\/(.*)" }, securityLevel = 1, matcherGroup = 1)
 	public void getPageInfo(CommandData data){
 		if(!data.getRegexTarget().contains("/") && !data.getRegexTarget().contains("forum")){
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getRegexTarget()));
@@ -528,14 +556,8 @@ public class Command {
 		helen.partChannel(data.getTarget());
 	}
 
-	@IRCCommand(command = ".tell", startOfLine = true, securityLevel = 1)
-	public void tell(CommandData data) {
-		String str = Tells.sendTell(data.getTarget(), data.getSender(), data.getTellMessage(),
-				(data.getChannel().isEmpty() ? true : false));
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + str);
-	}
 
-	@IRCCommand(command = ".mtell", startOfLine = true, securityLevel = 1,coexistWithJarvis = true)
+	@IRCCommand(command = {".tell",".mtell"}, startOfLine = true, securityLevel = 1)
 	public void multiTell(CommandData data) {
 		String str = Tells.sendMultitell(data);
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + str);
@@ -643,7 +665,7 @@ public class Command {
 		}
 	}
 
-	@IRCCommand(command = ".discord", startOfLine = true, securityLevel = 4, coexistWithJarvis = true)
+	@IRCCommand(command = ".discord", startOfLine = true, securityLevel = 2, coexistWithJarvis = true)
 	public void showDiscordMessage(CommandData data){
 		helen.sendMessage(data.getChannel(), "There are currently no plans for an official SCP Discord." +
 		" Staff feel that, at this time, the benefits of Discord do not outweigh the difficulties of moderation," +
@@ -651,7 +673,7 @@ public class Command {
 				"the technical and financial viability of discord.");
 	}
 
-	@IRCCommand(command = ".updateBans", startOfLine = true, securityLevel = 4, coexistWithJarvis = true)
+	@IRCCommand(command = ".updateBans", startOfLine = true, securityLevel = 2, coexistWithJarvis = true)
 	public void updateBans(CommandData data) {
 		try {
 			Bans.updateBans();

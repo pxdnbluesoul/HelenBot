@@ -11,7 +11,18 @@ public class CommandData {
 	private String message;
 	private String regexTarget;
 
-	
+	@Override
+	public String toString() {
+		return "CommandData{" +
+				"channel='" + channel + '\'' +
+				", sender='" + sender + '\'' +
+				", login='" + login + '\'' +
+				", hostname='" + hostname + '\'' +
+				", message='" + message + '\'' +
+				", regexTarget='" + regexTarget + '\'' +
+				'}';
+	}
+
 	public CommandData(String channel, String sender, String login, String hostname, String message) {
 		this.channel = channel;
 		this.sender = sender;

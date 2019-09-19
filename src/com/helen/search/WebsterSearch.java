@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import com.helen.commands.Command;
 import org.apache.log4j.Logger;
 import org.jibble.pircbot.Colors;
 import org.w3c.dom.Document;
@@ -26,7 +27,7 @@ public class WebsterSearch {
 
 	public static String dictionarySearch(String query) {
 		query = query.toLowerCase();
-		String result = "There was an error, please contact Dr. Magnus";
+		String result = Command.ERROR;
 		try {
 			Document doc = findDefinition(query);
 			NodeList sugList = doc.getElementsByTagName("suggestion");
@@ -49,7 +50,7 @@ public class WebsterSearch {
 	}
 
 	private static Document findDefinition(String keyword) {
-		
+
 		Document doc = null;
 		try {
 			StringBuilder result = new StringBuilder();
@@ -73,75 +74,82 @@ public class WebsterSearch {
 		} catch (Exception e) {
 			logger.error("There was an exception attempting to retreive dictionary results", e);
 		}
-		
+
 		return doc;
 	}
 
 	private static String processDocument(Document doc, String keyword) {
 		NodeList list = doc.getElementsByTagName("entry");
 		if(list.getLength() > 0){
-		ArrayList<Node> nodesToAnalyze = new ArrayList<Node>();
-		try {
-			for (int i = 0; i < list.getLength(); i++) {
-				NodeList nl = ((Element) list.item(i)).getElementsByTagName("ew");
-				for (int j = 0; j < nl.getLength(); j++) {
-					if (nl.item(j).getFirstChild().getNodeValue().equals(keyword)) {
-						nodesToAnalyze.add(list.item(i));
+			String alternateForm =
+					((Element) list.item(0))
+							.getElementsByTagName("ew")
+							.item(0)
+							.getFirstChild()
+							.getNodeValue();
+			ArrayList<Node> nodesToAnalyze = new ArrayList<Node>();
+			try {
+				for (int i = 0; i < list.getLength(); i++) {
+					NodeList nl = ((Element) list.item(i)).getElementsByTagName("ew");
+					for (int j = 0; j < nl.getLength(); j++) {
+						String value = nl.item(j).getFirstChild().getNodeValue();
+						if (keyword.equals(value) || alternateForm.equals(value)) {
+							nodesToAnalyze.add(list.item(i));
+						}
 					}
 				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 
-		ArrayList<Definition> test = new ArrayList<Definition>();
-		for (Node n : nodesToAnalyze) {
-			Definition def = new Definition();
-			Element nodeler = (Element) n;
-			def.partOfSpeech = nodeler.getElementsByTagName("fl").item(0).getFirstChild().getNodeValue();
-			NodeList defs = ((Element) nodeler.getElementsByTagName("def").item(0)).getElementsByTagName("dt");
-			for (int i = 0; i < defs.getLength(); i++) {
-				NodeList sxList = ((Element) defs.item(i)).getElementsByTagName("sx");
-				NodeList fwList = ((Element) defs.item(i)).getElementsByTagName("fw");
-				NodeList testList = defs.item(i).getChildNodes();
-				String definition;
-				if (sxList.getLength() > 0) {
-					definition = testList.item(1).getFirstChild().getNodeValue();
-				}else if(fwList.getLength() > 0){
-					definition = defs.item(i).getFirstChild().getNodeValue().replace(":", "") + testList.item(1).getFirstChild().getNodeValue().replace(":", "");
-					
-				} else {
-					definition = defs.item(i).getFirstChild().getNodeValue().replace(":", "");
+			ArrayList<Definition> test = new ArrayList<Definition>();
+			for (Node n : nodesToAnalyze) {
+				Definition def = new Definition();
+				Element nodeler = (Element) n;
+				def.partOfSpeech = nodeler.getElementsByTagName("fl").item(0).getFirstChild().getNodeValue();
+				NodeList defs = ((Element) nodeler.getElementsByTagName("def").item(0)).getElementsByTagName("dt");
+				for (int i = 0; i < defs.getLength(); i++) {
+					NodeList sxList = ((Element) defs.item(i)).getElementsByTagName("sx");
+					NodeList fwList = ((Element) defs.item(i)).getElementsByTagName("fw");
+					NodeList testList = defs.item(i).getChildNodes();
+					String definition;
+					if (sxList.getLength() > 0) {
+						definition = testList.item(1).getFirstChild().getNodeValue();
+					}else if(fwList.getLength() > 0){
+						definition = defs.item(i).getFirstChild().getNodeValue().replace(":", "") + testList.item(1).getFirstChild().getNodeValue().replace(":", "");
+
+					} else {
+						definition = defs.item(i).getFirstChild().getNodeValue().replace(":", "");
+					}
+					if (!definition.trim().isEmpty()) {
+						def.definitions.add(definition);
+					}
 				}
-				if (!definition.trim().isEmpty()) {
-					def.definitions.add(definition);
-				}
+				test.add(def);
 			}
-			test.add(def);
-		}
-		StringBuilder str = new StringBuilder();
-		str.append(Colors.BOLD);
-		str.append(keyword);
-		str.append(" - ");
-		str.append(Colors.NORMAL);
-		for (Definition d : test) {
+			StringBuilder str = new StringBuilder();
 			str.append(Colors.BOLD);
-			str.append(d.partOfSpeech);
-			str.append(": ");
+			str.append(keyword);
+			str.append(" - ");
 			str.append(Colors.NORMAL);
-			int i = 0;
-			for (String s : d.definitions) {
-				if (i < 2) {
-					str.append((i + 1));
-					str.append(". ");
-					str.append(d.definitions.get(i++));
-					str.append(" ");
+			for (Definition d : test) {
+				str.append(Colors.BOLD);
+				str.append(d.partOfSpeech);
+				str.append(": ");
+				str.append(Colors.NORMAL);
+				int i = 0;
+				for (String s : d.definitions) {
+					if (i < 2) {
+						str.append((i + 1));
+						str.append(". ");
+						str.append(d.definitions.get(i++));
+						str.append(" ");
+					}
 				}
+
 			}
 
-		}
-
-		return str.toString();
+			return str.toString();
 		}else{
 			return "I couldn't find a definition for " + keyword + ".";
 		}

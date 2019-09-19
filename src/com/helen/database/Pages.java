@@ -1,6 +1,8 @@
 package com.helen.database;
 
+import com.helen.commands.Command;
 import com.helen.commands.CommandData;
+import com.helen.search.WikipediaSearch;
 import org.apache.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
@@ -14,11 +16,11 @@ import java.io.InputStream;
 import java.net.URL;
 import java.sql.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Pages {
 
@@ -175,8 +177,72 @@ public class Pages {
 			returnString.append("Written ");
 			returnString.append(findTime(df.parse((String) result.get(targetName)
 					.get("created_at")).getTime()));
+
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findRewrite"),targetName);
+			ResultSet rs = stmt.getResultSet();
+			LocalDate date = null;
+			Metadata meta = null;
+			List<Metadata> finalMetas = new LinkedList<>();
+			while(rs != null && rs.next()){
+				Metadata m = new Metadata(rs.getString("pagename"),
+						rs.getString("username"),
+						rs.getString("metadata_type"),
+						rs.getString("authorage_date"));
+
+				LocalDate newDate = LocalDate.parse(m.getDate());
+				if(meta == null || LocalDate.parse(meta.getDate()).compareTo(newDate) < 0){
+					meta = m;
+				}else if(LocalDate.parse(meta.getDate()).compareTo(newDate) == 0){
+					finalMetas.clear();
+					finalMetas.add(meta);
+					finalMetas.add(m);
+				}
+			}
+
+			if(finalMetas.isEmpty() && meta != null){
+				finalMetas.add(meta);
+			}
+
+            stmt = Connector.getStatement(Queries.getQuery("findAuthors"),targetName);
+            rs = stmt.getResultSet();
+            Metadata metaAuthor = null;
+            List<Metadata> authorFinalMetas = new LinkedList<>();
+            while(rs != null && rs.next()){
+                Metadata m = new Metadata(rs.getString("pagename"),
+                        rs.getString("username"),
+                        rs.getString("metadata_type"),
+                        rs.getString("authorage_date"));
+
+                authorFinalMetas.add(m);
+            }
+
 			returnString.append("By: ");
-			returnString.append(result.get(targetName).get("created_by"));
+            if(!authorFinalMetas.isEmpty()){
+
+                if(authorFinalMetas.size() == 1) {
+                    returnString.append(authorFinalMetas.get(0).getUsername());
+                }else if(authorFinalMetas.size() == 2){
+                    returnString.append(authorFinalMetas.get(0).getUsername() + " and " + authorFinalMetas.get(1).getUsername());
+                }else{
+                    returnString.append(authorFinalMetas.stream().map(metadata -> metadata.getUsername()).collect(Collectors.joining(", ")));
+                }
+            }else {
+
+                returnString.append(result.get(targetName).get("created_by"));
+            }
+			if(meta != null){
+
+				returnString.append(" rewritten on: ");
+				returnString.append(meta.getDate());
+				returnString.append( " by ");
+				if(finalMetas.size() == 1) {
+					returnString.append(finalMetas.get(0).getUsername());
+				}else if(finalMetas.size() == 2){
+					returnString.append(finalMetas.get(0).getUsername() + " and " + finalMetas.get(1).getUsername());
+				}else{
+					returnString.append(finalMetas.stream().map(metadata -> metadata.getUsername()).collect(Collectors.joining(", ")));
+				}
+			}
 			returnString.append(")");
 			returnString.append(" - ");
             returnString.append("http://scp-wiki.net/");
@@ -188,15 +254,16 @@ public class Pages {
 			logger.error("There was an exception retreiving metadata", e);
 		}
 
-		return "I couldn't find anything matching that, apologies.";
+		return Command.NOT_FOUND;
 	}
 	
 	public static String getAuthorDetail(CommandData data, String user){
 		user = user.toLowerCase();
+		user = user.trim();
 		try{
 			
 			ArrayList<Selectable> authors = new ArrayList<Selectable>();
-			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findAuthors"), "%" + user + "%");
+			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findAuthorName"), "%" + user + "%");
 			ResultSet rs = stmt.getResultSet();
 			while(rs != null && rs.next()){
 				authors.add(new Author(rs.getString("created_by")));
@@ -234,47 +301,157 @@ public class Pages {
 		
 		return "I apologize, there's been an error.  Please inform DrMagnus there's an error with author details.";
 	}
+
+	public static String disambiguateWikipedia(CommandData data, List<String> titles){
+		if(titles.isEmpty()){
+			return "I couldn't find any choices.";
+		}
+		try{
+				ArrayList<Selectable> choices = new ArrayList<>();
+				for(String title : titles){
+					choices.add(new WikipediaAmbiguous(data, title));
+				}
+				storedEvents.put(data.getSender(), choices);
+				StringBuilder str = new StringBuilder();
+				str.append("Did you mean: ");
+				String prepend = "";
+				for (Selectable choice : choices) {
+					str.append(prepend);
+					prepend=",";
+					str.append(Colors.BOLD);
+					str.append(((WikipediaAmbiguous)choice).getTitle());
+					str.append(Colors.NORMAL);
+				}
+				str.append("?");
+				String result = str.toString();
+				result = result.substring(0, Math.min(400, result.length()));
+				int lastComma = result.lastIndexOf(',');
+				if(lastComma != -1){
+					result = result.substring(0, lastComma);
+				}
+				return result;
+		}catch(Exception e){
+			logger.error("Error constructing choice",e);
+		}
+
+		return "I apologize, there's been an error.  Please inform DrMagnus there's an error with author details.";
+	}
 	
 	public static String getAuthorDetailsPages(String user){
 		String lowerUser = user.toLowerCase();
+		Timestamp ts = new java.sql.Timestamp(0l);
+		int rating = 0;
+		Page latest = null;
+		int pagecount = 0;
 		Page authorPage = null;
 		try{
 		CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findAuthorPage"), lowerUser);
 		ResultSet rs = stmt.getResultSet();
 		if(rs != null && rs.next()){
 			authorPage = new Page(rs.getString("pagename"),
-					rs.getString("title"),
-					rs.getBoolean("scppage"),
-					rs.getString("scptitle"));
+                    rs.getString("title"),
+                    rs.getInt("rating"),
+                    rs.getString("created_by"),
+                    rs.getTimestamp("created_on"),
+                    rs.getBoolean("scppage"),
+                    rs.getString("scptitle"));
+
+			rating = rating + authorPage.getRating();
+			pagecount++;
+			if(authorPage.getCreatedAt() != null && authorPage.getCreatedAt().compareTo(ts) > 0){
+				ts = authorPage.getCreatedAt();
+				 latest = authorPage;
+			}
+
 		}
 		rs.close();
 		stmt.close();
 		
-		ArrayList<Page> pages = new ArrayList<Page>();
-		stmt = Connector.getStatement(Queries.getQuery("findSkips"), lowerUser);
+		ArrayList<Page> pages = new ArrayList<>();
+		stmt = Connector.getStatement(Queries.getQuery("findAllSkips"), lowerUser, lowerUser);
 		rs = stmt.getResultSet();
 		while(rs != null && rs.next()){
-			pages.add( new Page(rs.getString("pagename"),
+			Page p = new Page(rs.getString("pagename"),
 					rs.getString("title"),
 					rs.getInt("rating"),
 					rs.getString("created_by"),
 					rs.getTimestamp("created_on"),
 					rs.getBoolean("scppage"),
-					rs.getString("scptitle")));
+					rs.getString("scptitle"));
+			pages.add(p);
+			pagecount++;
+			rating = rating + p.getRating();
+
+			if(p.getCreatedAt() != null && p.getCreatedAt().compareTo(ts) > 0){
+				ts = p.getCreatedAt();
+				latest = p;
+			}
 		}
 		
-		stmt = Connector.getStatement(Queries.getQuery("findTales"), lowerUser);
+		stmt = Connector.getStatement(Queries.getQuery("findAllTales"), lowerUser, lowerUser);
 		rs = stmt.getResultSet();
+		List<Page> tales = new LinkedList<>();
 		while(rs != null && rs.next()){
-			pages.add( new Page(rs.getString("pagename"),
+			Page p = new Page(rs.getString("pagename"),
 					rs.getString("title"),
 					rs.getInt("rating"),
 					rs.getString("created_by"),
 					rs.getTimestamp("created_on"),
 					rs.getBoolean("scppage"),
-					rs.getString("scptitle")));
+					rs.getString("scptitle"));
+
+			rating = rating + p.getRating();
+			pagecount++;
+			tales.add(p);
+
+			if(p.getCreatedAt() != null && p.getCreatedAt().compareTo(ts) > 0){
+				ts = p.getCreatedAt();
+				latest = p;
+			}
 		}
-		
+
+
+		stmt = Connector.getStatement(Queries.getQuery("findAllGoi"), lowerUser, lowerUser);
+		rs = stmt.getResultSet();
+		List<Page> gois = new LinkedList<>();
+		while(rs != null && rs.next()){
+			Page p = new Page(rs.getString("pagename"),
+					rs.getString("title"),
+					rs.getInt("rating"),
+					rs.getString("created_by"),
+					rs.getTimestamp("created_on"),
+					rs.getBoolean("scppage"),
+					rs.getString("scptitle"));
+			gois.add(p);
+			pagecount++;
+			rating = rating + p.getRating();
+
+			if(p.getCreatedAt() != null && p.getCreatedAt().compareTo(ts) > 0){
+				ts = p.getCreatedAt();
+				latest = p;
+			}
+		}
+
+			stmt = Connector.getStatement(Queries.getQuery("findAllOthers"), lowerUser, lowerUser);
+			rs = stmt.getResultSet();
+			List<Page> others = new LinkedList<>();
+			while(rs != null && rs.next()){
+				Page p = new Page(rs.getString("pagename"),
+						rs.getString("title"),
+						rs.getInt("rating"),
+						rs.getString("created_by"),
+						rs.getTimestamp("created_on"),
+						rs.getBoolean("scppage"),
+						rs.getString("scptitle"));
+				others.add(p);
+				pagecount++;
+				rating = rating + p.getRating();
+				if(p.getCreatedAt() != null && p.getCreatedAt().compareTo(ts) > 0){
+					ts = p.getCreatedAt();
+					latest = p;
+				}
+
+			}
 		
 		StringBuilder str = new StringBuilder();
 		str.append(Colors.BOLD);
@@ -288,50 +465,40 @@ public class Pages {
 			str.append(authorPage.getPageLink());
 			str.append(") ");
 		}
-		String authorPageName = authorPage == null ? "null" : authorPage.getPageLink();
-		int scps = 0;
-		int tales = 0;
-		int rating = 0;
-			int total = 0;
-		Timestamp ts = new java.sql.Timestamp(0l);
-		Page latest = null;
-		for(Page p: pages){
-			total++;
-			if(!p.getPageLink().equals(authorPageName)){
-				if(p.getScpPage()){
-					scps++;
-				}else{
-					tales++;
-				}
-				rating += p.getRating();
-				
-				if(p.getCreatedAt().compareTo(ts) > 0){
-					ts = p.getCreatedAt();
-					latest = p;
-				}
-			}
-		}
+
 		str.append("has ");
 		str.append(Colors.BOLD);
-			str.append(total);
+		str.append(pagecount);
 		str.append(Colors.NORMAL);
 		str.append(" pages. (");
 		str.append(Colors.BOLD);
-		str.append(scps);
+		str.append(pages.size());
 		str.append(Colors.NORMAL);
 		str.append(" SCP articles, ");
 		str.append(Colors.BOLD);
-		str.append(tales);
+		str.append(tales.size());
 		str.append(Colors.NORMAL);
-		str.append(" Tales).");
+		str.append(" Tales, ");
+		str.append(Colors.BOLD);
+		str.append(gois.size());
+		str.append(Colors.NORMAL);
+		str.append(" GoI Formats, ");
+		str.append(Colors.BOLD);
+		str.append(others.size());
+		str.append(Colors.NORMAL);
+		str.append(" others.)");
 		str.append(" They have ");
 		str.append(Colors.BOLD);
 		str.append(rating);
 		str.append(Colors.NORMAL);
 		str.append(" net upvotes with an average of ");
 		str.append(Colors.BOLD);
-		long avg = Math.round((rating) / (tales + scps));
-		str.append(avg);
+		if(pagecount > 0) {
+			long avg = Math.round((rating) / (pagecount));
+			str.append(avg);
+		}else{
+			str.append("apparently zero? (contact magnus.) ");
+		}
 		str.append(Colors.NORMAL);
 		str.append(".  Their latest page is ");
 		str.append(Colors.BOLD);
@@ -433,7 +600,7 @@ public class Pages {
 			if (potentialPages.size() == 1) {
 				return getPageInfo(((Page)potentialPages.get(0)).getPageLink());
 			} else {
-				return "I couldn't find anything.";
+				return Command.NOT_FOUND;
 			}
 		}
 	}
@@ -445,6 +612,10 @@ public class Pages {
 				return getPageInfo((String)s.selectResource());
 			}else if(s instanceof Author){
 				return getAuthorDetailsPages((String)s.selectResource());
+			}else if(s instanceof WikipediaAmbiguous){
+				WikipediaAmbiguous choice = (WikipediaAmbiguous) s;
+				CommandData data = choice.getData();
+				return WikipediaSearch.search(data, choice.getTitle());
 			}
 			
 		} catch (Exception e) {

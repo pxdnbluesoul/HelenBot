@@ -10,13 +10,17 @@ import org.jibble.pircbot.PircBot;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class HelenBot extends PircBot {
 
 	private static Command cmd = null;
-	
+	private static Timer timer = new Timer();
+
 	private static final Logger logger = Logger.getLogger(HelenBot.class);
-	private static HashMap<String, Boolean> jarvisPresent = new HashMap<String, Boolean>();
+	private static ConcurrentHashMap<String, Boolean> jarvisPresent = new ConcurrentHashMap<String, Boolean>();
 
 	public HelenBot() throws NickAlreadyInUseException, IOException,
 			IrcException, InterruptedException {
@@ -59,6 +63,11 @@ public class HelenBot extends PircBot {
 
 	public void onMessage(String channel, String sender, String login,
 			String hostname, String message) {
+	    if(channel != null){
+	        if(sender.equalsIgnoreCase("jarvis")){
+	            jarvisPresent.put(channel, true);
+            }
+        }
 		Users.insertUser(sender, hostname, message, channel.toLowerCase());
 		cmd.dispatchTable(new CommandData(channel, sender, login, hostname,
 				message));
@@ -92,9 +101,12 @@ public class HelenBot extends PircBot {
 	public void onServerResponse(int code, String response) {
 		if (code == 352) {
 			logger.info(response);
-			if(response.split(" ")[5].equalsIgnoreCase("jarvis")){
-				jarvisPresent.put(response.split(" ")[1].toLowerCase(), true);
-			}
+            String[] tokens = response.split(" ");
+            for (int i = 0; i < tokens.length; i++) {
+                if (tokens[i].equalsIgnoreCase("jarvis")) {
+                    jarvisPresent.put(response.split(" ")[1].toLowerCase(), true);
+                }
+            }
 		}
 	}
 
@@ -148,6 +160,11 @@ public class HelenBot extends PircBot {
 		}
 	}
 
+	public Boolean toggleJarvis(String channel, Boolean status){
+		jarvisPresent.put(channel, status);
+		return jarvisPresent.get(channel);
+	}
+
 	public Boolean jarvisIsPresent(String channel) {
 		return jarvisPresent.getOrDefault(channel.toLowerCase(), false);
 	}
@@ -162,10 +179,16 @@ public class HelenBot extends PircBot {
 		//logger.info("JOINED: " + sender + " LOGIN: " + login + " HOSTNAME: " + hostmask + " CHANNEL: " + channel);
 		//Testing in separate channel
 		try {
-			BanInfo info = Bans.getUserBan(sender, hostmask, channel);
+			BanInfo info = Bans.getUserBan(sender, hostmask, channel, login);
 			if (info != null) {
 				kick(channel, sender, info.getBanReason());
 				ban(channel, hostmask);
+				timer.schedule(new TimerTask() {
+					@Override
+					public void run() {
+						unBan(channel,hostmask);
+					}
+				},900000);
 			}
 		}catch(Exception e){
 			logger.error("Exception attempting onjoin for " + channel + " , " + sender + " " + login + " " + hostmask,e);
