@@ -288,10 +288,10 @@ public class Command {
 		Roll roll = new Roll(".roll " + data.getMessage(),
 				data.getSender(),
 				"([0-9]+)(d|f)([0-9]+)([+|-]?[0-9]+)?(\\s-e|-s)?\\s?(-e|-s)?\\s?(.+)?");
-		Rolls.insertRoll(roll);
-		if(roll.getDiceThrows() > 100){
-			helen.kick(data.getChannel(), data.getSender(), "Ops " + data.getSender() + " sent over 100 dice rolls, potentially crashing me.");
-		}else if(roll.getDiceThrows() > 20){
+		if(roll.getDiceThrows() >= 100){
+			helen.kick(data.getChannel(), data.getSender(), "Begone..");
+			helen.sendMessage(data.getChannel(), "Ops, " + data.getSender() + " sent over 100 dice rolls potentially crashing me.");
+		}else if(roll.getDiceThrows() >= 20){
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": How's about no.");
 		}		else {
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + roll.toString());
@@ -302,8 +302,8 @@ public class Command {
 	public void roll(CommandData data) {
 		Roll roll = new Roll(data.getMessage(), data.getSender());
 		if(roll.getDiceThrows() > 100){
-			helen.kick(data.getChannel(), data.getSender(), "Ops " + data.getSender() + " sent over 100 dice rolls, potentially crashing me.");
-		}else if(roll.getDiceThrows() > 20){
+			helen.kick(data.getChannel(), data.getSender(), "Begone..");
+			helen.sendMessage(data.getChannel(), "Ops, " + data.getSender() + " sent over 100 dice rolls potentially crashing me.");		}else if(roll.getDiceThrows() > 20){
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": How's about no.");
 		}else {
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + roll.toString());

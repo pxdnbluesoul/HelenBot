@@ -31,6 +31,7 @@ public class HelenBot extends PircBot {
 		joinChannels();
 		Bans.updateBans();
 		cmd = new Command(this);
+		//whos();
 	}
 
 	private void connect() throws NickAlreadyInUseException, IOException,
@@ -48,11 +49,15 @@ public class HelenBot extends PircBot {
 		Thread.sleep(2000l);
 	}
 
+	private void whos(){
+		Configs.getProperty("autojoin").forEach(channel -> sendWho(channel.getValue()));
+	}
+
 	private void joinChannels() {
 
 		for (Config channel : Configs.getProperty("autojoin")) {
 			this.joinChannel(channel.getValue());
-			sendWho(channel.getValue());
+
 		}
 	}
 

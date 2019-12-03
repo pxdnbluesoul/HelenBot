@@ -78,23 +78,25 @@ public class Bans {
 
 	public static BanInfo getUserBan(String username, String hostmask, String channel, String login){
 		LocalDate today = LocalDate.now();
-		for(BanInfo info : bans.get(channel)){
-			if((info.getIPs().contains(hostmask) || info.getUserNames().contains(username)) && info.getBanEnd().isAfter(today)){
-				return info;
-			}else if(info.isSpecial()) {
-				for (String infoHostMask : info.getIPs()) {
-					if (infoHostMask.contains("@")) {
-						if (infoHostMask.contains("@*")) {
-							if (infoHostMask.split("@")[0].equalsIgnoreCase(login)) {
+		if(bans.containsKey(channel)) {
+			for (BanInfo info : bans.get(channel)) {
+				if ((info.getIPs().contains(hostmask) || info.getUserNames().contains(username)) && info.getBanEnd().isAfter(today)) {
+					return info;
+				} else if (info.isSpecial()) {
+					for (String infoHostMask : info.getIPs()) {
+						if (infoHostMask.contains("@")) {
+							if (infoHostMask.contains("@*")) {
+								if (infoHostMask.split("@")[0].equalsIgnoreCase(login)) {
+									return info;
+								}
+							}
+							if (infoHostMask.equalsIgnoreCase(login + "@" + hostmask)) {
 								return info;
 							}
-						}
-						if (infoHostMask.equalsIgnoreCase(login + "@" + hostmask)) {
-							return info;
-						}
-					} else if (infoHostMask.contains("*")) {
-						if (isMatch(hostmask, infoHostMask)) {
-							return info;
+						} else if (infoHostMask.contains("*")) {
+							if (isMatch(hostmask, infoHostMask)) {
+								return info;
+							}
 						}
 					}
 				}
