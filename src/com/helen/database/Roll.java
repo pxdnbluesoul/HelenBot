@@ -48,7 +48,7 @@ public class Roll implements DatabaseObject {
 	}
 
 	public Integer getDiceThrows() {
-		return values.size();
+		return diceThrows;
 	}
 
 	public boolean isExpand() {

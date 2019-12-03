@@ -305,7 +305,7 @@ public class Command {
 			helen.kick(data.getChannel(), data.getSender(), "Ops " + data.getSender() + " sent over 100 dice rolls, potentially crashing me.");
 		}else if(roll.getDiceThrows() > 20){
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": How's about no.");
-		}		else {
+		}else {
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + roll.toString());
 		}
 	}
