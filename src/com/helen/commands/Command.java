@@ -289,25 +289,25 @@ public class Command {
 				data.getSender(),
 				"([0-9]+)(d|f)([0-9]+)([+|-]?[0-9]+)?(\\s-e|-s)?\\s?(-e|-s)?\\s?(.+)?");
 		Rolls.insertRoll(roll);
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + roll.toString());
+		if(roll.getDiceThrows() > 100){
+			helen.kick(data.getChannel(), data.getSender(), "Ops " + data.getSender() + " sent over 100 dice rolls, potentially crashing me.");
+		}else if(roll.getDiceThrows() > 20){
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": How's about no.");
+		}		else {
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + roll.toString());
+		}
 	}
+
 	@IRCCommand(command = { ".roll" }, startOfLine = true, securityLevel = 1)
 	public void roll(CommandData data) {
 		Roll roll = new Roll(data.getMessage(), data.getSender());
-		Rolls.insertRoll(roll);
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + roll.toString());
-	}
-
-	@IRCCommand(command = { ".myRolls", ".myrolls" }, startOfLine = true, securityLevel = 1)
-	public void getRolls(CommandData data) {
-		ArrayList<Roll> rolls = Rolls.getRolls(data.getSender());
-		if (rolls.size() > 0) {
-			helen.sendMessage(data.getResponseTarget(), buildResponse(rolls));
-		} else {
-			helen.sendMessage(data.getResponseTarget(),
-					data.getSender() + ": *Checks her clipboard* Apologies, I do not have any saved rolls for you at this time.");
+		if(roll.getDiceThrows() > 100){
+			helen.kick(data.getChannel(), data.getSender(), "Ops " + data.getSender() + " sent over 100 dice rolls, potentially crashing me.");
+		}else if(roll.getDiceThrows() > 20){
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": How's about no.");
+		}		else {
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + roll.toString());
 		}
-
 	}
 
 	@IRCCommand(command = {".hugme"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
@@ -337,15 +337,6 @@ public class Command {
 
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + messages[((int) (Math.random() * (messages.length - 1)))]);
 		}
-	}
-
-	@IRCCommand(command = { ".average", ".avg" }, startOfLine = true, securityLevel = 1)
-	public void getAverage(CommandData data) {
-		String average = Rolls.getAverage(data.getSplitMessage()[1], data.getSender());
-		if (average != null) {
-			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + average);
-		}
-
 	}
 
 	@IRCCommand(command = { ".g", ".google" }, startOfLine = true, securityLevel = 1)
