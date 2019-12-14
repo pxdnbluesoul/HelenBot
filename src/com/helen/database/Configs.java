@@ -3,7 +3,9 @@ package com.helen.database;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -16,14 +18,14 @@ public class Configs {
 	private static HashMap<String, ArrayList<Config>> cachedProperties = new HashMap<String, ArrayList<Config>>();
 	private static Boolean cacheValid = false;
 	
-	public static ArrayList<Config> getProperty(String key) {
+	public static List<Config> getProperty(String key) {
 		if (!cacheValid) {
 			loadProperties();
 		}
 		if (cachedProperties.containsKey(key)) {
 			return cachedProperties.get(key);
 		} else {
-			return null;
+			return Collections.emptyList();
 		}
 	}
 	

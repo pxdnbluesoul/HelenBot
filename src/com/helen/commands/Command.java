@@ -502,16 +502,18 @@ public class Command {
 
 	@IRCCommand(command = ".setPronouns", startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
 	public void setPronouns(CommandData data) {
-		String response = Pronouns.insertPronouns(data);
-		if (response.contains("banned term")) {
-			for(Config c : Configs.getProperty("registeredNicks")){
-				Tells.sendTell(c.getValue(), "Secretary_Helen",
-						"User " + data.getSender() + " attempted to add a banned term:" + response +". Their full message "
-						+ "was: " + data.getMessage(), true);
+		if(Configs.getProperty("pronounchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))){
+			String response = Pronouns.insertPronouns(data);
+			if (response.contains("banned term")) {
+				for(Config c : Configs.getProperty("registeredNicks")){
+					Tells.sendTell(c.getValue(), "Secretary_Helen",
+							"User " + data.getSender() + " hostmask: " + data.getHostname()  + "attempted to add a banned term:" + response +". Their full message "
+							+ "was: " + data.getMessage(), true);
 
+				}
 			}
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
 		}
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
 	}
 
 	@IRCCommand(command = ".clearPronouns", startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
@@ -578,7 +580,7 @@ public class Command {
 
 	@IRCCommand(command = ".property", startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
 	public void getProperty(CommandData data) {
-		ArrayList<Config> properties = Configs.getProperty(data.getTarget());
+		List<Config> properties = Configs.getProperty(data.getTarget());
 		helen.sendMessage(data.getResponseTarget(),
 				data.getSender() + ": Configured properties: " + buildResponse(properties));
 	}
@@ -685,7 +687,7 @@ public class Command {
     	helen.sendMessage(data.getChannel(), data.getSender() + ": http://www.wikidot.com/user:info/" + StringUtils.join(list,"_"));
 	}
 
-	private String buildResponse(ArrayList<? extends DatabaseObject> dbo) {
+	private String buildResponse(List<? extends DatabaseObject> dbo) {
 		StringBuilder str = new StringBuilder();
 		str.append("{");
 		for (int i = 0; i < dbo.size(); i++) {
