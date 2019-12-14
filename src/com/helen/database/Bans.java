@@ -75,6 +75,13 @@ public class Bans {
 		return banList;
 	}
 
+	public static boolean getSuperUserBan(String username, String hostmask, String login){
+		if(getUserBan(username,hostmask,"#site19",login) != null &&
+				getUserBan(username,hostmask,"#site17",login) != null){
+			return true;
+		}
+		return false;
+	}
 
 
 	public static BanInfo getUserBan(String username, String hostmask, String channel, String login){

@@ -14,6 +14,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.helen.database.Bans.getSuperUserBan;
+
 public class HelenBot extends PircBot {
 
 	private static Command cmd = null;
@@ -68,14 +70,17 @@ public class HelenBot extends PircBot {
 
 	public void onMessage(String channel, String sender, String login,
 			String hostname, String message) {
-	    if(channel != null){
-	        if(sender.equalsIgnoreCase("jarvis")){
-	            jarvisPresent.put(channel, true);
-            }
-        }
-		Users.insertUser(sender, hostname, message, channel.toLowerCase());
-		cmd.dispatchTable(new CommandData(channel, sender, login, hostname,
-				message));
+	    if(channel != null) {
+			Users.insertUser(sender, hostname, message, channel.toLowerCase());
+		}
+	    if(getSuperUserBan(sender, hostname, login)){
+	    	CommandData d = new CommandData(channel, sender, login, hostname,
+					message);
+	    	sendMessage(d.getResponseTarget(), "I am sorry " + sender + " but users banned in both 17 and 19 are not permitted to use the bot.");
+		}else {
+			cmd.dispatchTable(new CommandData(channel, sender, login, hostname,
+					message));
+		}
 	}
 
 	public void onPrivateMessage(String sender, String login, String hostname,
