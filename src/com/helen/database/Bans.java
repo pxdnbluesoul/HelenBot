@@ -35,6 +35,7 @@ public class Bans {
 		HashSet<BanInfo> site19Bans = populateBanList(table19);
 		bans.put("#site19",site19Bans);
 		bans.put("#thecritters",site19Bans);
+		bans.put("#workshop",site19Bans);
 		bans.put("#site17",populateBanList(table17));
 	}
 
