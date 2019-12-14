@@ -15,16 +15,32 @@ public class Nicks {
         try {
             UserNick nick = new UserNick(data);
             if(nick.getNickToGroup() != null) {
-                CloseableStatement insertStatement = Connector.getStatement(Queries.getQuery("insert_grouped_nick"),
-                        nick.getGroupId(), nick.getNickToGroup().toLowerCase());
-                if (insertStatement.executeUpdate()) {
-                    if (nick.isNewNick()) {
-                        return "Established a new nickgroup under " + data.getSender() + " and added the nick " + nick.getNickToGroup() + " as a grouped nick.";
+                if (nick.isNewNick()) {
+                    CloseableStatement insertBase = Connector.getStatement(Queries.getQuery("insert_grouped_nick"),
+                            nick.getGroupId(), data.getSender().toLowerCase());
+                    if(insertBase.executeUpdate()){
+                        CloseableStatement insertStatement = Connector.getStatement(Queries.getQuery("insert_grouped_nick"),
+                                nick.getGroupId(), nick.getNickToGroup().toLowerCase());
+                        if(insertStatement.executeUpdate()) {
+                            return "Established a new nickgroup under " + data.getSender() + " and added the nick " + nick.getNickToGroup() + " as a grouped nick.";
+                        }else{
+                            return "Something went very wrong, pinging DrMagnus.";
+                        }
                     }
-                    return "Inserted " + nick.getNickToGroup() + " for user " + data.getSender() + ".";
-                } else {
-                    return "Failed to insert grouped nick during final insert, please contact DrMagnus.";
+
+                }else{
+                    CloseableStatement insertStatement = Connector.getStatement(Queries.getQuery("insert_grouped_nick"),
+                            nick.getGroupId(), nick.getNickToGroup().toLowerCase());
+                    if(insertStatement.executeUpdate()){
+                        return "Inserted " + nick.getNickToGroup() + " for user " + data.getSender() + ".";
+
+                    }else{
+                        return "Something went very wrong, pinging DrMagnus.";
+                    }
+
                 }
+
+
             }else{
                 return "Your nick is already grouped with ID: " + nick.getGroupId();
             }
