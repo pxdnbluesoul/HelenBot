@@ -35,7 +35,7 @@ public class Memo implements DatabaseObject {
     public static String deleteMemo(String memoTitle){
         try {
             CloseableStatement stmt = Connector.getStatement(Queries.getQuery("deleteMemo"), memoTitle);
-            if (stmt.executeUpdate()) {
+            if (stmt.executeDelete()) {
                 return "Memo deleted (or didn't exist) with title: " + memoTitle;
             }else{
                 return "Hmm, I didn't quite get that.  Magnus, a word?";

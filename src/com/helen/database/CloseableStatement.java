@@ -52,6 +52,14 @@ public class CloseableStatement {
 		}
 	}
 
+	public Boolean executeDelete() throws SQLException {
+		if (stmt != null) {
+			stmt.executeUpdate();
+			return true;
+		}
+		return false;
+	}
+
 	public ResultSet getResultSet() throws SQLException {
 		return executeQuery();
 	}
