@@ -329,7 +329,7 @@ public class Command {
 		}
 	}
 
-	@IRCCommand(command = {"meh"}, reg =  true, matcherGroup = 1, securityLevel = 1, regex = "\\?(\\S+)\\s.*", startOfLine = true)
+	@IRCCommand(command = {"meh"}, reg =  true, matcherGroup = 1, securityLevel = 1, regex = "\\?(\\S+).*", startOfLine = true)
 	public void getMemo(CommandData data){
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.getMemo(data.getRegexTarget()));
 	}
