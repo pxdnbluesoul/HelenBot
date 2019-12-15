@@ -7,7 +7,7 @@ public class Memo implements DatabaseObject {
 
     public static String addMemo(String memoTitle, String message){
         try {
-            CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertMemo"), memoTitle, message);
+            CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertMemo"), memoTitle, message, memoTitle, message, memoTitle);
             if (stmt.executeUpdate()) {
                 return "*Jots that down on her clipboard* Gotcha, I'll keep that memo.";
             }else{
