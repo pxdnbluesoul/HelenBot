@@ -16,6 +16,8 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.helen.database.Memo.addMemo;
+
 public class Command {
 	private static final Logger logger = Logger.getLogger(Command.class);
 	public static final String NOT_FOUND = "I'm sorry, I couldn't find anything.";
@@ -317,6 +319,24 @@ public class Command {
 		}else{
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": You're not authorized to do that.");
 		}
+	}
+
+	@IRCCommand(command = {".rem"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
+	public void remember(CommandData data){
+		if(Configs.getProperty("remchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))){
+
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + addMemo(data.getSplitMessage()[1], data.getSplitMessage()[2]));
+		}
+	}
+
+	@IRCCommand(command = {"meh"}, reg =  true, matcherGroup = 1, securityLevel = 1, regex = "\\?(\\S+)\\s.*", startOfLine = true)
+	public void getMemo(CommandData data){
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.getMemo(data.getRegexTarget()));
+	}
+
+	@IRCCommand(command = {".deleteRem"}, securityLevel = 1, startOfLine = true)
+	public void removeMemo(CommandData data){
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.deleteMemo(data.getTarget()));
 	}
 
 	@IRCCommand(command={".hugHelen",".helenhug",".hugsplox"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
