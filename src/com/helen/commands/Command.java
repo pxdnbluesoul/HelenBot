@@ -324,8 +324,7 @@ public class Command {
 	@IRCCommand(command = {".rem"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
 	public void remember(CommandData data){
 		if(Configs.getProperty("remchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))){
-
-			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + addMemo(data.getSplitMessage()[1], data.getSplitMessage()[2]));
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + addMemo(data.getSplitMessage()[1], data.getMessageWithoutCommand()));
 		}
 	}
 
