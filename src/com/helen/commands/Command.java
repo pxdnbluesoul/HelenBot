@@ -712,6 +712,22 @@ public class Command {
     	helen.sendMessage(data.getChannel(), data.getSender() + ": http://www.wikidot.com/user:info/" + StringUtils.join(list,"_"));
 	}
 
+	@IRCCommand(command = ".contest", startOfLine = true, securityLevel = 1)
+	public void getContestInformation(CommandData data){
+    	List<Config> property = Configs.getProperty("contests");
+    	if(property.isEmpty()){
+    		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": There is no contest currently running.");
+		}
+		else{
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + property);
+		}
+	}
+
+	@IRCCommand(command = ".blackbox", startOfLine = true, securityLevel = 1)
+	public void getBlackbox(CommandData data){
+		helen.sendMessage(data.getChannel(), data.getSender() + ": " + "█");
+	}
+
 	private String buildResponse(List<? extends DatabaseObject> dbo) {
 		StringBuilder str = new StringBuilder();
 		str.append("{");
