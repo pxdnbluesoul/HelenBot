@@ -719,7 +719,7 @@ public class Command {
     		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": There is no contest currently running.");
 		}
 		else{
-			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + property);
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + property.getValue());
 		}
 	}
 
