@@ -714,8 +714,8 @@ public class Command {
 
 	@IRCCommand(command = ".contest", startOfLine = true, securityLevel = 1)
 	public void getContestInformation(CommandData data){
-    	List<Config> property = Configs.getProperty("contests");
-    	if(property.isEmpty()){
+    	Config property = Configs.getSingleProperty("contests");
+    	if(property == null){
     		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": There is no contest currently running.");
 		}
 		else{
