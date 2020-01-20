@@ -683,7 +683,7 @@ public class Command {
 	@IRCCommand(command = ".getTimezone", startOfLine = true, securityLevel = 4)
 	public void getTimezone(CommandData data){
     	String timezone = Timezone.getTimezone(data.getTarget());
-		ZoneOffset offset = ZoneOffset.ofHoursMinutes(Integer.parseInt(timezone.substring(4,5)),Integer.parseInt(timezone.substring(7,8)));
+		ZoneOffset offset = ZoneOffset.ofHoursMinutes(Integer.parseInt(timezone.substring(3,5)),Integer.parseInt(timezone.substring(7,8)));
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Timezone.getTimezone(data.getTarget()) +". It is currently: " + Instant.now().atOffset(offset) + " in that timezone");
 	}
 
