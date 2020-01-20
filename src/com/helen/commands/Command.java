@@ -686,7 +686,7 @@ public class Command {
 	public void getTimezone(CommandData data){
     	String timezone = Timezone.getTimezone(data.getTarget());
 		ZoneOffset offset = ZoneOffset.ofHoursMinutes(Integer.parseInt(timezone.substring(3,6)),Integer.parseInt(timezone.substring(7,8)));
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + DATE_TIME_FORMATTER.format(Instant.now().atOffset(offset)) +". It is currently: " + Instant.now().atOffset(offset) + " in that timezone");
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Timezone.getTimezone(data.getTarget()) +". It is currently: " + DATE_TIME_FORMATTER.format(Instant.now().atOffset(offset)) + " in that timezone");
 	}
 
 	@IRCCommand(command = ".deleteTimezone", startOfLine = true, securityLevel = 4)
