@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.helen.commands.Command;
 import com.helen.commands.CommandData;
+import com.helen.database.Config;
 import com.helen.database.Configs;
 import com.helen.database.Pages;
 
@@ -16,6 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class WikipediaSearch {
 
@@ -26,7 +28,7 @@ public class WikipediaSearch {
 	}
 
 	private static String cleanContent(String content) {
-		content = content.replaceAll("\\s*\\([^()]+\\)", "").replaceAll("  "," ");
+		content = content.replaceAll("\\s*\\([^()]+\\)", "").replaceAll(" {2}"," ");
 		if(content.length() <= CHARACTER_LIMIT){
 			return content;
 		} else {
@@ -38,7 +40,11 @@ public class WikipediaSearch {
 
 	private static int getPage(String searchTerm) throws IOException {
 		int page = -1;
-		URL url = new URL(Configs.getSingleProperty("wikipediaSearchUrl").getValue() + searchTerm);
+		Optional<Config> wikipediaSearchUrl = Configs.getSingleProperty("wikipediaSearchUrl");
+		if(!wikipediaSearchUrl.isPresent()){
+			return -1;
+		}
+		URL url = new URL(wikipediaSearchUrl.get().getValue() + searchTerm);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("GET");
 		conn.setRequestProperty("Accept", "application/json");
@@ -79,7 +85,11 @@ public class WikipediaSearch {
 		String link = null;
 		String content = null;
 		ArrayList<String> disambiguate = new ArrayList<>();
-		URL url = new URL(Configs.getSingleProperty("wikipediaEntryUrl").getValue() + pageString);
+		Optional<Config> wikipediaEntryUrl = Configs.getSingleProperty("wikipediaEntryUrl");
+		if(!wikipediaEntryUrl.isPresent()){
+			return Command.CONFIG_ERROR;
+		}
+		URL url = new URL(wikipediaEntryUrl.get().getValue() + pageString);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("GET");
 		conn.setRequestProperty("Accept", "application/json");

@@ -1,12 +1,12 @@
 package com.helen.database;
 
-import java.sql.ResultSet;
-import java.util.ArrayList;
-
 import com.helen.commands.Command;
+import com.helen.commands.CommandData;
 import org.apache.log4j.Logger;
 
-import com.helen.commands.CommandData;
+import java.sql.Array;
+import java.sql.ResultSet;
+import java.util.*;
 
 public class Pronouns {
 
@@ -18,54 +18,60 @@ public class Pronouns {
 		reload();
 	}
 
-	public static String getPronouns(String user) {
-		try {
-			StringBuilder str = new StringBuilder();
-			CloseableStatement stmt = Connector.getStatement(
-					Queries.getQuery("getPronouns"), user.toLowerCase());
-			ResultSet rs = stmt.getResultSet();
-			StringBuilder accepted = new StringBuilder();
-			StringBuilder pronouns = new StringBuilder();
-			if (rs != null) {
-				while (rs.next()) {
-					if (rs.getBoolean("accepted")) {
-						if (accepted.length() > 0) {
-							accepted.append(", ");
-						}
-						accepted.append(rs.getString("pronoun"));
-					} else {
-						if (pronouns.length() > 0) {
-							pronouns.append(", ");
-						}
-						pronouns.append(rs.getString("pronoun"));
-					}
+	private static String getPronounsByUsername(List<String> users, String username) throws Exception {
+		StringBuilder str = new StringBuilder();
+		Array a = Connector.getConnection().createArrayOf("text", users.toArray());
+
+		CloseableStatement stmt = Connector.getStatement(
+				Queries.getQuery("getPronounByArray"), a);
+		ResultSet rs = stmt.getResultSet();
+		Set<String> accepted = new HashSet<>();
+		Set<String> pronouns = new HashSet<>();
+		if (rs != null) {
+			while (rs.next()) {
+				if (rs.getBoolean("accepted")) {
+					accepted.add(rs.getString("pronoun"));
+				} else
+					pronouns.add(rs.getString("pronoun"));
 				}
-				if (accepted.length() > 0 || pronouns.length() > 0) {
-					if (pronouns.length() > 0) {
-						str.append(user);
-						str.append(" uses the following pronouns: ");
-						str.append(pronouns.toString());
-						str.append(";");
-					} else {
-						str.append(" I have no record of pronouns;");
-					}
-					if (accepted.length() > 0) {
-						str.append(" ");
-						str.append(user);
-						str.append(" accepts the following pronouns: ");
-						str.append(accepted.toString());
-					} else {
-						str.append(" I have no record of accepted pronouns");
-					}
-					str.append(".");
+			}
+			if (accepted.size() > 0 || pronouns.size() > 0) {
+				if (pronouns.size() > 0) {
+					str.append(username);
+					str.append(" uses the following pronouns: ");
+					str.append(String.join(", ", pronouns));
+					str.append(";");
 				} else {
-					str.append("I'm sorry, I don't have any record of pronouns for "
-							+ user);
+					str.append(" I have no record of pronouns;");
 				}
+				if (accepted.size() > 0) {
+					str.append(" ");
+					str.append(username);
+					str.append(" accepts the following pronouns: ");
+					str.append(String.join(", ", accepted));
+				} else {
+					str.append(" I have no record of accepted pronouns");
+				}
+				str.append(".");
 			} else {
-				str.append(Command.ERROR);
+				str.append("I'm sorry, I don't have any record of pronouns for ").append(username);
 			}
 			return str.toString();
+		}
+
+	public static String getPronouns(String user) {
+		try {
+			Integer groupId = Nicks.getNickGroup(user);
+			if(groupId != null && groupId != -1){
+				List<String> nicks = Nicks.getNicksByGroup(groupId);
+				if(nicks != null) {
+					return getPronounsByUsername(nicks, user);
+				}else{
+					return "I'm sorry, something went wrong.";
+				}
+			}else{
+				return getPronounsByUsername(Collections.singletonList(user), user);
+			}
 		} catch (Exception e) {
 			logger.error("Error retreiving pronouns", e);
 		}
@@ -79,7 +85,7 @@ public class Pronouns {
 				CloseableStatement stmt = Connector.getStatement(Queries
 						.getQuery("establishPronoun"), data.getSender()
 						.toLowerCase(), data.getSplitMessage()[1]
-						.equalsIgnoreCase("accepted") ? true : false);
+						.equalsIgnoreCase("accepted"));
 				ResultSet rs = stmt.execute();
 
 				String nounData = data.getMessage().substring(

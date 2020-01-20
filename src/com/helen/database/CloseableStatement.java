@@ -1,11 +1,11 @@
 package com.helen.database;
 
+import org.apache.log4j.Logger;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import org.apache.log4j.Logger;
 
 public class CloseableStatement {
 	private Connection conn;
@@ -43,7 +43,7 @@ public class CloseableStatement {
 
 	public Boolean executeUpdate() throws SQLException {
 		if (stmt != null) {
-			Boolean result = false;
+			boolean result;
 			result = stmt.executeUpdate() > 0;
 			close();
 			return result;
@@ -76,8 +76,6 @@ public class CloseableStatement {
 		if (rs == null) {
 			if (stmt != null) {
 				rs = stmt.executeQuery();
-			} else {
-				rs = null;
 			}
 		}
 		return rs;

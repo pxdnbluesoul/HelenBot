@@ -1,29 +1,31 @@
 package com.helen.database;
 
+import org.jibble.pircbot.Colors;
+
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jibble.pircbot.Colors;
-
 public class Roll implements DatabaseObject {
 
-	private String regex = ".roll\\s([0-9]+)(d|f)([0-9]+)(\\s[+|-]?[0-9]+)?(\\s-e|-s)?\\s?(-e|-s)?\\s?(.+)?";
-	private String diceString = null;
+	private String regex = ".roll\\s([0-9]+)([df])([0-9]+)(\\s[+|-]?[0-9]+)?(\\s-e|-s)?\\s?(-e|-s)?\\s?(.+)?";
+	private String diceString;
 	private boolean expand = false;
 	private Integer diceSize = null;
 	private Integer bonus = 0;
 	private String diceMessage = "";
 	private String dicetype = "u";
-	private ArrayList<Integer> values = new ArrayList<Integer>();
+	private ArrayList<Integer> values;
 	private Integer diceThrows = null;
-	private String username = null;
+	private String username;
 
 	public Roll(String diceCommand, String username) {
 		diceString = diceCommand;
 		parse();
 		computeRoll();
 		this.username = username;
+		values = new ArrayList<>();
 	}
 	
 	public Roll(String diceCommand, String username, String regex) {
@@ -32,43 +34,11 @@ public class Roll implements DatabaseObject {
 		parse();
 		computeRoll();
 		this.username = username;
-	}
-
-	public Roll(String diceType, Integer diceSize, Integer bonus, String diceMessage, String username) {
-		this.dicetype = diceType;
-		this.diceSize = diceSize;
-		this.bonus = bonus;
-		this.diceMessage = diceMessage;
-		this.username = username;
-		this.expand = true;
-	}
-
-	public String getDiceString() {
-		return diceString;
+		values = new ArrayList<>();
 	}
 
 	public Integer getDiceThrows() {
 		return diceThrows;
-	}
-
-	public boolean isExpand() {
-		return expand;
-	}
-
-	public Integer getDiceSize() {
-		return diceSize;
-	}
-
-	public Integer getBonus() {
-		return bonus;
-	}
-
-	public String getDiceMessage() {
-		return diceMessage;
-	}
-
-	public String getDiceType() {
-		return dicetype;
 	}
 
 	public String getUsername() {
@@ -84,7 +54,8 @@ public class Roll implements DatabaseObject {
 	}
 
 	public String getDelimiter() {
-		return Configs.getSingleProperty("dicedelim").getValue();
+		Optional<Config> diceDelimiter = Configs.getSingleProperty("diceDelim");
+		return diceDelimiter.isPresent() ? diceDelimiter.get().getValue() : ",";
 	}
 
 	public String toString() {
@@ -133,14 +104,6 @@ public class Roll implements DatabaseObject {
 		}
 	}
 
-	public ArrayList<Integer> getValues() {
-		return values;
-	}
-
-	public void addRoll(Integer i) {
-		values.add(i);
-	}
-
 	private void parse() {
 		Pattern r = Pattern.compile(regex);
 		Matcher m = r.matcher(diceString);
@@ -171,17 +134,13 @@ public class Roll implements DatabaseObject {
 		}
 	}
 
-	private Integer computeRoll() {
-		Integer rollSum = 0;
+	private void computeRoll() {
 		if(diceThrows <= 20) {
 			for (int i = 0; i < diceThrows; i++) {
 				int roll = (int) (Math.random() * (diceSize)) + 1;
 				values.add(roll);
-				rollSum += roll;
 			}
-			rollSum += bonus;
 		}
-		return rollSum;
 
 	}
 

@@ -1,9 +1,11 @@
 package com.helen.database;
 
+import java.util.Optional;
+
 public class Config implements DatabaseObject {
 	
-	private String key = null;
-	private String value = null;
+	private String key = "";
+	private String value = "";
 	private String lastUpdated = null;
 	private boolean displayToPublic = false;
 	
@@ -32,16 +34,12 @@ public class Config implements DatabaseObject {
 	}
 	
 	public String getDelimiter(){
-		return Configs.getSingleProperty("configDelim").getValue();
+		Optional<Config> delimiter = Configs.getSingleProperty("configDelim");
+		return delimiter.isPresent() ? delimiter.get().getValue() : "|";
 	}
 	
 	public String toString(){
-		StringBuilder str = new StringBuilder();
-		
-		str.append(key);
-		str.append(":");
-		str.append(value);
-		return str.toString();
+		return key + ":" + value;
 	}
 	
 	public boolean displayToUser(){

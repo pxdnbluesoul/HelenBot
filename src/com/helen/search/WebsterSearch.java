@@ -1,16 +1,8 @@
 package com.helen.search;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import com.helen.commands.Command;
+import com.helen.database.Config;
+import com.helen.database.Configs;
 import org.apache.log4j.Logger;
 import org.jibble.pircbot.Colors;
 import org.w3c.dom.Document;
@@ -19,7 +11,15 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import com.helen.database.Configs;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Optional;
 
 public class WebsterSearch {
 
@@ -29,14 +29,20 @@ public class WebsterSearch {
 		query = query.toLowerCase();
 		String result = Command.ERROR;
 		try {
-			Document doc = findDefinition(query);
-			NodeList sugList = doc.getElementsByTagName("suggestion");
+			Optional<Document> doc = findDefinition(query);
+			if(!doc.isPresent()){
+				return result;
+			}
+			NodeList sugList = doc.get().getElementsByTagName("suggestion");
 			if (sugList.getLength() > 0) {
 				System.out.println(sugList.item(0).getFirstChild().getNodeValue());
-				result =  processDocument(findDefinition(sugList.item(0).getFirstChild().getNodeValue()),
-						sugList.item(0).getFirstChild().getNodeValue());
+				Optional<Document> resultingPage = findDefinition(sugList.item(0).getFirstChild().getNodeValue());
+				if(!resultingPage.isPresent()){
+					return Command.ERROR;
+				}
+				result =  processDocument(resultingPage.get(),sugList.item(0).getFirstChild().getNodeValue());
 			} else {
-				result =  processDocument(doc, query);
+				result =  processDocument(doc.get(), query);
 			}
 
 		} catch (Exception e) {
@@ -45,17 +51,18 @@ public class WebsterSearch {
 		return result;
 	}
 
-	public String thesaurusSearch(String query) {
-		return "This is currently in development";
-	}
-
-	private static Document findDefinition(String keyword) {
+	private static Optional<Document> findDefinition(String keyword) {
 
 		Document doc = null;
 		try {
 			StringBuilder result = new StringBuilder();
-			URL url = new URL(Configs.getSingleProperty("dictionaryURL").getValue() + keyword
-					+ "?key=" + Configs.getSingleProperty("dictionaryKey").getValue());
+			Optional<Config> websterSearch = Configs.getSingleProperty("dictionaryURL");
+			Optional<Config> dictionaryKey = Configs.getSingleProperty("dictionaryKey");
+			if(!websterSearch.isPresent() || !dictionaryKey.isPresent()){
+				return Optional.empty();
+			}
+			URL url = new URL(websterSearch.get().getValue() + keyword
+					+ "?key=" + dictionaryKey.get().getValue());
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 			BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -75,7 +82,7 @@ public class WebsterSearch {
 			logger.error("There was an exception attempting to retreive dictionary results", e);
 		}
 
-		return doc;
+		return doc == null ? Optional.empty() : Optional.of(doc);
 	}
 
 	private static String processDocument(Document doc, String keyword) {
@@ -87,7 +94,7 @@ public class WebsterSearch {
 							.item(0)
 							.getFirstChild()
 							.getNodeValue();
-			ArrayList<Node> nodesToAnalyze = new ArrayList<Node>();
+			ArrayList<Node> nodesToAnalyze = new ArrayList<>();
 			try {
 				for (int i = 0; i < list.getLength(); i++) {
 					NodeList nl = ((Element) list.item(i)).getElementsByTagName("ew");
@@ -102,7 +109,7 @@ public class WebsterSearch {
 				e.printStackTrace();
 			}
 
-			ArrayList<Definition> test = new ArrayList<Definition>();
+			ArrayList<Definition> test = new ArrayList<>();
 			for (Node n : nodesToAnalyze) {
 				Definition def = new Definition();
 				Element nodeler = (Element) n;

@@ -1,15 +1,11 @@
 package com.helen.database;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-
+import com.helen.commands.CommandData;
 import org.apache.log4j.Logger;
 
-import com.helen.commands.CommandData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 public class Configs {
 
@@ -34,25 +30,14 @@ public class Configs {
 		loadProperties();
 	}
 
-	public static Config getSingleProperty(String key) {
+	public static Optional<Config> getSingleProperty(String key) {
 		if (!cacheValid) {
 			loadProperties();
 		}
 		if (cachedProperties.containsKey(key)) {
-			return cachedProperties.get(key).get(0);
+			return Optional.of(cachedProperties.get(key).get(0));
 		} else {
-			return null;
-		}
-	}
-	
-	public static java.sql.Timestamp getTimestamp(String key) {
-		if (!cacheValid) {
-			loadProperties();
-		}
-		if (cachedProperties.containsKey(key)) {
-			return java.sql.Timestamp.valueOf( cachedProperties.get(key).get(0).getValue());
-		} else {
-			return null;
+			return Optional.empty();
 		}
 	}
 
@@ -60,7 +45,7 @@ public class Configs {
 		try {
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("propertySet"), key, value,
 					new java.sql.Date(System.currentTimeMillis()),
-					publicFlag.equals("t") ? true : false);
+					publicFlag.equals("t"));
 
 			if (stmt.executeUpdate()) {
 				cacheValid = false;

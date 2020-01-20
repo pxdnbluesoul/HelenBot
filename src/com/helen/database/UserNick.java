@@ -4,6 +4,7 @@ import com.helen.commands.CommandData;
 import org.apache.log4j.Logger;
 
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserNick {
@@ -13,6 +14,16 @@ public class UserNick {
     private String nickToGroup;
     private boolean newNick = false;
 
+    public static List<String> getUserNicks(String username){
+        Integer id = Nicks.getNickGroup(username);
+        List<String> nicks = new ArrayList<>();
+        if(id != null && id != -1) {
+            nicks = Nicks.getNicksByGroup(id);
+        }else{
+            nicks.add(username);
+        }
+        return nicks;
+    }
 
     public UserNick(CommandData data) {
         try {

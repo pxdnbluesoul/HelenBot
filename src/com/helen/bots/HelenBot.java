@@ -9,7 +9,7 @@ import org.jibble.pircbot.NickAlreadyInUseException;
 import org.jibble.pircbot.PircBot;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,37 +22,46 @@ public class HelenBot extends PircBot {
 	private static Timer timer = new Timer();
 
 	private static final Logger logger = Logger.getLogger(HelenBot.class);
-	private static ConcurrentHashMap<String, Boolean> jarvisPresent = new ConcurrentHashMap<String, Boolean>();
+	private static ConcurrentHashMap<String, Boolean> jarvisPresent = new ConcurrentHashMap<>();
 
-	public HelenBot() throws NickAlreadyInUseException, IOException,
+	public HelenBot() throws IOException,
 			IrcException, InterruptedException {
-		logger.info("Initializing HelenBot v"
-				+ Configs.getSingleProperty("version").getValue());
-		this.setVerbose(true);
-		connect();
-		joinChannels();
-		Bans.updateBans();
-		cmd = new Command(this);
-		//whos();
-	}
-
-	private void connect() throws NickAlreadyInUseException, IOException,
-			IrcException, InterruptedException {
-
-		this.setLogin(Configs.getSingleProperty("hostname").getValue());
-		this.setName(Configs.getSingleProperty("bot_name").getValue());
-		try {
-			this.connect(Configs.getSingleProperty("server").getValue());
-		} catch (NickAlreadyInUseException e) {
-			this.identify(Configs.getSingleProperty("pass").getValue());
+		Optional<Config> version = Configs.getSingleProperty("version");
+		if(version.isPresent()){
+			logger.info("Initializing HelenBot v"
+					+ version.get().getValue());
+			this.setVerbose(true);
+			connect();
+			joinChannels();
+			Bans.updateBans();
+			cmd = new Command(this);
+		}else{
+			logger.error("Version info is missing, please check configs.");
+			System.exit(1);
 		}
-		Thread.sleep(1000l);
-		this.identify(Configs.getSingleProperty("pass").getValue());
-		Thread.sleep(2000l);
+
 	}
 
-	private void whos(){
-		Configs.getProperty("autojoin").forEach(channel -> sendWho(channel.getValue()));
+	private void connect() throws IOException,
+			IrcException, InterruptedException {
+		Optional<Config> loginName = Configs.getSingleProperty("hostname");
+		Optional<Config> botName = Configs.getSingleProperty("bot_name");
+		Optional<Config> server = Configs.getSingleProperty("server");
+		Optional<Config> pass = Configs.getSingleProperty("pass");
+		if(loginName.isPresent() && botName.isPresent() && server.isPresent() && pass.isPresent()){
+			this.setLogin(loginName.get().getValue());
+			this.setName(botName.get().getValue());
+			try {
+				this.connect(server.get().getValue());
+			} catch (NickAlreadyInUseException e) {
+				this.identify(pass.get().getValue());
+			}
+			Thread.sleep(1000L);
+			this.identify(pass.get().getValue());
+			Thread.sleep(2000L);
+		}
+
+
 	}
 
 	private void joinChannels() {
@@ -103,19 +112,15 @@ public class HelenBot extends PircBot {
 		}
 	}
 
-	public void onUserList(String channel, Users[] users) {
-		logger.info("Recieved user list for a channel" + channel);
-	}
-
 	public void onServerResponse(int code, String response) {
 		if (code == 352) {
 			logger.info(response);
             String[] tokens = response.split(" ");
-            for (int i = 0; i < tokens.length; i++) {
-                if (tokens[i].equalsIgnoreCase("jarvis")) {
-                    jarvisPresent.put(response.split(" ")[1].toLowerCase(), true);
-                }
-            }
+			for (String token : tokens) {
+				if (token.equalsIgnoreCase("jarvis")) {
+					jarvisPresent.put(response.split(" ")[1].toLowerCase(), true);
+				}
+			}
 		}
 	}
 
@@ -151,9 +156,7 @@ public class HelenBot extends PircBot {
 	public void onPart(String channel, String sender, String login,
 			String hostname) {
 		if (sender.equalsIgnoreCase("jarvis")) {
-			if (jarvisPresent.containsKey(channel.toLowerCase())) {
-				jarvisPresent.remove(channel.toLowerCase());
-			}
+			jarvisPresent.remove(channel.toLowerCase());
 		}
 	}
 	
@@ -163,9 +166,7 @@ public class HelenBot extends PircBot {
             String reason) {
 		
 		if (sourceNick.equalsIgnoreCase("jarvis")) {
-			for(String channel : jarvisPresent.keySet()){
-				jarvisPresent.put(channel, false);
-			}
+			jarvisPresent.replaceAll((c, v) -> false);
 		}
 	}
 

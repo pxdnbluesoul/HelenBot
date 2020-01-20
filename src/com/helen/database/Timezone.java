@@ -1,7 +1,12 @@
 package com.helen.database;
 
 
+import java.sql.Array;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class Timezone implements DatabaseObject {
 
@@ -18,17 +23,32 @@ public class Timezone implements DatabaseObject {
         }
     }
 
-    public static String getTimezone(String username){
+    public static Set<String> getTimezone(String username){
+        Set<String> timezones = new HashSet<>();
         try {
-            CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getTimezone"), username);
-            ResultSet rs = stmt.execute();
-            if (rs != null && rs.next()) {
-                return rs.getString("timezone");
+
+            Integer groupId = Nicks.getNickGroup(username);
+            List<String> usernames = new ArrayList<>();
+            if(groupId != null && groupId != -1){
+                List<String> nicks = Nicks.getNicksByGroup(groupId);
+                if(nicks != null) {
+                    usernames = nicks;
+                }else{
+                    return timezones;
+                }
             }else{
-                return "I didn't find anything for: " + username;
+                usernames.add(username);
             }
+            Array a = Connector.getConnection().createArrayOf("text",usernames.toArray());
+            CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getTimezoneArray"), a);
+            ResultSet rs = stmt.execute();
+
+            while (rs != null && rs.next()) {
+                timezones.add(rs.getString("timezone"));
+            }
+            return timezones;
         }catch(Exception e){
-            return "Hmm, I didn't quite get that.  Magnus, a word?";
+            return timezones;
         }
     }
 

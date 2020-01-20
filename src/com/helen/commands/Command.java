@@ -8,9 +8,9 @@ import org.apache.log4j.Logger;
 import org.jibble.pircbot.User;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -23,22 +23,18 @@ import static com.helen.database.Memo.addMemo;
 public class Command {
 	private static final Logger logger = Logger.getLogger(Command.class);
 	public static final String NOT_FOUND = "I'm sorry, I couldn't find anything.";
+	public static final String CONFIG_ERROR = "I'm sorry there's a config error that Magnus must investigate.";
 	public static final String ERROR = "I'm sorry, there was an error. Please inform DrMagnus.";
 	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 	private HelenBot helen;
 
 	private boolean adminMode = false;
-	private final int adminSecurity = 2;
 	private int bullets = 6;
 
-	private static HashMap<String, Method> hashableCommandList = new HashMap<String, Method>();
-	private static HashMap<String, Method> slowCommands = new HashMap<String, Method>();
-	private static HashMap<String, Method> regexCommands = new HashMap<String, Method>();
-
-	public Command() {
-
-	}
+	private static HashMap<String, Method> hashableCommandList = new HashMap<>();
+	private static HashMap<String, Method> slowCommands = new HashMap<>();
+	private static HashMap<String, Method> regexCommands = new HashMap<>();
 
 	public Command(HelenBot ircBot) {
 		helen = ircBot;
@@ -49,19 +45,19 @@ public class Command {
 		for (Method m : Command.class.getDeclaredMethods()) {
 			if (m.isAnnotationPresent(IRCCommand.class)) {
 				if (m.getAnnotation(IRCCommand.class).startOfLine() && !m.getAnnotation(IRCCommand.class).reg()) {
-					for (String s : ((IRCCommand) m.getAnnotation(IRCCommand.class)).command()) {
+					for (String s : m.getAnnotation(IRCCommand.class).command()) {
 						hashableCommandList.put(s.toLowerCase(), m);
 					}
 				} else if (!m.getAnnotation(IRCCommand.class).reg()) {
-					for (String s : ((IRCCommand) m.getAnnotation(IRCCommand.class)).command()) {
+					for (String s : m.getAnnotation(IRCCommand.class).command()) {
 						slowCommands.put(s.toLowerCase(), m);
 					}
 				} else {
-					for (String s : ((IRCCommand) m.getAnnotation(IRCCommand.class)).regex()) {
+					for (String s : m.getAnnotation(IRCCommand.class).regex()) {
 						regexCommands.put(s, m);
 					}
 				}
-				for(String s: ((IRCCommand) m.getAnnotation(IRCCommand.class)).command()){
+				for(String s: m.getAnnotation(IRCCommand.class).command()){
 					logger.info("Loaded command: " + m + " with activation string " + s);
 				}
 			}
@@ -128,24 +124,17 @@ public class Command {
 
 		checkTells(data);
 		User[] userList = getUserlist(data);
-		Integer securityLevel = getSecurityLevel(userList, data);
+		int securityLevel = getSecurityLevel(userList, data);
 		//logger.info("Entering dispatch table with command: \"" + data.getCommand() + "\"");
 
 		// If we can use hashcommands, do so
+		int adminSecurity = 2;
 		if (hashableCommandList.containsKey(data.getCommand().toLowerCase())) {
 			try {
 
 				Method m = hashableCommandList.get(data.getCommand().toLowerCase());
 				if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !helen.jarvisIsPresent(data.getChannel().toLowerCase())) {
-					if (securityLevel >= (adminMode
-							? Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity)
-							: m.getAnnotation(IRCCommand.class).securityLevel())) {
-						m.invoke(this, data);
-					} else {
-						logger.info("User " + data.getSender() + " attempted to use command: "
-								+ data.getCommand() + " which is above their security level of: "
-								+ securityLevel + (adminMode ? ".  I am currently in admin mode." : "."));
-					}
+					checkSecurityLevelAndExecute(data, securityLevel, adminSecurity, m);
 				}
 
 			} catch (Exception e) {
@@ -159,15 +148,7 @@ public class Command {
 					try {
 						Method m = slowCommands.get(command);
 						if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !helen.jarvisIsPresent(data.getChannel())) {
-							if (securityLevel >= (adminMode
-									? Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity)
-									: m.getAnnotation(IRCCommand.class).securityLevel())) {
-								m.invoke(this, data);
-							} else {
-								logger.info("User " + data.getSender() + " attempted to use command: "
-										+ data.getCommand() + " which is above their security level of: "
-										+ securityLevel + (adminMode ? ".  I am currently in admin mode." : "."));
-							}
+							checkSecurityLevelAndExecute(data, securityLevel, adminSecurity, m);
 						}
 					} catch (Exception e) {
 						logger.error("Exception invoking command: " + command, e);
@@ -188,20 +169,11 @@ public class Command {
 								data.setRegexTarget(match.group(m.getAnnotation(IRCCommand.class).matcherGroup()));
 							}
 							if (m.getAnnotation(IRCCommand.class).coexistWithJarvis() || !helen.jarvisIsPresent(data.getChannel())) {
-								if (securityLevel >= (adminMode
-										? Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity)
-										: m.getAnnotation(IRCCommand.class).securityLevel())) {
-									m.invoke(this, data);
-								} else {
-									logger.info("User " + data.getSender() + " attempted to use command: "
-											+ data.getCommand() + " which is above their security level of: "
-											+ securityLevel + (adminMode ? ".  I am currently in admin mode." : "."));
-
-								}
+								checkSecurityLevelAndExecute(data, securityLevel, adminSecurity, m);
 							}
 						} catch (Exception e) {
 							logger.error("Exception invoking command: "
-									+ regexCommands.get(regex).getAnnotation(IRCCommand.class).command(), e);
+									+ Arrays.toString(regexCommands.get(regex).getAnnotation(IRCCommand.class).command()), e);
 						}
 					}
 
@@ -209,15 +181,30 @@ public class Command {
 		}
 	}
 
+	private void checkSecurityLevelAndExecute(CommandData data, int securityLevel, int adminSecurity, Method m) throws IllegalAccessException, InvocationTargetException {
+		if (securityLevel >= (adminMode
+				? Math.max(m.getAnnotation(IRCCommand.class).securityLevel(), adminSecurity)
+				: m.getAnnotation(IRCCommand.class).securityLevel())) {
+			m.invoke(this, data);
+		} else {
+			logger.info("User " + data.getSender() + " attempted to use command: "
+					+ data.getCommand() + " which is above their security level of: "
+					+ securityLevel + (adminMode ? ".  I am currently in admin mode." : "."));
+		}
+	}
+
 	// Relatively unregulated commands (anyone can try these)
 	@IRCCommand(command = { ".HelenBot" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
 	public void versionResponse(CommandData data) {
 		if (data.getChannel().isEmpty()) {
-			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Greetings, I am HelenBot v"
-					+ Configs.getSingleProperty("version").getValue());
+			Optional<Config> version = Configs.getSingleProperty("version");
+			if(version.isPresent()){
+				helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Greetings, I am HelenBot v"
+						+ version.get().getValue());
+			}else{
+				helen.sendMessage(data.getResponseTarget(), "I'm sorry there appears to be some kind of configuration issue.  Magnus, a word?");
+			}
 		}
-		helen.sendMessage(data.getResponseTarget(),
-				data.getSender() + ": Greetings, I am HelenBot v" + Configs.getSingleProperty("version").getValue());
 	}
 
 	@IRCCommand(command = { ".modeToggle" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 3)
@@ -235,7 +222,7 @@ public class Command {
 
 	@IRCCommand(command = { ".jt" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
 	public void toggleJarvis(CommandData data) {
-		Boolean status = data.getSplitMessage().length > 1 ? Boolean.valueOf(data.getSplitMessage()[1]) : false;
+		Boolean status = data.getSplitMessage().length > 1 && Boolean.parseBoolean(data.getSplitMessage()[1]);
 		boolean returnedStatus = helen.toggleJarvis(data.getChannel(), status);
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Jarvis present set to: " + returnedStatus);
 	}
@@ -370,9 +357,9 @@ public class Command {
 	@IRCCommand(command = { ".g", ".google" }, startOfLine = true, securityLevel = 1)
 	public void webSearch(CommandData data) {
 		try {
-			GoogleResults results = WebSearch.search(data.getMessage());
+			Optional<GoogleResults> results = WebSearch.search(data.getMessage());
 			helen.sendMessage(data.getResponseTarget(),
-					data.getSender() + ": " + (results == null ? NOT_FOUND : results)
+					data.getSender() + ": " + (results.isPresent() ? results : NOT_FOUND)
 			);
 		} catch (IOException e) {
 			logger.error("Exception during web search", e);
@@ -382,9 +369,9 @@ public class Command {
 	@IRCCommand(command = { ".gis" }, startOfLine = true, securityLevel = 1)
 	public void imageSearch(CommandData data) {
 		try {
-			GoogleResults results = WebSearch.imageSearch(data.getMessage());
+			Optional<GoogleResults> results = WebSearch.imageSearch(data.getMessage());
 			helen.sendMessage(data.getResponseTarget(),
-					data.getSender() + ": " + (results == null ? NOT_FOUND : results)
+					data.getSender() + ": " + (results.isPresent() ? results : NOT_FOUND)
 			);
 		} catch (IOException e) {
 			logger.error("Exception during image search", e);
@@ -404,7 +391,7 @@ public class Command {
 	@IRCCommand(command = { ".y", ".yt", ".youtube" }, startOfLine = true, securityLevel = 1)
 	public void youtubeSearch(CommandData data) {
 		helen.sendMessage(data.getResponseTarget(),
-				data.getSender() + ": " + YouTubeSearch.youtubeSearch(data.getMessage()).toString());
+				data.getSender() + ": " + YouTubeSearch.youtubeSearch(data.getMessage()));
 	}
 
 	@IRCCommand(command="YTREGEX",reg = true, securityLevel = 1, startOfLine = true, matcherGroup = 1,
@@ -437,10 +424,10 @@ public class Command {
 
 	@IRCCommand(command = {".lc",".l"}, startOfLine = true, securityLevel = 1)
 	public void lastCreated(CommandData data){
-		ArrayList<String> pages = Pages.lastCreated();
-		ArrayList<String> infoz = new ArrayList<String>();
-		if (pages != null) {
-			for (String str : pages) {
+		Optional<ArrayList<String>> pages = Pages.lastCreated();
+		ArrayList<String> infoz = new ArrayList<>();
+		if (pages.isPresent()) {
+			for (String str : pages.get()) {
 				infoz.add(Pages.getPageInfo(str,data));
 			}
 			for(String str: infoz){
@@ -452,25 +439,6 @@ public class Command {
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I can't do that yet.");
 		}
 	}
-
-    @IRCCommand(command = {".hlc", ".hl"}, coexistWithJarvis = true, startOfLine = true, securityLevel = 1)
-    public void lastCreatedHelen(CommandData data) {
-        ArrayList<String> pages = Pages.lastCreated();
-        ArrayList<String> infoz = new ArrayList<String>();
-        if (pages != null) {
-            for (String str : pages) {
-                infoz.add(Pages.getPageInfo(str, data));
-            }
-            for (String str : infoz) {
-                helen.sendMessage(data.getResponseTarget(), data.getSender()
-                        + ": " + str);
-            }
-
-        } else {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I can't do that yet.");
-        }
-    }
-
 	@IRCCommand(command = ".au", startOfLine = true, securityLevel = 1)
 	public void authorDetail(CommandData data){
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getAuthorDetail(
@@ -506,17 +474,15 @@ public class Command {
 
 	@IRCCommand(command = {".pronouns", ".pronoun"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
 	public void getPronouns(CommandData data) {
-
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " +
 				Pronouns.getPronouns((data.getSplitMessage().length > 1) ? data.getTarget() : data.getSender()));
-
-
 	}
 
 	@IRCCommand(command = ".myPronouns", startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
 	public void myPronouns(CommandData data) {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.getPronouns(data.getSender()));
 	}
+
 	//TODO make this less stupid
 	@IRCCommand(command = ".helenconf", startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
 	public void configure(CommandData data) {
@@ -524,7 +490,7 @@ public class Command {
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + "{shoot|lcratings}");
 		}else{
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Configs.insertToggle(data, data.getTarget(),
-					data.getSplitMessage()[2].equalsIgnoreCase("true") ? true : false));
+					data.getSplitMessage()[2].equalsIgnoreCase("true")));
 		}
 	}
 
@@ -560,7 +526,7 @@ public class Command {
 
 	}
 
-	@IRCCommand(command = {".def",".definition"}, startOfLine = true, coexistWithJarvis = false, securityLevel = 1)
+	@IRCCommand(command = {".def",".definition"}, startOfLine = true, securityLevel = 1)
 	public void define(CommandData data){
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + WebsterSearch.dictionarySearch(data.getTarget()));
 	}
@@ -592,7 +558,7 @@ public class Command {
 		try {
 			Thread.sleep(5000);
 		} catch (Exception e) {
-
+			logger.error("Error sleeping.", e);
 		}
 		helen.disconnect();
 		System.exit(0);
@@ -685,9 +651,24 @@ public class Command {
 
 	@IRCCommand(command = {".getTimezone", ".timezone"}, startOfLine = true, securityLevel = 1)
 	public void getTimezone(CommandData data){
-    	String timezone = Timezone.getTimezone(data.getTarget());
-		ZoneOffset offset = ZoneOffset.ofHoursMinutes(Integer.parseInt(timezone.substring(3,6)),Integer.parseInt(timezone.substring(7,8)));
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Timezone.getTimezone(data.getTarget()) +". It is currently: " + DATE_TIME_FORMATTER.format(Instant.now().atOffset(offset)) + " in that timezone");
+    	Set<String> timezones = Timezone.getTimezone(data.getTarget());
+    	if(timezones.isEmpty()){
+    		helen.sendMessage(data.getResponseTarget(), "I have no record of timezone for that user, or something went wrong.");
+		}
+    	Instant now = Instant.now();
+    	Set<String> responses = new HashSet<>();
+    	for(String timezone : timezones){
+			ZoneOffset offset = ZoneOffset.ofHoursMinutes(Integer.parseInt(timezone.substring(3,6)),Integer.parseInt(timezone.substring(7,8)));
+			responses.add(DATE_TIME_FORMATTER.format(now.atOffset(offset)));
+		}
+    	if(responses.size() > 1){
+    		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + data.getTarget() + " has the following timezones set: " + String.join(", ", timezones) + ". The times at those zones are: " + String.join(", ", responses));
+		}else{
+    		String timezone = timezones.iterator().next();
+    		String response = responses.iterator().next();
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": "+ data.getTarget() + " Has the following timezone set: " + timezone +". It is currently: " + response + " in that timezone.");
+
+		}
 	}
 
 	@IRCCommand(command=".passcode", startOfLine = true, securityLevel = 1)
@@ -786,24 +767,21 @@ public class Command {
 		}
 	}
 
-	@IRCCommand(command = ".user", startOfLine = true, securityLevel = 1, coexistWithJarvis = false)
+	@IRCCommand(command = ".user", startOfLine = true, securityLevel = 1)
 	public void getUserName(CommandData data){
-    	List<String> list = new ArrayList<>();
-    	String[] words = data.getSplitMessage();
-    	for(int i = 1; i < words.length; i++){
-    		list.add(words[i]);
-		}
+		String[] words = data.getSplitMessage();
+		List<String> list = new ArrayList<>(Arrays.asList(words).subList(1, words.length));
     	helen.sendMessage(data.getResponseTarget(), data.getSender() + ": http://www.wikidot.com/user:info/" + StringUtils.join(list,"_"));
 	}
 
 	@IRCCommand(command = ".contest", startOfLine = true, securityLevel = 1)
 	public void getContestInformation(CommandData data){
-    	Config property = Configs.getSingleProperty("contests");
-    	if(property == null){
+    	Optional<Config> property = Configs.getSingleProperty("contests");
+    	if(!property.isPresent()){
     		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": There is no contest currently running.");
 		}
 		else{
-			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + property.getValue());
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + property.get().getValue());
 		}
 	}
 

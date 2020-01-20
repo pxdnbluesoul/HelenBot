@@ -100,7 +100,7 @@ public class Nicks {
             ResultSet rs = stmt.execute();
             ArrayList<String> nicks = new ArrayList<>();
             while(rs != null && rs.next()){
-                nicks.add(rs.getString("nick"));
+                nicks.add(rs.getString("nick").toLowerCase());
             }
             return nicks;
         }catch(Exception e){

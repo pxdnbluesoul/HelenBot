@@ -1,12 +1,12 @@
 package com.helen.database;
 
 
+import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
@@ -81,11 +81,8 @@ public class Bans {
 	}
 
 	public static boolean getSuperUserBan(String username, String hostmask, String login){
-		if(getUserBan(username,hostmask,"#site19",login) != null &&
-				getUserBan(username,hostmask,"#site17",login) != null){
-			return true;
-		}
-		return false;
+		return getUserBan(username, hostmask, "#site19", login) != null &&
+				getUserBan(username, hostmask, "#site17", login) != null;
 	}
 
 
@@ -125,7 +122,6 @@ public class Bans {
 	public static void main(String[] args) throws Exception{
 		updateBans();
 		bans.forEach((key, value) -> value.forEach(k -> System.out.println(key + ": " + k)));
-		int i = 0;
 	}
 
 	private static boolean isMatch(String s, String p) {

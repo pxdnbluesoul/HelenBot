@@ -25,34 +25,40 @@ import java.util.stream.Collectors;
 public class Pages {
 
 	
-	private static final Long YEARS = 1000 * 60 * 60 * 24 * 365l;
-	private static final Long DAYS = 1000 * 60 * 60 * 24l;
-	private static final Long HOURS = 1000 * 60l * 60;
-	private static final Long MINUTES = 1000 * 60l;
+	private static final Long YEARS = 1000 * 60 * 60 * 24 * 365L;
+	private static final Long DAYS = 1000 * 60 * 60 * 24L;
+	private static final Long HOURS = 1000 * 60L * 60;
+	private static final Long MINUTES = 1000 * 60L;
 	private static final Logger logger = Logger.getLogger(Pages.class);
 	private static XmlRpcClientConfigImpl config;
 	private static XmlRpcClient client;
 	private static Long lastLc = System.currentTimeMillis() - 20000;
-	private static HashMap<String, ArrayList<Selectable>> storedEvents = new HashMap<String, ArrayList<Selectable>>();
+	private static HashMap<String, ArrayList<Selectable>> storedEvents = new HashMap<>();
+	private static boolean setupComplete = false;
 
 	static {
 		config = new XmlRpcClientConfigImpl();
 		try {
-			config.setServerURL(new URL(Configs.getSingleProperty(
-					"wikidotServer").getValue()));
-			config.setBasicUserName(Configs.getSingleProperty("appName")
-					.getValue());
-			config.setBasicPassword(Configs.getSingleProperty("wikidotapikey")
-					.getValue());
-			config.setEnabledForExceptions(true);
-			config.setConnectionTimeout(10 * 1000);
-			config.setReplyTimeout(30 * 1000);
+			Optional<Config> wikidotServer = Configs.getSingleProperty(
+					"wikidotServer");
+			Optional<Config> appName = Configs.getSingleProperty("appName");
+			Optional<Config> wikidotApiKey = Configs.getSingleProperty("wikidotapikey");
+			if(wikidotApiKey.isPresent() && wikidotServer.isPresent() && appName.isPresent()){
+				config.setServerURL(new URL(wikidotServer.get().getValue()));
+				config.setBasicUserName(appName.get().getValue());
+				config.setBasicPassword(wikidotApiKey.get().getValue());
+				config.setEnabledForExceptions(true);
+				config.setConnectionTimeout(10 * 1000);
+				config.setReplyTimeout(30 * 1000);
 
-			client = new XmlRpcClient();
-			client.setTransportFactory(new XmlRpcSun15HttpTransportFactory(
-					client));
-			client.setTypeFactory(new XmlRpcTypeNil(client));
-			client.setConfig(config);
+				client = new XmlRpcClient();
+				client.setTransportFactory(new XmlRpcSun15HttpTransportFactory(
+						client));
+				client.setTypeFactory(new XmlRpcTypeNil(client));
+				client.setConfig(config);
+				setupComplete = true;
+			}
+
 
 		} catch (Exception e) {
 			logger.error("There was an exception", e);
@@ -65,9 +71,12 @@ public class Pages {
 		return (Object) client.execute(method, params);
 	}
 
-	public static ArrayList<String> lastCreated() {
+	public static Optional<ArrayList<String>> lastCreated() {
+		if(!setupComplete){
+			return Optional.empty();
+		}
 		if (System.currentTimeMillis() - lastLc > 15000) {
-			ArrayList<String> pagelist = new ArrayList<String>();
+			ArrayList<String> pagelist = new ArrayList<>();
 			try {
 				String regex = "<td style=\"vertical-align: top;\"><a href=\"\\/(.+)\">(.+)<\\/a><\\/td>";
 				Pattern r = Pattern.compile(regex);
@@ -93,10 +102,10 @@ public class Pages {
 						e);
 			}
 			lastLc = System.currentTimeMillis();
-			return pagelist;
+			return Optional.of(pagelist);
 		}
 
-		return null;
+		return Optional.empty();
 
 	}
 
@@ -135,10 +144,14 @@ public class Pages {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		String targetName = pagename.toLowerCase();
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("site", Configs.getSingleProperty("site").getValue());
+		Optional<Config> site = Configs.getSingleProperty("site");
+		if(!site.isPresent()){
+			return Command.CONFIG_ERROR;
+		}
+		params.put("site", site.get().getValue());
 		String[] target = new String[] { targetName.toLowerCase() };
 		params.put("pages", target);
-		ArrayList<String> keyswewant = new ArrayList<String>();
+		ArrayList<String> keyswewant = new ArrayList<>();
 		keyswewant.add("title_shown");
 		keyswewant.add("rating");
 		keyswewant.add("created_at");
@@ -180,7 +193,6 @@ public class Pages {
 
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findRewrite"),targetName);
 			ResultSet rs = stmt.getResultSet();
-			LocalDate date = null;
 			Metadata meta = null;
 			List<Metadata> finalMetas = new LinkedList<>();
 			while(rs != null && rs.next()){
@@ -205,8 +217,7 @@ public class Pages {
 
             stmt = Connector.getStatement(Queries.getQuery("findAuthors"),targetName);
             rs = stmt.getResultSet();
-            Metadata metaAuthor = null;
-            List<Metadata> authorFinalMetas = new LinkedList<>();
+			List<Metadata> authorFinalMetas = new LinkedList<>();
             while(rs != null && rs.next()){
                 Metadata m = new Metadata(rs.getString("pagename"),
                         rs.getString("username"),
@@ -222,9 +233,9 @@ public class Pages {
                 if(authorFinalMetas.size() == 1) {
                     returnString.append(authorFinalMetas.get(0).getUsername());
                 }else if(authorFinalMetas.size() == 2){
-                    returnString.append(authorFinalMetas.get(0).getUsername() + " and " + authorFinalMetas.get(1).getUsername());
+                    returnString.append(authorFinalMetas.get(0).getUsername()).append(" and ").append(authorFinalMetas.get(1).getUsername());
                 }else{
-                    returnString.append(authorFinalMetas.stream().map(metadata -> metadata.getUsername()).collect(Collectors.joining(", ")));
+                    returnString.append(authorFinalMetas.stream().map(Metadata::getUsername).collect(Collectors.joining(", ")));
                 }
             }else {
 
@@ -238,9 +249,9 @@ public class Pages {
 				if(finalMetas.size() == 1) {
 					returnString.append(finalMetas.get(0).getUsername());
 				}else if(finalMetas.size() == 2){
-					returnString.append(finalMetas.get(0).getUsername() + " and " + finalMetas.get(1).getUsername());
+					returnString.append(finalMetas.get(0).getUsername()).append(" and ").append(finalMetas.get(1).getUsername());
 				}else{
-					returnString.append(finalMetas.stream().map(metadata -> metadata.getUsername()).collect(Collectors.joining(", ")));
+					returnString.append(finalMetas.stream().map(Metadata::getUsername).collect(Collectors.joining(", ")));
 				}
 			}
 			returnString.append(")");
@@ -262,7 +273,7 @@ public class Pages {
 		user = user.trim();
 		try{
 			
-			ArrayList<Selectable> authors = new ArrayList<Selectable>();
+			ArrayList<Selectable> authors = new ArrayList<>();
 			CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findAuthorName"), "%" + user + "%");
 			ResultSet rs = stmt.getResultSet();
 			while(rs != null && rs.next()){
@@ -339,7 +350,7 @@ public class Pages {
 	
 	public static String getAuthorDetailsPages(String user){
 		String lowerUser = user.toLowerCase();
-		Timestamp ts = new java.sql.Timestamp(0l);
+		Timestamp ts = new java.sql.Timestamp(0L);
 		int rating = 0;
 		Page latest = null;
 		int pagecount = 0;
@@ -494,7 +505,7 @@ public class Pages {
 		str.append(" net upvotes with an average of ");
 		str.append(Colors.BOLD);
 		if(pagecount > 0) {
-			long avg = Math.round((rating) / (pagecount));
+			long avg = Math.round(rating / pagecount);
 			str.append(avg);
 		}else{
 			str.append("apparently zero? (contact magnus.) ");
@@ -525,21 +536,21 @@ public class Pages {
 	}
 
 	public static String getPotentialTargets(String[] terms, String username) {
-		Boolean exact = terms[1].equalsIgnoreCase("-e");
+		boolean exact = terms[1].equalsIgnoreCase("-e");
 		int indexOffset = 1;
 		if(exact){
 			indexOffset = 2;
 		}
-		ArrayList<Selectable> potentialPages = new ArrayList<Selectable>();
+		ArrayList<Selectable> potentialPages = new ArrayList<>();
 		String[] lowerterms = new String[terms.length - indexOffset];
 		for (int i = indexOffset ; i < terms.length; i++) {
 			lowerterms[i - indexOffset] = terms[i].toLowerCase();
 			logger.info(lowerterms[i - indexOffset]);
 		}
 		try {
-			ResultSet rs = null;
+			ResultSet rs;
 			CloseableStatement stmt = null;
-			PreparedStatement state = null;
+			PreparedStatement state;
 			Connection conn = null;
 			if(exact){
 				stmt = Connector.getArrayStatement(
@@ -629,7 +640,7 @@ public class Pages {
 	public static String findTime(Long time){
 		//compensate for EST (helen runs in EST)
 		time = (System.currentTimeMillis() + HOURS * 4) - time;
-		Long diff = 0l;
+		long diff;
 		if(time >= YEARS){
 			diff = time/YEARS;
 			return (time / YEARS) + " year" + (diff > 1 ? "s" : "") + " ago ";
