@@ -682,7 +682,7 @@ public class Command {
 
 	}
 
-	@IRCCommand(command = {".getTimezone", ".timezone"}, startOfLine = true, securityLevel = 4)
+	@IRCCommand(command = {".getTimezone", ".timezone"}, startOfLine = true, securityLevel = 1)
 	public void getTimezone(CommandData data){
     	String timezone = Timezone.getTimezone(data.getTarget());
 		ZoneOffset offset = ZoneOffset.ofHoursMinutes(Integer.parseInt(timezone.substring(3,6)),Integer.parseInt(timezone.substring(7,8)));
