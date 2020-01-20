@@ -691,7 +691,7 @@ public class Command {
 
 	@IRCCommand(command=".passcode", startOfLine = true, securityLevel = 1)
 	public void passcode(CommandData data){
-    	helen.sendMessage(data.getResponseTarget(), "As written above the chat we will not help you to find the pass code. You find it by reading this guide:http://scp-wiki.net/guide-for-newbies Yes it is definitly in there, yes it is clearly stated what it is. Try reading it out loud and do not skim.");
+    	helen.sendMessage(data.getResponseTarget(), "As written above the chat in big red letters, we will not help you find the passcode. It is located here: http://scp-wiki.net/guide-for-newbies and is clearly stated. If you can't find it, slow down, don't skim, and try reading it out loud.");
 	}
 
 	@IRCCommand(command = ".deleteTimezone", startOfLine = true, securityLevel = 4)
