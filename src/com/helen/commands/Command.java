@@ -762,7 +762,7 @@ public class Command {
 		String[] tokens = data.getSplitMessage();
 		if(tokens.length > 2){
 			if(data.getChannel() != null && Configs.getProperty("quoteChannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))){
-				logger.info("I got the following as the message: " + data.getSplitMessage());
+				logger.info("I got the following as the message: " + Arrays.toString(data.getSplitMessage()));
 				helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.deleteQuote(tokens[1], Integer.parseInt(tokens[2])));
 			}
 		}else{
