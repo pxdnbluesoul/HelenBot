@@ -16,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.helen.database.Memo.addMemo;
 
@@ -747,7 +748,7 @@ public class Command {
 		String[] tokens = data.getSplitMessage();
 		if(tokens.length > 2){
 			if(data.getChannel() != null && Configs.getProperty("quoteChannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))){
-					helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.setQuote(tokens[1].toLowerCase(), tokens[2]));
+					helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.setQuote(tokens[1].toLowerCase(), Arrays.stream(tokens).skip(2).collect(Collectors.joining())));
 			}
 		}else{
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Please specify a username and message.  E.g. .aq DrMagnus Butts-hole");
