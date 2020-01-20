@@ -9,6 +9,9 @@ import org.jibble.pircbot.User;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -679,7 +682,9 @@ public class Command {
 
 	@IRCCommand(command = ".getTimezone", startOfLine = true, securityLevel = 4)
 	public void getTimezone(CommandData data){
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Timezone.getTimezone(data.getTarget()));
+    	String timezone = Timezone.getTimezone(data.getTarget());
+		ZoneOffset offset = ZoneOffset.ofHoursMinutes(Integer.parseInt(timezone.substring(4,5)),Integer.parseInt(timezone.substring(7,8)));
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Timezone.getTimezone(data.getTarget()) +". It is currently: " + Instant.now().atOffset(offset) + " in that timezone");
 	}
 
 	@IRCCommand(command = ".deleteTimezone", startOfLine = true, securityLevel = 4)

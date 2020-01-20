@@ -64,7 +64,7 @@ public class Bans {
 					}
 				}
 				LocalDate bdate;
-				
+
 				if (date.contains("/")) {
 					bdate = LocalDate.parse(date, formatter);
 				} else {
