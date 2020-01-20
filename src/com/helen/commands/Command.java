@@ -689,6 +689,11 @@ public class Command {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Timezone.getTimezone(data.getTarget()) +". It is currently: " + DATE_TIME_FORMATTER.format(Instant.now().atOffset(offset)) + " in that timezone");
 	}
 
+	@IRCCommand(command=".passcode", startOfLine = true, securityLevel = 1)
+	public void passcode(CommandData data){
+    	helen.sendMessage(data.getResponseTarget(), "As written above the chat we will not help you to find the pass code. You find it by reading this guide:http://scp-wiki.net/guide-for-newbies Yes it is definitly in there, yes it is clearly stated what it is. Try reading it out loud and do not skim.");
+	}
+
 	@IRCCommand(command = ".deleteTimezone", startOfLine = true, securityLevel = 4)
 	public void deleteTimezone(CommandData data){
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Timezone.deleteMemo(data.getTarget()));
