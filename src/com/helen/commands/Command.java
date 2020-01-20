@@ -9,10 +9,7 @@ import org.jibble.pircbot.User;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -247,7 +244,7 @@ public class Command {
 	public void choose(CommandData data) {
 		String[] choices = data.getMessage().substring(data.getMessage().indexOf(" ")).split(",");
 		helen.sendMessage(data.getResponseTarget(),
-				data.getSender() + ": " + choices[new Random().nextInt(choices.length)]);
+				data.getSender() + ": " + choices[new Random().nextInt(choices.length)].trim());
 	}
 
 	@IRCCommand(command = { ".mode" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
@@ -292,7 +289,7 @@ public class Command {
 				"([0-9]+)(d|f)([0-9]+)([+|-]?[0-9]+)?(\\s-e|-s)?\\s?(-e|-s)?\\s?(.+)?");
 		if(roll.getDiceThrows() >= 100){
 			helen.kick(data.getChannel(), data.getSender(), "Begone..");
-			helen.sendMessage(data.getChannel(), "Ops, " + data.getSender() + " sent over 100 dice rolls potentially crashing me.");
+			helen.sendMessage(data.getResponseTarget(), "Ops, " + data.getSender() + " sent over 100 dice rolls potentially crashing me.");
 		}else if(roll.getDiceThrows() >= 20){
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": How's about no.");
 		}		else {
@@ -305,7 +302,7 @@ public class Command {
 		Roll roll = new Roll(data.getMessage(), data.getSender());
 		if(roll.getDiceThrows() > 100){
 			helen.kick(data.getChannel(), data.getSender(), "Begone..");
-			helen.sendMessage(data.getChannel(), "Ops, " + data.getSender() + " sent over 100 dice rolls potentially crashing me.");		}else if(roll.getDiceThrows() > 20){
+			helen.sendMessage(data.getResponseTarget(), "Ops, " + data.getSender() + " sent over 100 dice rolls potentially crashing me.");		}else if(roll.getDiceThrows() > 20){
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": How's about no.");
 		}else {
 			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + roll.toString());
@@ -640,7 +637,7 @@ public class Command {
 	@IRCCommand(command = ".shoot", startOfLine = true, securityLevel = 4, coexistWithJarvis = true)
 	public void shootUser(CommandData data) {
 		if(Configs.commandEnabled(data, "shoot")){
-			if(data.getTarget().equalsIgnoreCase("Secretary_Helen")){
+			if(data.getTarget().equalsIgnoreCase("Secretary_Helen") || data.getTarget().equalsIgnoreCase("DrMagnus")){
 				bullets--;
 				helen.sendAction(data.getChannel(), "shoots " + data.getSender());
 				if(bullets < 1){
@@ -662,6 +659,32 @@ public class Command {
 	public void reload(CommandData data) {
 		helen.sendAction(data.getChannel(), "reloads all six cylinders.");
 		bullets = 6;
+	}
+
+	@IRCCommand(command = ".setTimezone", startOfLine = true, securityLevel = 1)
+	public void setTimezone(CommandData data){
+    	String timezone = data.getTarget();
+    	String regex = "GMT[+-][0-9]{2}:[0-9]{2}\\b";
+    	Pattern m = Pattern.compile(regex);
+    	Matcher mat = m.matcher(timezone);
+
+		if(mat.matches()){
+			String message = Timezone.setTimezone(data.getSender(),data.getTarget());
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + message);
+		}else{
+			helen.sendMessage(data.getResponseTarget(), "I'm sorry that's not a valid timezone abbreviation.  Please enter timezone as GMT Plus or Minus 24 hour time e.g. GMT-05:00");
+		}
+
+	}
+
+	@IRCCommand(command = ".getTimezone", startOfLine = true, securityLevel = 4)
+	public void getTimezone(CommandData data){
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Timezone.getTimezone(data.getTarget()));
+	}
+
+	@IRCCommand(command = ".deleteTimezone", startOfLine = true, securityLevel = 4)
+	public void deleteTimezone(CommandData data){
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Timezone.deleteMemo(data.getTarget()));
 	}
 
 	@IRCCommand(command = ".unload", startOfLine = true, securityLevel = 4, coexistWithJarvis = true)
@@ -712,7 +735,7 @@ public class Command {
     	for(int i = 1; i < words.length; i++){
     		list.add(words[i]);
 		}
-    	helen.sendMessage(data.getChannel(), data.getSender() + ": http://www.wikidot.com/user:info/" + StringUtils.join(list,"_"));
+    	helen.sendMessage(data.getResponseTarget(), data.getSender() + ": http://www.wikidot.com/user:info/" + StringUtils.join(list,"_"));
 	}
 
 	@IRCCommand(command = ".contest", startOfLine = true, securityLevel = 1)
@@ -728,7 +751,7 @@ public class Command {
 
 	@IRCCommand(command = ".blackbox", startOfLine = true, securityLevel = 1)
 	public void getBlackbox(CommandData data){
-		helen.sendMessage(data.getChannel(), data.getSender() + ": " + "█");
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + "█");
 	}
 
 	private String buildResponse(List<? extends DatabaseObject> dbo) {
