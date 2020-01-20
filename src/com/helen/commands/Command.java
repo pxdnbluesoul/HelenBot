@@ -196,7 +196,7 @@ public class Command {
 	// Relatively unregulated commands (anyone can try these)
 	@IRCCommand(command = { ".HelenBot" }, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
 	public void versionResponse(CommandData data) {
-		if (data.getChannel().isEmpty()) {
+		if (!data.getChannel().isEmpty()) {
 			Optional<Config> version = Configs.getSingleProperty("version");
 			if(version.isPresent()){
 				helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Greetings, I am HelenBot v"
