@@ -695,7 +695,10 @@ public class Command {
 	public void updateBans(CommandData data) {
 		try {
 			Bans.updateBans();
-			helen.sendMessage(data.getChannel(), "Ban List successfully updated.");
+			helen.sendMessage(data.getResponseTarget(), "Ban List successfully updated.");
+			if(!Bans.getProblematicEntries().isEmpty()){
+				helen.sendMessage(data.getResponseTarget(), "There are problematic entries for the following: " + Bans.getProblematicEntries().toString());
+			}
 		} catch (Exception e) {
 			helen.sendMessage(data.getChannel(), "Error parsing chat ban page. Please check the page for correct syntax.");
 			logger.error("Exception attempting to update bans.",e);

@@ -59,7 +59,6 @@ public class HelenBot extends PircBot {
 
 		for (Config channel : Configs.getProperty("autojoin")) {
 			this.joinChannel(channel.getValue());
-
 		}
 	}
 

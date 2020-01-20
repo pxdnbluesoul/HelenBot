@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -21,6 +22,7 @@ public class Bans {
 	private static final Logger logger = Logger.getLogger(Bans.class);
 	private static ConcurrentHashMap<String, HashSet<BanInfo>> bans = new ConcurrentHashMap<>();
 	static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+	private static List<String> problematicEntries = new ArrayList<>();
 
 	public static void updateBans() throws IOException {
 
@@ -42,6 +44,7 @@ public class Bans {
 	private static HashSet<BanInfo> populateBanList(Element table){
 		HashSet<BanInfo> banList = new HashSet<>();
 		Elements rows = table.select("tr");
+		problematicEntries.clear();
 		for(int i = 2; i < rows.size(); i++) {
 			Element row = rows.get(i);
 			//skip first two rows
@@ -50,27 +53,29 @@ public class Bans {
 			String ips = entries.get(1).text();
 			String date = entries.get(2).text();
 			String reason = entries.get(3).text();
-
-			List<String> nameList = Arrays.asList(names.split(" "));
-			List<String> ipList = Arrays.asList(ips.split(" "));
-			boolean isSpecial = false;
-			for(String s : ipList){
-				if(s.contains("@") || s.contains("*")){
-					isSpecial = true;
-					break;
+			try {
+				List<String> nameList = Arrays.asList(names.split(" "));
+				List<String> ipList = Arrays.asList(ips.split(" "));
+				boolean isSpecial = false;
+				for(String s : ipList){
+					if(s.contains("@") || s.contains("*")){
+						isSpecial = true;
+						break;
+					}
 				}
+				LocalDate bdate;
+				
+				if (date.contains("/")) {
+					bdate = LocalDate.parse(date, formatter);
+				} else {
+					bdate = LocalDate.parse("12/31/2999", formatter);
+				}
+				banList.add(new BanInfo(nameList, ipList, reason, bdate, isSpecial));
+			}catch(Exception e){
+				logger.error("There was an issue with this entry: " + names + " " + ips + " " + date + " " + reason);
+				problematicEntries.add(names + "|" + date);
 			}
-			LocalDate bdate;
 
-
-
-			if(date.contains("/")) {
-				bdate = LocalDate.parse(date,formatter);
-			} else {
-				bdate = LocalDate.parse("12/31/2999",formatter);
-			}
-
-			banList.add(new BanInfo(nameList, ipList, reason, bdate, isSpecial));
 		}
 		return banList;
 	}
@@ -83,6 +88,10 @@ public class Bans {
 		return false;
 	}
 
+
+	public static List<String> getProblematicEntries() {
+		return problematicEntries;
+	}
 
 	public static BanInfo getUserBan(String username, String hostmask, String channel, String login){
 		LocalDate today = LocalDate.now();
