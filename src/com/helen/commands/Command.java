@@ -761,7 +761,7 @@ public class Command {
 		if(tokens.length > 2){
 			if(data.getChannel() != null && Configs.getProperty("quoteChannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))){
 
-				helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.deleteQuote(tokens[1], Integer.parseInt(tokens[1])));
+				helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.deleteQuote(tokens[1], Integer.parseInt(tokens[2])));
 
 			}
 		}else{
