@@ -1,5 +1,6 @@
 package com.helen.bots;
 
+import com.helen.database.Timezone;
 import org.jibble.pircbot.PircBot;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -7,41 +8,28 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.net.URL;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 public class TestBot extends PircBot {
 
 
 	public static void main(String[] args) throws Exception {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+		String timezone="GMT-05:00";
+		String t = timezone.substring(3,6);
+		String m = timezone.substring(7,8);
+		ZoneOffset offset = ZoneOffset.ofHoursMinutes(Integer.parseInt(timezone.substring(3,6)),Integer.parseInt(timezone.substring(7,8)));
+		System.out.println(t);
+		System.out.println(m);
 
-		URL url = new URL("http://05command.wikidot.com/chat-ban-page");
-		Document result = Jsoup.parse(url, 3000);
-		Element table = result.select("table").get(0);
-		Elements rows = table.select("tr");
-		for (int i = 2; i < rows.size(); i++) {
-			Element row = rows.get(i);
-			//skip first two rows
-			Elements entries = row.select("td");
-			String names = entries.get(0).text();
-			String ips = entries.get(1).text();
-			String date = entries.get(2).text();
-			String reason = entries.get(3).text();
+		DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		System.out.println(DATE_TIME_FORMATTER.format(Instant.now().atOffset(offset)) + " in that timezone");
 
-			List<String> nameList = Arrays.asList(names.split(" "));
-			List<String> ipList = Arrays.asList(ips.split(" "));
-			LocalDate bdate;
-
-
-			if (date.contains("/")) {
-				bdate = LocalDate.parse(date, formatter);
-			} else {
-				bdate = LocalDate.parse("12/31/2999", formatter);
-			}
-		}
 	}
 
 }

@@ -12,6 +12,7 @@ import java.lang.reflect.Method;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,6 +23,7 @@ public class Command {
 	private static final Logger logger = Logger.getLogger(Command.class);
 	public static final String NOT_FOUND = "I'm sorry, I couldn't find anything.";
 	public static final String ERROR = "I'm sorry, there was an error. Please inform DrMagnus.";
+	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 	private HelenBot helen;
 
@@ -680,11 +682,11 @@ public class Command {
 
 	}
 
-	@IRCCommand(command = ".getTimezone", startOfLine = true, securityLevel = 4)
+	@IRCCommand(command = {".getTimezone", ".timezone"}, startOfLine = true, securityLevel = 4)
 	public void getTimezone(CommandData data){
     	String timezone = Timezone.getTimezone(data.getTarget());
-		ZoneOffset offset = ZoneOffset.ofHoursMinutes(Integer.parseInt(timezone.substring(3,5)),Integer.parseInt(timezone.substring(7,8)));
-		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Timezone.getTimezone(data.getTarget()) +". It is currently: " + Instant.now().atOffset(offset) + " in that timezone");
+		ZoneOffset offset = ZoneOffset.ofHoursMinutes(Integer.parseInt(timezone.substring(3,6)),Integer.parseInt(timezone.substring(7,8)));
+		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + DATE_TIME_FORMATTER.format(Instant.now().atOffset(offset)) +". It is currently: " + Instant.now().atOffset(offset) + " in that timezone");
 	}
 
 	@IRCCommand(command = ".deleteTimezone", startOfLine = true, securityLevel = 4)
