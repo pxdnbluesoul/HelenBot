@@ -41,11 +41,11 @@ public class Quotes implements DatabaseObject {
         }
     }
 
-    public static String deleteQuote(String userName, String quoteNumber){
+    public static String deleteQuote(String userName, Integer quoteNumber){
         try {
             CloseableStatement stmt = Connector.getStatement(Queries.getQuery("deleteQuote"), userName, quoteNumber);
             if (stmt.executeDelete()) {
-                stmt = Connector.getStatement(Queries.getQuery("adjustQuoteIndexes"));
+                stmt = Connector.getStatement(Queries.getQuery("adjustQuoteIndexes"), userName, quoteNumber);
                 stmt.executeUpdate();
                 return "Quote number " + quoteNumber + " deleted for: " + userName;
             }else{
