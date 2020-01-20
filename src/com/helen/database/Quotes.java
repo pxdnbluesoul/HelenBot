@@ -6,7 +6,7 @@ public class Quotes implements DatabaseObject {
 
     public static String setQuote(String userName, String message){
         try {
-            CloseableStatement stmt = Connector.getStatement(Queries.getQuery("addQuote"), userName, message);
+            CloseableStatement stmt = Connector.getStatement(Queries.getQuery("addQuote"), userName, message, userName);
             if (stmt.executeUpdate()) {
                 return "*Jots that down on her clipboard* Gotcha, I'll remember they said that.";
             }else{
