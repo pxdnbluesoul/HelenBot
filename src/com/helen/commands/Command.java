@@ -268,6 +268,17 @@ public class Command {
 		helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Nicks.deleteAllNicks(data, true));
 	}
 
+	@IRCCommand(command = {".nicks"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
+	public void getNicksList(CommandData data){
+		List<String> nicks = Nicks.getNicksByUsername(data.getTarget());
+		if(nicks.isEmpty()){
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I didn't find any nicks for " + data.getTarget());
+		}else{
+			helen.sendMessage(data.getResponseTarget(), data.getSender() + ": "+data.getTarget() + " uses the following nicks: " + String.join(", ", nicks));
+		}
+
+	}
+
 	@IRCCommand(command = {".deleteNicksAdmin"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
 	public void deleteNicksAdmin(CommandData data){
 
@@ -635,6 +646,9 @@ public class Command {
 
 	@IRCCommand(command = ".setTimezone", startOfLine = true, securityLevel = 1)
 	public void setTimezone(CommandData data){
+    	if(! (data.getSplitMessage().length > 1)){
+    		helen.sendMessage(data.getResponseTarget(), "Please specify a timezone to set, e.g. .settimezone GMT-05:00");
+		}
     	String timezone = data.getTarget();
     	String regex = "GMT[+-][0-9]{2}:[0-9]{2}\\b";
     	Pattern m = Pattern.compile(regex);

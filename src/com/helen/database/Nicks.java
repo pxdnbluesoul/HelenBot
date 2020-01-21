@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Nicks {
@@ -108,6 +109,15 @@ public class Nicks {
         }
         return null;
 
+    }
+
+    public static List<String> getNicksByUsername(String username){
+        Integer group = getNickGroup(username.toLowerCase());
+        if(group != null && group != -1){
+            return getNicksByGroup(group);
+        }else{
+            return Collections.emptyList();
+        }
     }
 
     public static Integer getNickGroup(String username){
