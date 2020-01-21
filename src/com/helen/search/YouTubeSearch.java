@@ -128,7 +128,7 @@ public class YouTubeSearch {
 				List<Video> videoList = listResponse.getItems();
 
 				Video targetVideo = videoList.get(0);
-				str.append(getVideoInfo(targetVideo, str, video.getSnippet().getTitle()));
+				getVideoInfo(targetVideo, str, video.getSnippet().getTitle());
 				str.append("https://www.youtube.com/watch?v=").append(video.getId().getVideoId());
 				
 				return str.toString();

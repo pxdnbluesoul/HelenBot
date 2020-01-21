@@ -359,7 +359,7 @@ public class Command {
 		try {
 			Optional<GoogleResults> results = WebSearch.search(data.getMessage());
 			helen.sendMessage(data.getResponseTarget(),
-					data.getSender() + ": " + (results.isPresent() ? results : NOT_FOUND)
+					data.getSender() + ": " + (results.isPresent() ? results.get() : NOT_FOUND)
 			);
 		} catch (IOException e) {
 			logger.error("Exception during web search", e);
