@@ -153,12 +153,18 @@ public class Pronouns {
                         }
                     }
                 }
+                String s;
+                if(accepted){
+                    s = "Accepted pronouns";
+                }else if(unaccepted){
+                    s = "Unaccepted pronouns.";
+                }else{
+                    s = "pronouns.";
+                }
                 return "Inserted the following pronouns: "
                         + str.toString()
                         + " as "
-                        + (data.getSplitMessage()[1]
-                        .equalsIgnoreCase("accepted") ? "accepted pronouns."
-                        : "pronouns");
+                        + s;
             } catch (Exception e) {
                 logger.error("Error retreiving pronouns", e);
             }
