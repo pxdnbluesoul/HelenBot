@@ -4,6 +4,7 @@ import com.helen.commands.Command;
 import com.helen.commands.CommandData;
 import com.helen.database.framework.*;
 import org.apache.log4j.Logger;
+import org.jibble.pircbot.Colors;
 
 import java.sql.Array;
 import java.sql.ResultSet;
@@ -28,15 +29,18 @@ public class Pronouns {
             try (ResultSet rs = stmt != null ? stmt.getResultSet() : null) {
                 Set<String> accepted = new HashSet<>();
                 Set<String> pronouns = new HashSet<>();
+                Set<String> unaccepted = new HashSet<>();
                 if (rs != null) {
                     while (rs.next()) {
-                        if (rs.getBoolean("accepted")) {
+                        if(rs.getBoolean("unaccepted")){
+                            unaccepted.add(rs.getString("pronoun"));
+                        }else if (rs.getBoolean("accepted")) {
                             accepted.add(rs.getString("pronoun"));
                         } else
                             pronouns.add(rs.getString("pronoun"));
                     }
                 }
-                if (accepted.size() > 0 || pronouns.size() > 0) {
+                if (accepted.size() > 0 || pronouns.size() > 0 || unaccepted.size() > 0) {
                     if (pronouns.size() > 0) {
                         str.append(username);
                         str.append(" uses the following pronouns: ");
@@ -52,6 +56,17 @@ public class Pronouns {
                         str.append(String.join(", ", accepted));
                     } else {
                         str.append(" I have no record of accepted pronouns");
+                    }
+                    if (unaccepted.size() > 0) {
+                        str.append(" ");
+                        str.append(username);
+                        str.append(Colors.BOLD);
+                        str.append(" DOES NOT ");
+                        str.append(Colors.NORMAL);
+                        str.append("accept the following pronouns: ");
+                        str.append(String.join(", ", unaccepted));
+                    } else {
+                        str.append(" I have no record of unaccepted pronouns");
                     }
                     str.append(".");
                 } else {
@@ -84,15 +99,22 @@ public class Pronouns {
     public static String insertPronouns(CommandData data) {
         if (data.getSplitMessage().length > 1) {
             try {
+                boolean accepted = false;
+                boolean unaccepted = false;
+                if(data.getSplitMessage()[1].equalsIgnoreCase("accepted")){
+                    accepted = true;
+                }else if(data.getSplitMessage()[1].equalsIgnoreCase("unaccepted")){
+                    unaccepted = true;
+                }
+                String nounData = data.getMessage().substring(
+                        data.getMessage().split(" ")[0].length()
+                );
                 StringBuilder str = new StringBuilder();
                 try(CloseableStatement stmt = Connector.getStatement(Queries
                         .getQuery("establishPronoun"), data.getSender()
-                        .toLowerCase(), data.getSplitMessage()[1]
-                        .equalsIgnoreCase("accepted"))){
+                        .toLowerCase(), accepted,unaccepted)){
                     try(ResultSet rs = stmt != null ? stmt.execute() : null){
-                        String nounData = data.getMessage().substring(
-                                data.getMessage().split(" ")[0].length()
-                        );
+
 
                         String[] nouns = nounData.replace(",", " ").replace("/", " ")
                                 .replace("\\", " ").trim().replaceAll(" +", " ")
@@ -100,7 +122,7 @@ public class Pronouns {
                         if (rs != null && rs.next()) {
                             int pronounID = rs.getInt("pronounID");
                             int j = 0;
-                            if (nouns[0].equalsIgnoreCase("accepted")) {
+                            if (nouns[0].equalsIgnoreCase("accepted") || nouns[0].equalsIgnoreCase("unaccepted")) {
                                 j = 1;
                             }
 
@@ -142,7 +164,7 @@ public class Pronouns {
             }
             return Command.ERROR;
         } else {
-            return "Usage: .setPronouns (accepted) pronoun1 pronoun2 pronoun3 ... pronoun[n]";
+            return "Usage: .setPronouns (accepted) (unaccepted) pronoun1 pronoun2 pronoun3 ... pronoun[n]";
         }
     }
 
