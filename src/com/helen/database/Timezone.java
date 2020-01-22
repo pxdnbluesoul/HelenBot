@@ -12,7 +12,7 @@ public class Timezone implements DatabaseObject {
 
     public static String setTimezone(String userName, String timeZone){
         try {
-            CloseableStatement stmt = Connector.getStatement(Queries.getQuery("setTimezone"), userName, timeZone);
+            CloseableStatement stmt = Connector.getStatement(Queries.getQuery("setTimezone"), userName.toLowerCase(), timeZone);
             if (stmt.executeUpdate()) {
                 return "*Jots that down on her clipboard* Gotcha, I'll make a note of that.";
             }else{
