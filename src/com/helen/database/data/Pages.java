@@ -1,8 +1,12 @@
-package com.helen.database;
+package com.helen.database.data;
 
 import com.helen.commands.Command;
 import com.helen.commands.CommandData;
+import com.helen.database.Selectable;
+import com.helen.database.framework.*;
+import com.helen.search.WikipediaAmbiguous;
 import com.helen.search.WikipediaSearch;
+import com.helen.search.XmlRpcTypeNil;
 import org.apache.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
@@ -71,7 +75,7 @@ public class Pages {
 
     private static Object pushToAPI(String method, Object... params)
             throws XmlRpcException {
-        return (Object) client.execute(method, params);
+        return client.execute(method, params);
     }
 
     public static Optional<ArrayList<String>> lastCreated() {
