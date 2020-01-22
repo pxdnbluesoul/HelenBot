@@ -22,7 +22,8 @@ public class Pronouns {
 
     private static String getPronounsByUsername(List<String> users, String username) throws Exception {
         StringBuilder str = new StringBuilder();
-        Array a = Connector.getConnection().createArrayOf("text", users.toArray());
+
+        Array a = Connector.getConnection().createArrayOf("text", users.stream().map(String::toLowerCase).toArray());
 
         try(CloseableStatement stmt = Connector.getStatement(
                 Queries.getQuery("getPronounByArray"), a)) {
