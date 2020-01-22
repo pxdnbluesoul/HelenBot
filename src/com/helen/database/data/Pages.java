@@ -176,6 +176,14 @@ public class Pages {
             }
         }
 
+        if (flags.contains("-f")) {
+            if (!slots.isEmpty()) {
+                return "The least recent unused slot is: http://scp-wiki.net/scp-" + slots.get(0);
+            } else {
+                return "There are no unused slots between " + min + " and " + max + ".";
+            }
+        }
+
         if (flags.contains("-r")) {
             if (!slots.isEmpty()) {
                 return "http://scp-wiki.net/scp-" + slots.get(new Random().nextInt(slots.size()));
