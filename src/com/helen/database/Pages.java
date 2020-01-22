@@ -356,8 +356,8 @@ public class Pages {
         try (CloseableStatement authorOverrideStatement = Connector.getStatement(Queries.getQuery("findAuthorOverride"), user)) {
             try (ResultSet rs = authorOverrideStatement.getResultSet()) {
                 if (rs != null && rs.next()) {
-                    String overridenUserName = rs.getString("username");
-                    authorStatement = Connector.getStatement(Queries.getQuery("getOverridenAuthorPage"), overridenUserName.toLowerCase());
+                    String overridenUrl = rs.getString("url");
+                    authorStatement = Connector.getStatement(Queries.getQuery("getOverridenAuthorPage"), overridenUrl.toLowerCase());
                 } else {
                     authorStatement = Connector.getStatement(Queries.getQuery("findAuthorPage"), user.toLowerCase());
                 }
@@ -408,6 +408,7 @@ public class Pages {
 
         return skips;
     }
+
 
     public static String getAuthorDetailsPages(String user) {
         String lowerUser = user.toLowerCase();
