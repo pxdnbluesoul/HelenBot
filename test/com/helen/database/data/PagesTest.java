@@ -10,7 +10,8 @@ public class PagesTest {
 
     @Test
     public void unused(){
-        String[] testStrings = new String[]{".unused -s 1",
+        String[] testStrings = new String[]{".unused",
+                ".unused -s 1",
                 ".unused -s 2",
                 ".unused -s 3",
                 ".unused -s 4",
@@ -26,7 +27,7 @@ public class PagesTest {
                 ".unused -s 4 -l",
                 ".unused -s 5 -l"};
         for (String message : testStrings) {
-            CommandData d = new CommandData("#site19", "Drmagnus", "test", "blah", message);
+            CommandData d = new CommandData("", "Drmagnus", "test", "blah", message);
             assertNotNull(getUnused(d));
         }
     }

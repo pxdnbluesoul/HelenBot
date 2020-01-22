@@ -151,6 +151,7 @@ public class Pages {
         } else {
             min = 1;
             max = 4999;
+            flags.add("-r");
         }
 
         try (CloseableStatement stmt = Connector.getStatement(Queries.getQuery("unusedBySeries"), min, max)) {
