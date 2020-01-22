@@ -7,7 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class CloseableStatement {
+public class CloseableStatement implements AutoCloseable {
 	private Connection conn;
 	private ResultSet rs = null;
 
@@ -84,5 +84,6 @@ public class CloseableStatement {
 	public String toString(){
 		return stmt.toString();
 	}
+
 
 }
