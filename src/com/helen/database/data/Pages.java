@@ -116,6 +116,78 @@ public class Pages {
 
     }
 
+
+    public static String getUnused(CommandData data) {
+        String[] messageParts = data.getSplitMessage();
+
+
+        List<String> flags = Arrays.stream(messageParts).filter(s -> s.contains("-")).collect(Collectors.toList());
+        List<String> slots = new ArrayList<>();
+        int min;
+        int max;
+        if (flags.contains("-s") || flags.contains("-series")) {
+            if (flags.size() == 1) {
+                flags.add("-r");
+            }
+            if (messageParts.length > 2) {
+                String seriesNumber = messageParts[2];
+                if (seriesNumber.matches("[1-5]")) {
+                    Integer i = Integer.parseInt(seriesNumber);
+                    if (i == 1) {
+                        min = 1;
+                        max = 999;
+                    } else {
+                        min = 1000 * (i - 1);
+                        max = (1000 * i) - 1;
+                    }
+                } else {
+                    return "When using series flags, please enter the series number between 1 and 5 immediately after.  e.g. .unused -s 1 -c";
+                }
+            } else {
+                min = 1;
+                max = 4999;
+                flags.add("-r");
+            }
+        } else {
+            min = 1;
+            max = 4999;
+        }
+
+        try (CloseableStatement stmt = Connector.getStatement(Queries.getQuery("unusedBySeries"), min, max)) {
+            if (stmt != null) {
+                ResultSet rs = stmt.executeQuery();
+                while (rs != null && rs.next()) {
+                    slots.add(rs.getString("missing_id"));
+                }
+            }
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+
+        if (flags.contains("-c")) {
+            return "There are " + slots.size() + " unused slots between " + min + " and " + max + ".";
+        }
+
+        if (flags.contains("-l")) {
+            if (!slots.isEmpty()) {
+                return "The most recent unused slot is: http://scp-wiki.net/scp-" + slots.get(slots.size() - 1);
+            } else {
+                return "There are no unused slots between " + min + " and " + max + ".";
+            }
+        }
+
+        if (flags.contains("-r")) {
+            if (!slots.isEmpty()) {
+                return "http://scp-wiki.net/scp-" + slots.get(new Random().nextInt(slots.size()));
+            } else {
+                return "There are no unused slots between " + min + " and " + max + ".";
+            }
+        }
+
+
+        return "";
+    }
+
     private static String getTitle(String pagename) {
         String pageName = null;
         try {

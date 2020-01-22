@@ -1,4 +1,4 @@
-package com.helen.database;
+package com.helen.database.users;
 
 
 import org.junit.Before;
