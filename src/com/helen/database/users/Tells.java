@@ -9,10 +9,43 @@ import org.apache.log4j.Logger;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Tells {
 
     private final static Logger logger = Logger.getLogger(Tells.class);
+
+    public static String sendMassTell(CommandData data){
+        String[] message = data.getSplitMessage();
+        if(Arrays.stream(message).noneMatch(s -> s.equalsIgnoreCase("|"))){
+            return "I'm sorry I think you may have the wrong address....please use .masstell name1 name2 name3 | message";
+        }else{
+            List<String> targets = new ArrayList<>();
+            int i = 1;
+            for(; i < message.length; i++){
+                if(!message[i].equalsIgnoreCase("|")){
+                    targets.add(message[i]);
+                }else{
+                    break;
+                }
+            }
+            targets.forEach(target -> sendMultiTell(data.getSender(),
+                    target.replace(",","").trim(),
+                    data.getMessage().split("\\|")[1].trim(),
+                    data.getChannel().isEmpty()) );
+            return "I've sent the message to the following users: " + String.join(" ", targets);
+        }
+    }
+
+    public static String sendMultiTell(String sender, String target, String message, boolean privateMessage){
+        Integer id = Nicks.getNickGroup(target);
+        if (id == null || id == -1) {
+            return sendTell(target, sender, message, privateMessage);
+        } else {
+            return sendTell(id.toString(), sender, message, privateMessage);
+        }
+    }
 
     public static String sendMultitell(CommandData data) {
         String sender = data.getSender().toLowerCase();
@@ -20,12 +53,7 @@ public class Tells {
         String message = data.getTellMessage();
         boolean privateMessage = data.getChannel().isEmpty();
 
-        Integer id = Nicks.getNickGroup(target);
-        if (id == null || id == -1) {
-            return sendTell(target, sender, message, privateMessage);
-        } else {
-            return sendTell(id.toString(), sender, message, privateMessage);
-        }
+        return sendMultiTell(sender,target,message,privateMessage);
     }
 
     public static String sendTell(String target, String sender, String message, boolean privateMessage) {

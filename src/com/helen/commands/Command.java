@@ -564,10 +564,15 @@ public class Command {
     }
 
 
-    @IRCCommand(command = {".tell", ".mtell"}, startOfLine = true, securityLevel = 1)
+    @IRCCommand(command = {".tell"}, startOfLine = true, securityLevel = 1)
     public void multiTell(CommandData data) {
         String str = Tells.sendMultitell(data);
         helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + str);
+    }
+
+    @IRCCommand(command = {".masstell", ".mtell"}, startOfLine = true, securityLevel = 1)
+    public void massTell(CommandData data) {
+        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Tells.sendMassTell(data));
     }
 
     @IRCCommand(command = ".exit", startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
