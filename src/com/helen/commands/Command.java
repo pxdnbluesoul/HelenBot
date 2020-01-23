@@ -563,6 +563,15 @@ public class Command {
         helen.partChannel(data.getTarget());
     }
 
+    @IRCCommand(command = {".o5"}, startOfLine = true, securityLevel = 1)
+    public void findO5Record(CommandData data) {
+        if (Configs.getProperty("remchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
+            List<String> responses = Users.getUserO5Thread(data.getTarget());
+            for (String response : responses) {
+                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
+            }
+        }
+    }
 
     @IRCCommand(command = {".tell"}, startOfLine = true, securityLevel = 1)
     public void multiTell(CommandData data) {
