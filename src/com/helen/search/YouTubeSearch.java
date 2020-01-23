@@ -43,7 +43,7 @@ public class YouTubeSearch {
 
             StringBuilder str = new StringBuilder();
 
-            str.append(getVideoInfo(video, str, video.getSnippet().getTitle()));
+            getVideoInfo(video, str, video.getSnippet().getTitle());
             str.append("https://www.youtube.com/watch?v=").append(video.getId());
 
             return str.toString();
