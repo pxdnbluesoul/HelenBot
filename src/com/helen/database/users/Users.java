@@ -87,7 +87,7 @@ public class Users {
                     Type myType = new TypeToken<ArrayList<ForumThread>>() {}.getType();
                     List<ForumThread> test = new Gson().fromJson(result, myType);
                     for(ForumThread thread : test){
-                        String str = thread.getTitle() + " - " + (thread.getSubtitle() != null ? thread.getSubtitle() : "") + " - http://05command.wikidot.com/forum/t-"  + thread.getWd_thread_id();
+                        String str = thread.getTitle()  + (thread.getSubtitle() != null ? " - " + thread.getSubtitle() : "") + " - http://05command.wikidot.com/forum/t-"  + thread.getWd_thread_id();
                         if(thread.getForum_id().equalsIgnoreCase("55")){
                             returnStrings.add(str + " (Disc)");//disc
                         }else if(thread.getForum_id().equalsIgnoreCase("56")){
