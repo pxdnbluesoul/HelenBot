@@ -2,8 +2,7 @@ package com.helen.bots;
 
 import com.helen.commands.Command;
 import com.helen.commands.CommandData;
-import com.helen.database.framework.Config;
-import com.helen.database.framework.Configs;
+import com.helen.database.framework.*;
 import com.helen.database.users.BanInfo;
 import com.helen.database.users.Bans;
 import com.helen.database.users.Users;
@@ -14,6 +13,7 @@ import org.jibble.pircbot.PircBot;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
@@ -81,6 +81,19 @@ public class HelenBot extends PircBot {
 
     public void onMessage(String channel, String sender, String login,
                           String hostname, String message) {
+        Set<String> channels = Configs.getFastConfigs("logChannels");
+        if(channels.contains(channel)){
+            try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("logMessage"), sender, channel, message)){
+                if(stmt != null){
+                    try {
+                        stmt.executeUpdate();
+                    }catch(Exception e){
+                        logger.error("There wsa an error logging a line",e);
+                    }
+                }
+            }
+        }
+
         if (channel != null) {
             Users.insertUser(sender, hostname, message, channel.toLowerCase());
         }
@@ -110,9 +123,9 @@ public class HelenBot extends PircBot {
 
 
     public void log(String line) {
-        if (!line.contains("PING :") && !line.contains(">>>PONG")) {
+       /* if (!line.contains("PING :") && !line.contains(">>>PONG")) {
             logger.info(System.currentTimeMillis() + " " + line);
-        }
+        }*/
     }
 
     public void onServerResponse(int code, String response) {

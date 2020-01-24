@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Configs {
 
@@ -22,6 +23,17 @@ public class Configs {
             return cachedProperties.get(key);
         } else {
             return Collections.emptyList();
+        }
+    }
+
+    public static Set<String> getFastConfigs(String key){
+        if(!cacheValid){
+            loadProperties();
+        }
+        if(cachedProperties.containsKey(key)){
+            return cachedProperties.get(key).stream().map(Config::getValue).collect(Collectors.toSet());
+        } else {
+            return Collections.emptySet();
         }
     }
 
