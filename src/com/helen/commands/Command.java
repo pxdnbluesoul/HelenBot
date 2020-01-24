@@ -708,6 +708,17 @@ public class Command {
         }
     }
 
+    @IRCCommand(command = ".log", startOfLine = true, securityLevel = 2)
+    public void getLog(CommandData data){
+        if(Configs.getFastConfigs("remchannels").contains(data.getChannel())){
+            String[] bits = data.getMessageWithoutCommand().split(";");
+            String channel = bits[0].trim();
+            String start = bits[1].trim();
+            String end = bits[2].trim();
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Logs.getPasteForTimeRangeAndChannel(channel, start, end));
+        }
+    }
+
     @IRCCommand(command = ".passcode", startOfLine = true, securityLevel = 1)
     public void passcode(CommandData data) {
         helen.sendMessage(data.getResponseTarget(), "As written above the chat in big red letters, we will not help you find the passcode. It is located here: http://scp-wiki.net/guide-for-newbies and is clearly stated. If you can't find it, slow down, don't skim, and try reading it out loud.");
