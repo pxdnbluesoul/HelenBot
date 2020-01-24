@@ -710,12 +710,23 @@ public class Command {
 
     @IRCCommand(command = ".log", startOfLine = true, securityLevel = 2)
     public void getLog(CommandData data){
-        if(Configs.getFastConfigs("remchannels").contains(data.getChannel())){
+        Set<String> remchannels = Configs.getFastConfigs("remchannels");
+        if(remchannels.contains(data.getChannel())){
             String[] bits = data.getMessageWithoutCommand().split(";");
             String channel = bits[0].trim();
-            String start = bits[1].trim();
-            String end = bits[2].trim();
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Logs.getPasteForTimeRangeAndChannel(channel, start, end));
+            if(remchannels.contains(channel)){
+                if(!data.getChannel().equals(channel)){
+                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I'm sorry, you can only request logs of staff channels from that channel.");
+                }else{
+                    String start = bits[1].trim();
+                    String end = bits[2].trim();
+                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Logs.getPasteForTimeRangeAndChannel(channel, start, end));
+                }
+            }else {
+                String start = bits[1].trim();
+                String end = bits[2].trim();
+                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Logs.getPasteForTimeRangeAndChannel(channel, start, end));
+            }
         }
     }
 
