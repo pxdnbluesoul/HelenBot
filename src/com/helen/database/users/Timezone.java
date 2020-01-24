@@ -43,7 +43,7 @@ public class Timezone implements DatabaseObject {
             } else {
                 usernames.add(username);
             }
-            Array a = Connector.getConnection().createArrayOf("text", usernames.toArray());
+            Array a = Connector.getConnection().createArrayOf("text", usernames.stream().map(String::toLowerCase).toArray());
             try (CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getTimezoneArray"), a)) {
                 try (ResultSet rs = stmt != null ? stmt.execute() : null) {
                     while (rs != null && rs.next()) {
