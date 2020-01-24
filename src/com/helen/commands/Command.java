@@ -821,6 +821,16 @@ public class Command {
         }
     }
 
+    @IRCCommand(command = ".email", startOfLine = true, securityLevel = 1)
+    public void getEmailMessage(CommandData data) {
+        Optional<Config> property = Configs.getSingleProperty("emailMessage");
+        if (property.isPresent()) {
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + property.get().getValue());
+        } else {
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Someone needs to set the emailMessage property");
+        }
+    }
+
     @IRCCommand(command = ".blackbox", startOfLine = true, securityLevel = 1)
     public void getBlackbox(CommandData data) {
         helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + "█");
