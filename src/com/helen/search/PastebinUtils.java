@@ -1,7 +1,9 @@
 package com.helen.search;
 
-import com.github.kennedyoliveira.pastebin4j.*;
+
+
 import com.helen.database.framework.Configs;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -9,7 +11,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.*;
 
-import static com.github.kennedyoliveira.pastebin4j.api.StringUtils.isNotNullNorEmpty;
 import static java.util.stream.Collectors.joining;
 
 
@@ -18,6 +19,7 @@ public class PastebinUtils {
 
     public static final String API_LOGIN_URL = "http://pastebin.com/api/api_login.php";
 
+    public static class GuestPaste extends Paste {}
 
     public static String getPasteForLog(String message, String title) {
         final String devKey = Configs.getSingleProperty("pastebinApiKey").get().getValue();
@@ -28,12 +30,10 @@ public class PastebinUtils {
 
         guestPaste.setContent(message);
         guestPaste.setTitle(title);
-        guestPaste.setExpiration(PasteExpiration.NEVER);
-        guestPaste.setVisibility(PasteVisibility.PRIVATE);
+        guestPaste.setExpiration("N");
+        guestPaste.setVisibility("2");
 
-        final String guestUrl = createPaste(pasteBin, guestPaste);
-
-        return guestUrl;
+        return createPaste(pasteBin, guestPaste);
     }
     public static void updateUserSessionKey(AccountCredentials accountCredentials) {
         if (!accountCredentials.getUserSessionKey().isPresent())
@@ -80,17 +80,12 @@ public class PastebinUtils {
             accountCredentials.getUserSessionKey().ifPresent(k -> parameters.put(PasteBinApiParams.USER_KEY, k));
         }
 
-        if (isNotNullNorEmpty(paste.getTitle()))
+        if (StringUtils.isNotBlank(paste.getTitle()))
             parameters.put(PasteBinApiParams.PASTE_NAME, paste.getTitle());
 
-        if (paste.getHighLight() != null)
-            parameters.put(PasteBinApiParams.PASTE_FORMAT, paste.getHighLight());
 
         if (paste.getVisibility() != null)
-            parameters.put(PasteBinApiParams.PASTE_PRIVATE, paste.getVisibility());
-
-        if (paste.getExpiration() != null)
-            parameters.put(PasteBinApiParams.PASTE_EXPIRE_DATE, paste.getExpiration());
+            parameters.put("api_paste_private", paste.getVisibility());
 
         final String pasteUrl = requiresValidResponse(post(API_POST_URL, parameters)).get();
 
@@ -114,10 +109,7 @@ public class PastebinUtils {
     enum PasteBinApiParams {
       DEV_KEY("api_dev_key"),
       PASTE_CODE("api_paste_code"),
-        PASTE_PRIVATE("api_paste_private"),
         PASTE_NAME("api_paste_name"),
-        PASTE_EXPIRE_DATE("api_paste_expire_date"),
-        PASTE_FORMAT("api_paste_format"),
         USER_KEY("api_user_key"),
         OPTION("api_option"),
         USER_NAME("api_user_name"),
@@ -186,7 +178,7 @@ public class PastebinUtils {
         }
     }
     static String doRequest( String url,  HttpURLConnection urlConnection,  String params, boolean keepResponseMultiLine) throws IOException {
-        if (isNotNullNorEmpty(params)) {
+        if (StringUtils.isNotBlank(params)) {
             urlConnection.setDoOutput(true);
 
             try (DataOutputStream dataOutputStream = new DataOutputStream(urlConnection.getOutputStream())) {

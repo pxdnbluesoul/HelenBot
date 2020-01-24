@@ -98,11 +98,6 @@
 			<version>v1-rev53-1.22.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.github.kennedyoliveira</groupId>
-			<artifactId>pastebin4j</artifactId>
-			<version>${pastebin4j.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>com.google.apis</groupId>
 			<artifactId>google-api-services-youtube</artifactId>
 			<version>v3-rev182-1.22.0</version>
