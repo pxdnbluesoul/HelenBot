@@ -39,7 +39,7 @@ public class Quotes implements DatabaseObject {
 
                 // use comma as separator
                 String[] country = line.split(cvsSplitBy);
-                setQuote(country[1] , country[2], country[4] );
+                setQuote(country[1] , country[4], country[2] );
 
             }
 
@@ -66,20 +66,20 @@ public class Quotes implements DatabaseObject {
         try {
             ResultSet rs = null;
             if (quoteNumber == -1) {
-                try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getRandomQuote"), username, username, channel)){
+                try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getRandomQuote"), username, channel, username, channel)){
                     if (stmt != null) {
                         rs = stmt.execute();
                     }
                 }
             } else {
-                try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getQuote"), username, username, channel, quoteNumber)){
+                try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getQuote"), username, channel, username, channel, quoteNumber)){
                     if (stmt != null) {
                         rs = stmt.execute();
                     }
                 }
             }
             if (rs != null && rs.next()) {
-                String returnString = "[" + rs.getString("index") + "/" + rs.getString("maxIndex") + "] " + rs.getString("message");
+                String returnString = "[" + rs.getString("rowNum") + "/" + rs.getString("maxIndex") + "] " + rs.getString("message");
                 rs.close();
                 return returnString;
             } else {
