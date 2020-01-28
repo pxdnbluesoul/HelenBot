@@ -5,13 +5,17 @@ import com.helen.database.framework.CloseableStatement;
 import com.helen.database.framework.Connector;
 import com.helen.database.framework.Queries;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.ResultSet;
 
 public class Quotes implements DatabaseObject {
 
-    public static String setQuote(String userName, String message) {
+    public static String setQuote(String userName, String message, String channel) {
         try {
-            CloseableStatement stmt = Connector.getStatement(Queries.getQuery("addQuote"), userName, message, userName);
+            CloseableStatement stmt = Connector.getStatement(Queries.getQuery("addQuote"), userName, channel, message, userName);
             if (stmt.executeUpdate()) {
                 return "*Jots that down on her clipboard* Gotcha, I'll remember they said that.";
             } else {
@@ -26,17 +30,17 @@ public class Quotes implements DatabaseObject {
         return getQuote(username, -1);
     }
 
-    public static String getQuote(String username, Integer quoteNumber) {
+    public static String getQuote(String username, Integer quoteNumber, String channel) {
         try {
             ResultSet rs = null;
             if (quoteNumber == -1) {
-                try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getRandomQuote"), username, username)){
+                try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getRandomQuote"), username, username, channel)){
                     if (stmt != null) {
                         rs = stmt.execute();
                     }
                 }
             } else {
-                try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getQuote"), username, username, quoteNumber)){
+                try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("getQuote"), username, username, channel, quoteNumber)){
                     if (stmt != null) {
                         rs = stmt.execute();
                     }

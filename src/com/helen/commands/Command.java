@@ -25,7 +25,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.helen.database.data.Memo.addMemo;
 
 public class Command {
     public static final String NOT_FOUND = "I'm sorry, I couldn't find anything.";
@@ -330,7 +329,7 @@ public class Command {
     @IRCCommand(command = {".rem"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
     public void remember(CommandData data) {
         if (Configs.getProperty("remchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + addMemo(data.getSplitMessage()[1], data.getMessageWithoutCommand().substring(data.getMessageWithoutCommand().split(" ")[0].length() + 1)));
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.addMemo(data.getSplitMessage()[1], data.getMessageWithoutCommand().substring(data.getMessageWithoutCommand().split(" ")[0].length() + 1), data.getChannel()));
         }
     }
 
@@ -338,7 +337,7 @@ public class Command {
     public void getMemo(CommandData data) {
         if (Configs.getProperty("remchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
 
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.getMemo(data.getRegexTarget()));
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.getMemo(data.getRegexTarget(), data.getChannel()));
         }
     }
 
@@ -346,7 +345,7 @@ public class Command {
     public void removeMemo(CommandData data) {
         if (Configs.getProperty("remchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
 
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.deleteMemo(data.getTarget()));
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.deleteMemo(data.getTarget(), data.getChannel()));
         }
     }
 
@@ -708,6 +707,7 @@ public class Command {
         }
     }
 
+
     @IRCCommand(command = ".log", startOfLine = true, securityLevel = 2)
     public void getLog(CommandData data){
         Set<String> remchannels = Configs.getFastConfigs("remchannels");
@@ -773,9 +773,9 @@ public class Command {
         if (tokens.length > 1) {
             if (data.getChannel() != null && Configs.getProperty("quoteChannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
                 if (tokens.length > 2) {
-                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(tokens[1], Integer.parseInt(tokens[2])));
+                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(tokens[1], Integer.parseInt(tokens[2]), data.getChannel()));
                 } else {
-                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(tokens[1]));
+                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(tokens[1], data.getChannel()));
                 }
             }
         } else {
@@ -789,7 +789,7 @@ public class Command {
         String[] tokens = data.getSplitMessage();
         if (tokens.length > 2) {
             if (data.getChannel() != null && Configs.getProperty("quoteChannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
-                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.setQuote(tokens[1].toLowerCase(), Arrays.stream(tokens).skip(2).collect(Collectors.joining(" "))));
+                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.setQuote(tokens[1].toLowerCase(), Arrays.stream(tokens).skip(2).collect(Collectors.joining(" ")), data.getChannel()));
             }
         } else {
             helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Please specify a username and message.  E.g. .aq DrMagnus Butts-hole");
