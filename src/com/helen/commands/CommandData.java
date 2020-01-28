@@ -113,4 +113,8 @@ public class CommandData {
         return false;
     }
 
+    public static CommandData getTestData(String message){
+        return new CommandData("#site19","drmagnus","test","test", message);
+    }
+
 }

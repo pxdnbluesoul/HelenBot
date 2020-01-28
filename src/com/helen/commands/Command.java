@@ -547,7 +547,11 @@ public class Command {
 
     @IRCCommand(command = {".def", ".definition"}, startOfLine = true, securityLevel = 1)
     public void define(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + WebsterSearch.dictionarySearch(data.getTarget()));
+        try {
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + WebSearch.search(".g definition " + data.getMessageWithoutCommand()));
+        }catch(Exception e){
+            helen.sendMessage(data.getResponseTarget(), data.getSender() +  ": I'm sorry something went wrong.  This function is experimental.");
+        }
     }
 
     // Authentication Required Commands
