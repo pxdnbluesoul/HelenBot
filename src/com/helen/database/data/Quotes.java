@@ -26,8 +26,40 @@ public class Quotes implements DatabaseObject {
         }
     }
 
-    public static String getQuote(String username) {
-        return getQuote(username, -1);
+    public static void main(String[] args) {
+        String csvFile = "C:/Users/chris/Desktop/quote1.csv";
+        BufferedReader br = null;
+        String line = "";
+        String cvsSplitBy = ";";
+
+        try {
+
+            br = new BufferedReader(new FileReader(csvFile));
+            while ((line = br.readLine()) != null) {
+
+                // use comma as separator
+                String[] country = line.split(cvsSplitBy);
+                setQuote(country[1] , country[2], country[4] );
+
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public static String getQuote(String username, String channel) {
+        return getQuote(username, -1, channel);
     }
 
     public static String getQuote(String username, Integer quoteNumber, String channel) {

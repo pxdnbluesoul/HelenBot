@@ -52,6 +52,40 @@ public class Memo implements DatabaseObject {
         }
     }
 
+    public static void main(String[] args) {
+        String csvFile = "C:/Users/chris/Desktop/memos.csv";
+        BufferedReader br = null;
+        String line = "";
+        String cvsSplitBy = ";";
+
+        try {
+
+            br = new BufferedReader(new FileReader(csvFile));
+            while ((line = br.readLine()) != null) {
+
+                // use comma as separator
+                String[] country = line.split(cvsSplitBy);
+
+                    addMemo(country[1],country[3], country[2]);
+
+
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     @Override
     public String getDelimiter() {
         return null;
