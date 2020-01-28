@@ -803,7 +803,7 @@ public class Command {
         if (tokens.length > 2) {
             if (data.getChannel() != null && Configs.getProperty("quoteChannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
                 logger.info("I got the following as the message: " + Arrays.toString(data.getSplitMessage()));
-                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.deleteQuote(tokens[1], Integer.parseInt(tokens[2])));
+                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.deleteQuote(tokens[1], Integer.parseInt(tokens[2]), data.getChannel()));
             }
         } else {
             helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Please specify a username and index.  E.g. .rq DrMagnus 1");

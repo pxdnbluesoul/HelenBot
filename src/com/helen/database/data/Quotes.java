@@ -10,12 +10,13 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class Quotes implements DatabaseObject {
 
     public static String setQuote(String userName, String message, String channel) {
         try {
-            CloseableStatement stmt = Connector.getStatement(Queries.getQuery("addQuote"), userName, channel, message, userName);
+            CloseableStatement stmt = Connector.getStatement(Queries.getQuery("addQuote"), userName, channel, message);
             if (stmt.executeUpdate()) {
                 return "*Jots that down on her clipboard* Gotcha, I'll remember they said that.";
             } else {
@@ -26,7 +27,7 @@ public class Quotes implements DatabaseObject {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
         String csvFile = "C:/Users/chris/Desktop/quote1.csv";
         BufferedReader br = null;
         String line = "";
@@ -35,11 +36,14 @@ public class Quotes implements DatabaseObject {
         try {
 
             br = new BufferedReader(new FileReader(csvFile));
+            br.readLine();
             while ((line = br.readLine()) != null) {
 
                 // use comma as separator
                 String[] country = line.split(cvsSplitBy);
-                setQuote(country[1] , country[4], country[2] );
+                CloseableStatement stmt = Connector.getStatement(Queries.getQuery("quoteRestore"), country[1], country[4], country[2],country[3]);
+
+                stmt.executeUpdate();
 
             }
 
@@ -90,23 +94,17 @@ public class Quotes implements DatabaseObject {
         }
     }
 
-    public static String deleteQuote(String userName, Integer quoteNumber) {
-        try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("deleteQuote"), userName, quoteNumber)) {
+    public static String deleteQuote(String userName, Integer quoteNumber, String channel) {
+        try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("deleteQuote"), userName, channel, quoteNumber)) {
             if (stmt != null && stmt.executeDelete()) {
-                try(CloseableStatement adjustmentstmt = Connector.getStatement(Queries.getQuery("adjustQuoteIndexes"), userName, quoteNumber)) {
-                    if (adjustmentstmt != null) {
-                        adjustmentstmt.executeUpdate();
-                        return "Quote number " + quoteNumber + " deleted for: " + userName;
-                    }
-                }
+                       return "Quote number " + quoteNumber + " deleted for: " + userName;
+
             } else {
                 return "That didn't quite delete properly.  Do they have at least " + quoteNumber + " quote(s)?";
             }
         } catch (Exception e) {
             return "Hmm, I didn't quite get that.  Magnus, a word?";
-        }
-        return "That didn't quite delete properly.  Do they have at least " + quoteNumber + " quote(s)?";
-    }
+        } }
 
     @Override
     public String getDelimiter() {
