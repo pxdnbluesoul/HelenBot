@@ -548,7 +548,9 @@ public class Command {
     @IRCCommand(command = {".def", ".definition"}, startOfLine = true, securityLevel = 1)
     public void define(CommandData data) {
         try {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + WebSearch.search(".g definition " + data.getMessageWithoutCommand()));
+            Optional<GoogleResults> results = WebSearch.search(".g definition " + data.getMessageWithoutCommand());
+
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + (results.isPresent() ? results.get() : NOT_FOUND));
         }catch(Exception e){
             helen.sendMessage(data.getResponseTarget(), data.getSender() +  ": I'm sorry something went wrong.  This function is experimental.");
         }
