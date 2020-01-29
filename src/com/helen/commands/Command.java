@@ -776,7 +776,7 @@ public class Command {
     @IRCCommand(command = {".q", ".quote"}, startOfLine = true, securityLevel = 1)
     public void getQuote(CommandData data) {
         String[] tokens = data.getSplitMessage();
-        if(data.getChannel() != null){
+        if(StringUtils.isNotBlank(data.getChannel())){
             if (Configs.getProperty("quoteChannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
                 if (tokens.length > 1) {
                     if (tokens.length > 2) {
@@ -785,7 +785,7 @@ public class Command {
                         helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(tokens[1], data.getChannel()));
                     }
                 } else if (tokens.length == 1){
-                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(tokens[1], data.getSender().toLowerCase()));
+                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(data.getSender().toLowerCase(), data.getChannel()));
                 }else {
                     helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Please specify a username and optionally an index.  E.g. .q username 1");
                 }
