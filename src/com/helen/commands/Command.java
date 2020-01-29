@@ -776,16 +776,28 @@ public class Command {
     @IRCCommand(command = {".q", ".quote"}, startOfLine = true, securityLevel = 1)
     public void getQuote(CommandData data) {
         String[] tokens = data.getSplitMessage();
-        if (tokens.length > 1) {
-            if (data.getChannel() != null && Configs.getProperty("quoteChannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
-                if (tokens.length > 2) {
-                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(tokens[1], Integer.parseInt(tokens[2]), data.getChannel()));
-                } else {
-                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(tokens[1], data.getChannel()));
+        if(data.getChannel() != null){
+            if (Configs.getProperty("quoteChannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
+                if (tokens.length > 1) {
+                    if (tokens.length > 2) {
+                        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(tokens[1], Integer.parseInt(tokens[2]), data.getChannel()));
+                    } else {
+                        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(tokens[1], data.getChannel()));
+                    }
+                } else if (tokens.length == 1){
+                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(tokens[1], data.getSender().toLowerCase()));
+                }else {
+                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Please specify a username and optionally an index.  E.g. .q username 1");
                 }
             }
-        } else {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Please specify a username and optionally an index.  E.g. .q DrMagnus 1");
+        }else{
+            if (tokens.length > 3) {
+                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(tokens[1], Integer.parseInt(tokens[3]), tokens[2].toLowerCase()));
+            } else if(tokens.length == 3){
+                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(tokens[1], tokens[2].toLowerCase()));
+            } else{
+                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Please specify a username and channel, optinally an index.  E.g. .q username #channel 1");
+            }
         }
 
     }
