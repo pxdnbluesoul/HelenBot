@@ -362,7 +362,7 @@ public class Pages {
         try {
 
             ArrayList<Selectable> authors = new ArrayList<>();
-            CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findAuthorName"), "%" + user + "%");
+            CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findAuthorName"), "%" + user + "%","%" + user + "%","%" + user + "%");
             ResultSet rs = stmt.getResultSet();
             while (rs != null && rs.next()) {
                 authors.add(new Author(rs.getString("created_by")));
