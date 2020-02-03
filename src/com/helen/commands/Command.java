@@ -572,6 +572,9 @@ public class Command {
     public void findO5Record(CommandData data) {
         if (Configs.getProperty("remchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
             List<String> responses = Users.getUserO5Thread(data.getTarget());
+            if(responses.isEmpty()){
+                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I didn't find any 05 threads for the user: " + data.getTarget());
+            }
             for (String response : responses) {
                 helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
             }
@@ -647,22 +650,26 @@ public class Command {
 
     @IRCCommand(command = ".shoot", startOfLine = true, securityLevel = 4, coexistWithJarvis = true)
     public void shootUser(CommandData data) {
-        if (Configs.commandEnabled(data, "shoot")) {
-            if (data.getTarget().equalsIgnoreCase("Secretary_Helen") || data.getTarget().equalsIgnoreCase("DrMagnus")) {
-                bullets--;
-                helen.sendAction(data.getChannel(), "shoots " + data.getSender());
-                if (bullets < 1) {
-                    reload(data);
-                }
+        if (data.getTarget().equalsIgnoreCase("Secretary_Helen") || data.getTarget().equalsIgnoreCase("DrMagnus")
+                || data.getTarget().equalsIgnoreCase("magnus") || data.getTarget().equalsIgnoreCase("helen")) {
+            if (data.getSender().equalsIgnoreCase("DrMagnus")) {
+                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Really boss?");
             } else {
-                helen.sendAction(data.getChannel(), "shoots " + data.getTarget());
                 bullets--;
+                helen.sendAction(data.getChannel(), "shoots stormfallen.");
                 if (bullets < 1) {
                     reload(data);
                 }
-                helen.sendMessage(data.getChannel(), "Be careful " + data.getTarget() + ". I still have " +
-                        (bullets > 1 ? bullets + " bullets left." : "one in the chamber."));
             }
+
+        } else if (Configs.commandEnabled(data, "shoot")) {
+            helen.sendAction(data.getChannel(), "shoots " + data.getTarget());
+            bullets--;
+            if (bullets < 1) {
+                reload(data);
+            }
+            helen.sendMessage(data.getChannel(), "Be careful " + data.getTarget() + ". I still have " +
+                    (bullets > 1 ? bullets + " bullets left." : "one in the chamber."));
         }
     }
 

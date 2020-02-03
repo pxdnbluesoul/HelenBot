@@ -25,19 +25,20 @@ public class Roll implements DatabaseObject {
 
     public Roll(String diceCommand, String username) {
         diceString = diceCommand;
+        values = new ArrayList<>();
         parse();
         computeRoll();
         this.username = username;
-        values = new ArrayList<>();
+
     }
 
     public Roll(String diceCommand, String username, String regex) {
         this.regex = regex;
         diceString = diceCommand;
+        values = new ArrayList<>();
         parse();
         computeRoll();
         this.username = username;
-        values = new ArrayList<>();
     }
 
     public Integer getDiceThrows() {
