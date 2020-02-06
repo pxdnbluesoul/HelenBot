@@ -743,6 +743,29 @@ public class Command {
         }
     }
 
+    @IRCCommand(command = ".flog", startOfLine = true, securityLevel = 2)
+    public void getFormattedLog(CommandData data){
+        Set<String> remchannels = Configs.getFastConfigs("remchannels");
+        if(remchannels.contains(data.getChannel())){
+            String[] bits = data.getMessageWithoutCommand().split(";");
+            String channel = bits[0].trim();
+            String username = bits[3].trim();
+            if(remchannels.contains(channel)){
+                if(!data.getChannel().equals(channel)){
+                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I'm sorry, you can only request logs of staff channels from that channel.");
+                }else{
+                    String start = bits[1].trim();
+                    String end = bits[2].trim();
+                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Logs.getFormattedPasteForTimeRangeAndChannel(channel, start, end,username));
+                }
+            }else {
+                String start = bits[1].trim();
+                String end = bits[2].trim();
+                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Logs.getFormattedPasteForTimeRangeAndChannel(channel, start, end, username));
+            }
+        }
+    }
+
     @IRCCommand(command = ".passcode", startOfLine = true, securityLevel = 1)
     public void passcode(CommandData data) {
         helen.sendMessage(data.getResponseTarget(), "As written above the chat in big red letters, we will not help you find the passcode. It is located here: http://scp-wiki.net/guide-for-newbies and is clearly stated. If you can't find it, slow down, don't skim, and try reading it out loud.");
