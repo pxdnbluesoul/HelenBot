@@ -14,7 +14,7 @@ public class Pronouns {
 
     private static final Logger logger = Logger.getLogger(Pronouns.class);
 
-    private static ArrayList<String> bannedNouns = new ArrayList<String>();
+    private static ArrayList<String> bannedNouns = new ArrayList<>();
 
     static {
         reload();
@@ -55,8 +55,9 @@ public class Pronouns {
                         str.append(username);
                         str.append(" accepts the following pronouns: ");
                         str.append(String.join(", ", accepted));
+                        str.append(";");
                     } else {
-                        str.append(" I have no record of accepted pronouns");
+                        str.append(" I have no record of accepted pronouns;");
                     }
                     if (unaccepted.size() > 0) {
                         str.append(" ");
@@ -191,11 +192,7 @@ public class Pronouns {
     }
 
     public static void reload() {
-        bannedNouns = new ArrayList<String>();
-        // Just a couple examples.
-        bannedNouns.add("apache");
-        bannedNouns.add("helicopter");
-        // More are added on the back end.
+        bannedNouns.clear();
         for (Config c : Configs.getProperty("bannedNouns")) {
             bannedNouns.add(c.getValue());
         }

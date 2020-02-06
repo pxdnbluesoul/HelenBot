@@ -1,7 +1,6 @@
 package com.helen.database.users;
 
 
-import com.helen.database.DatabaseObject;
 import com.helen.database.framework.CloseableStatement;
 import com.helen.database.framework.Connector;
 import com.helen.database.framework.Queries;
@@ -13,7 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class Timezone implements DatabaseObject {
+public class Timezone {
 
     public static String setTimezone(String userName, String timeZone) {
         try (CloseableStatement stmt = Connector.getStatement(Queries.getQuery("setTimezone"), userName.toLowerCase(), timeZone)) {
@@ -67,15 +66,5 @@ public class Timezone implements DatabaseObject {
         } catch (Exception e) {
             return "Hmm, I didn't quite get that.  Magnus, a word?";
         }
-    }
-
-    @Override
-    public String getDelimiter() {
-        return null;
-    }
-
-    @Override
-    public boolean displayToUser() {
-        return false;
     }
 }

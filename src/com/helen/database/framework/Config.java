@@ -1,10 +1,9 @@
 package com.helen.database.framework;
 
-import com.helen.database.DatabaseObject;
 
 import java.util.Optional;
 
-public class Config implements DatabaseObject {
+public class Config {
 
     private String key = "";
     private String value = "";
@@ -23,16 +22,8 @@ public class Config implements DatabaseObject {
         return displayToPublic;
     }
 
-    public String getKey() {
-        return key;
-    }
-
     public String getValue() {
         return value;
-    }
-
-    public String getUpdated() {
-        return lastUpdated;
     }
 
     public String getDelimiter() {

@@ -1,7 +1,8 @@
 package com.helen.database.data;
 
-import com.helen.database.DatabaseObject;
+import com.helen.commands.CommandData;
 import com.helen.database.framework.CloseableStatement;
+import com.helen.database.framework.Configs;
 import com.helen.database.framework.Connector;
 import com.helen.database.framework.Queries;
 
@@ -12,7 +13,7 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class Quotes implements DatabaseObject {
+public class Quotes {
 
     public static String setQuote(String userName, String message, String channel) {
         try {
@@ -27,7 +28,7 @@ public class Quotes implements DatabaseObject {
         }
     }
 
-    public static void main(String[] args) throws SQLException {
+    public static void mm(String[] args) throws SQLException {
         String csvFile = "C:/Users/chris/Desktop/quote1.csv";
         BufferedReader br = null;
         String line = "";
@@ -64,6 +65,35 @@ public class Quotes implements DatabaseObject {
 
     public static String getQuote(String username, String channel) {
         return getQuote(username, -1, channel);
+    }
+
+    public static void main(String[] args) {
+        CommandData data = new CommandData(null, "DrMagnus","test","test",".q DrMagnus #site67");
+
+        String[] tokens = data.getSplitMessage();
+        if(data.getChannel() != null){
+            if (Configs.getProperty("quoteChannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
+                if (tokens.length > 1) {
+                    if (tokens.length > 2) {
+                        System.out.println( Quotes.getQuote(tokens[1], Integer.parseInt(tokens[2]), data.getChannel()));
+                    } else {
+                        System.out.println( Quotes.getQuote(tokens[1], data.getChannel()));
+                    }
+                } else if (tokens.length == 1){
+                    System.out.println( Quotes.getQuote(data.getSender().toLowerCase(), data.getChannel()));
+                }else {
+                   System.out.println( ": Please specify a username and optionally an index.  E.g. .q username 1");
+                }
+            }
+        }else{
+            if (tokens.length > 3) {
+                System.out.println( Quotes.getQuote(tokens[1], Integer.parseInt(tokens[3]), tokens[2].toLowerCase()));
+            } else if(tokens.length == 3){
+                System.out.println( Quotes.getQuote(tokens[1], tokens[2].toLowerCase()));
+            } else{
+               System.out.println( ": Please specify a username and channel, optinally an index.  E.g. .q username #channel 1");
+            }
+        }
     }
 
     public static String getQuote(String username, Integer quoteNumber, String channel) {
@@ -104,15 +134,6 @@ public class Quotes implements DatabaseObject {
             }
         } catch (Exception e) {
             return "Hmm, I didn't quite get that.  Magnus, a word?";
-        } }
-
-    @Override
-    public String getDelimiter() {
-        return null;
-    }
-
-    @Override
-    public boolean displayToUser() {
-        return false;
+        }
     }
 }

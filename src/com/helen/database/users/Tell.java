@@ -8,16 +8,14 @@ public class Tell {
     private String target;
     private java.sql.Timestamp tell_time;
     private String message;
-    private boolean privateMessage;
     private Integer nickGroupId = null;
 
 
-    public Tell(String sender, String target, java.sql.Timestamp tell_time, String message, boolean privateMessage) {
+    public Tell(String sender, String target, java.sql.Timestamp tell_time, String message) {
         this.sender = sender;
         this.target = target;
         this.tell_time = tell_time;
         this.message = message;
-        this.privateMessage = privateMessage;
     }
 
     public String toString() {
@@ -38,7 +36,4 @@ public class Tell {
         return target;
     }
 
-    public boolean isPrivate() {
-        return privateMessage;
-    }
 }

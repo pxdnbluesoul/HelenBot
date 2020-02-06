@@ -1,6 +1,6 @@
 package com.helen.database.data;
 
-import com.helen.database.DatabaseObject;
+
 import com.helen.database.framework.CloseableStatement;
 import com.helen.database.framework.Connector;
 import com.helen.database.framework.Queries;
@@ -11,7 +11,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.sql.ResultSet;
 
-public class Memo implements DatabaseObject {
+public class Memo {
 
 
     public static String addMemo(String memoTitle, String message, String channel) {
@@ -86,13 +86,4 @@ public class Memo implements DatabaseObject {
         }
     }
 
-    @Override
-    public String getDelimiter() {
-        return null;
-    }
-
-    @Override
-    public boolean displayToUser() {
-        return false;
-    }
 }

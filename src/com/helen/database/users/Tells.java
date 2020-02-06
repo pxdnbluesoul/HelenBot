@@ -5,6 +5,7 @@ import com.helen.commands.CommandData;
 import com.helen.database.framework.CloseableStatement;
 import com.helen.database.framework.Connector;
 import com.helen.database.framework.Queries;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.ResultSet;
@@ -52,8 +53,11 @@ public class Tells {
         String target = data.getTarget().toLowerCase();
         String message = data.getTellMessage();
         boolean privateMessage = data.getChannel().isEmpty();
-
-        return sendMultiTell(sender,target,message,privateMessage);
+        if(StringUtils.isEmpty(target) || StringUtils.isEmpty(target.trim())){
+            return "I think you may have messed up the command...";
+        }else {
+            return sendMultiTell(sender, target, message, privateMessage);
+        }
     }
 
     public static String sendTell(String target, String sender, String message, boolean privateMessage) {
@@ -80,7 +84,7 @@ public class Tells {
             ResultSet rs = stmt.executeQuery();
             while (rs != null && rs.next()) {
                 list.add(new Tell(rs.getString("sender"), username
-                        , rs.getTimestamp("tell_time"), rs.getString("message"), rs.getBoolean("privateMessage")));
+                        , rs.getTimestamp("tell_time"), rs.getString("message")));
             }
             stmt.close();
             return list;

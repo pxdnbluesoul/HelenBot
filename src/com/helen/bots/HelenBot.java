@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static com.helen.database.users.Bans.getSuperUserBan;
 
@@ -25,7 +24,6 @@ public class HelenBot extends PircBot {
     private static final Logger logger = Logger.getLogger(HelenBot.class);
     private static Command cmd = null;
     private static Timer timer = new Timer();
-    private static ConcurrentHashMap<String, Boolean> jarvisPresent = new ConcurrentHashMap<>();
 
     public HelenBot() throws IOException,
             IrcException, InterruptedException {
@@ -74,11 +72,6 @@ public class HelenBot extends PircBot {
         }
     }
 
-    public void joinJarvyChannel(String channel) {
-        this.joinChannel(channel);
-        sendWho(channel);
-    }
-
     public void onMessage(String channel, String sender, String login,
                           String hostname, String message) {
         Set<String> channels = Configs.getFastConfigs("logChannels");
@@ -117,33 +110,6 @@ public class HelenBot extends PircBot {
         cmd.dispatchTable(new CommandData("", sender, login, hostname, message));
     }
 
-    public void sendWho(String channel) {
-        this.sendRawLine("WHO " + channel);
-    }
-
-
-    public void log(String line) {
-       /* if (!line.contains("PING :") && !line.contains(">>>PONG")) {
-            logger.info(System.currentTimeMillis() + " " + line);
-        }*/
-    }
-
-    public void onServerResponse(int code, String response) {
-        if (code == 352) {
-            logger.info(response);
-            String[] tokens = response.split(" ");
-            for (String token : tokens) {
-                if (token.equalsIgnoreCase("jarvis")) {
-                    jarvisPresent.put(response.split(" ")[1].toLowerCase(), true);
-                }
-            }
-        }
-    }
-
-    public void jarvisReset(String channel) {
-        jarvisPresent.remove(channel.toLowerCase());
-    }
-
     public void onDisconnect() {
         int tries = 0;
         while (!this.isConnected()) {
@@ -171,9 +137,7 @@ public class HelenBot extends PircBot {
 
     public void onPart(String channel, String sender, String login,
                        String hostname) {
-        if (sender.equalsIgnoreCase("jarvis")) {
-            jarvisPresent.remove(channel.toLowerCase());
-        }
+
     }
 
     public void onQuit(String sourceNick,
@@ -181,26 +145,11 @@ public class HelenBot extends PircBot {
                        String sourceHostname,
                        String reason) {
 
-        if (sourceNick.equalsIgnoreCase("jarvis")) {
-            jarvisPresent.replaceAll((c, v) -> false);
-        }
-    }
-
-    public Boolean toggleJarvis(String channel, Boolean status) {
-        jarvisPresent.put(channel, status);
-        return jarvisPresent.get(channel);
-    }
-
-    public Boolean jarvisIsPresent(String channel) {
-        return jarvisPresent.getOrDefault(channel.toLowerCase(), false);
     }
 
     public void onJoin(String channel, String sender, String login,
                        String hostmask) {
-        if (sender.equalsIgnoreCase("jarvis")) {
-            jarvisPresent.put(channel.toLowerCase(), true);
 
-        }
         //removing extraneous logging
         //logger.info("JOINED: " + sender + " LOGIN: " + login + " HOSTNAME: " + hostmask + " CHANNEL: " + channel);
         //Testing in separate channel
