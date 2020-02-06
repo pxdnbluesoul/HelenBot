@@ -4,7 +4,6 @@ import com.helen.commands.Command;
 import org.apache.commons.lang.StringUtils;
 import org.jibble.pircbot.Colors;
 
-import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,7 +20,6 @@ public class Roll {
         Matcher m = r.matcher(command);
 
         if (m.find()) {
-            ArrayList<Integer> values = new ArrayList<>();
              diceThrows = Integer.parseInt(m.group(1).trim());
             String dicetype = m.group(2).trim();
             int diceSize = Integer.parseInt(m.group(3).trim());
@@ -44,7 +42,7 @@ public class Roll {
                 if (!StringUtils.isEmpty(diceMessage)) {
                     str.append(diceMessage).append(": ");
                 }
-                str.append(Colors.BOLD).append(values).append(Colors.NORMAL).append(" (").append(diceThrows).append(dicetype);
+                str.append(Colors.BOLD).append(sum).append(Colors.NORMAL).append(" (").append(diceThrows).append(dicetype);
                 str.append(diceSize).append("=").append(Colors.BOLD).append(sum).append(Colors.NORMAL);
                     if (bonus != 0) {
                         str.append(" ").append(bonus > 0 ? ("+" + bonus) : "").append("= ").append(Colors.BOLD).append(sum + bonus).append(Colors.NORMAL);
