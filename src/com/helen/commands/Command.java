@@ -275,7 +275,7 @@ public class Command {
         } else if (roll.getDiceThrows() > 20) {
             helen.sendMessage(data.getResponseTarget(), data.getSender() + ": How's about no.");
         } else {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + roll.toString());
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + roll.getResult());
         }
     }
 
