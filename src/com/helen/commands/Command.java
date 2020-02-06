@@ -721,6 +721,7 @@ public class Command {
     }
 
 
+
     @IRCCommand(command = ".log", startOfLine = true, securityLevel = 2)
     public void getLog(CommandData data){
         Set<String> remchannels = Configs.getFastConfigs("remchannels");
@@ -749,7 +750,10 @@ public class Command {
         if(remchannels.contains(data.getChannel())){
             String[] bits = data.getMessageWithoutCommand().split(";");
             String channel = bits[0].trim();
-            String username = bits[3].trim();
+            String username = "";
+            if(bits.length > 3) {
+                username = bits[3].trim();
+            }
             if(remchannels.contains(channel)){
                 if(!data.getChannel().equals(channel)){
                     helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I'm sorry, you can only request logs of staff channels from that channel.");
