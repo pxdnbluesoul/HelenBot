@@ -60,10 +60,10 @@ public class Logs {
                                 default:
                                     color="**";
                             }
-                            str.append(color).append(user).append("##").append(": ").append(rs.getString("message")).append("**\n");
+                            str.append(color).append(user).append("##").append(": ").append(rs.getString("message").trim()).append("**\n");
                         } else {
                             str.append(rs.getString("username"))
-                                    .append(": ").append(rs.getString("message")).append("\n");
+                                    .append(": ").append(rs.getString("message").trim()).append("\n");
                         }
                     }
                 }
