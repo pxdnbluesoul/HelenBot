@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 
 import java.sql.ResultSet;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class Logs {
 
@@ -34,7 +35,7 @@ public class Logs {
         }
     }
 
-    public static String getFormattedPasteForTimeRangeAndChannel(String channel, String start, String end, String usernameToHighlight) {
+    public static String getFormattedPasteForTimeRangeAndChannel(String channel, String start, String end, List<String> usernamesToHighlight) {
         try {
             formatter.parse(start);
             formatter.parse(end);
@@ -45,8 +46,21 @@ public class Logs {
 
                         str.append("> ").append(rs.getString("timestamp")).append(" ");
                         String user = rs.getString("username");
-                        if (user.equalsIgnoreCase(usernameToHighlight)) {
-                            str.append("**##red|").append(user).append("##").append(": ").append(rs.getString("message")).append("**\n");
+                        if (usernamesToHighlight.contains(user.toLowerCase())) {
+                            String color = "**##red|";
+                            switch(usernamesToHighlight.indexOf(user.toLowerCase())){
+                                case 0:
+                                    break;
+                                case 1:
+                                    color = "**##blue|";
+                                    break;
+                                case 2:
+                                    color = "**##green|";
+                                    break;
+                                default:
+                                    color="**";
+                            }
+                            str.append(color).append(user).append("##").append(": ").append(rs.getString("message")).append("**\n");
                         } else {
                             str.append(rs.getString("username"))
                                     .append(": ").append(rs.getString("message")).append("\n");

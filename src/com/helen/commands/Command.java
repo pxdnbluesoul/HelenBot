@@ -705,9 +705,11 @@ public class Command {
         if(remchannels.contains(data.getChannel())){
             String[] bits = data.getMessageWithoutCommand().split(";");
             String channel = bits[0].trim();
-            String username = "";
+            List<String> usernames = new ArrayList<>();
             if(bits.length > 3) {
-                username = bits[3].trim();
+                for(int i = 3; i < bits.length; i++){
+                    usernames.add(bits[i].toLowerCase());
+                }
             }
             if(remchannels.contains(channel)){
                 if(!data.getChannel().equals(channel)){
@@ -715,12 +717,12 @@ public class Command {
                 }else{
                     String start = bits[1].trim();
                     String end = bits[2].trim();
-                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Logs.getFormattedPasteForTimeRangeAndChannel(channel, start, end,username));
+                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Logs.getFormattedPasteForTimeRangeAndChannel(channel, start, end,usernames));
                 }
             }else {
                 String start = bits[1].trim();
                 String end = bits[2].trim();
-                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Logs.getFormattedPasteForTimeRangeAndChannel(channel, start, end, username));
+                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Logs.getFormattedPasteForTimeRangeAndChannel(channel, start, end, usernames));
             }
         }
     }
