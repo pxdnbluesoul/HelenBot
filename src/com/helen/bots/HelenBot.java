@@ -72,6 +72,64 @@ public class HelenBot extends PircBot {
         }
     }
 
+    public void onKick(String channel,
+                       String kickerNick,
+                       String kickerLogin,
+                       String kickerHostname,
+                       String recipientNick,
+                       String reason){
+        Set<String> channels = Configs.getFastConfigs("logChannels");
+        if(channels.contains(channel)){
+            try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("logMessage"), recipientNick, channel, recipientNick + " was kicked by " + kickerNick + " for:" +reason)){
+                if(stmt != null){
+                    try {
+                        stmt.executeUpdate();
+                    }catch(Exception e){
+                        logger.error("There wsa an error logging a line",e);
+                    }
+                }
+            }
+        }
+    }
+
+    public void onSetChannelBan(String channel,
+                                String sourceNick,
+                                String sourceLogin,
+                                String sourceHostname,
+                                String hostmask){
+        Set<String> channels = Configs.getFastConfigs("logChannels");
+        if(channels.contains(channel)){
+            try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("logMessage"), sourceNick, channel, sourceNick + " has banned " + hostmask)){
+                if(stmt != null){
+                    try {
+                        stmt.executeUpdate();
+                    }catch(Exception e){
+                        logger.error("There wsa an error logging a line",e);
+                    }
+                }
+            }
+        }
+    }
+
+    public void onRemoveChannelBan(String channel,
+                                String sourceNick,
+                                String sourceLogin,
+                                String sourceHostname,
+                                String hostmask){
+        Set<String> channels = Configs.getFastConfigs("logChannels");
+        if(channels.contains(channel)){
+            try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("logMessage"), sourceNick, channel, sourceNick + " has unbanned " + hostmask)){
+                if(stmt != null){
+                    try {
+                        stmt.executeUpdate();
+                    }catch(Exception e){
+                        logger.error("There wsa an error logging a line",e);
+                    }
+                }
+            }
+        }
+    }
+
     public void onMessage(String channel, String sender, String login,
                           String hostname, String message) {
         Set<String> channels = Configs.getFastConfigs("logChannels");
