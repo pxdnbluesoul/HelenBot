@@ -708,7 +708,7 @@ public class Command {
             List<String> usernames = new ArrayList<>();
             if(bits.length > 3) {
                 for(int i = 3; i < bits.length; i++){
-                    usernames.add(bits[i].toLowerCase());
+                    usernames.add(bits[i].trim().toLowerCase());
                 }
             }
             if(remchannels.contains(channel)){
