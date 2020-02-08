@@ -131,7 +131,7 @@ public class Pages {
             }
             if (messageParts.length > 2) {
                 String seriesNumber = messageParts[2];
-                if (seriesNumber.matches("[1-5]")) {
+                if (seriesNumber.matches("[1-6]")) {
                     Integer i = Integer.parseInt(seriesNumber);
                     if (i == 1) {
                         min = 1;
@@ -141,16 +141,16 @@ public class Pages {
                         max = (1000 * i) - 1;
                     }
                 } else {
-                    return "When using series flags, please enter the series number between 1 and 5 immediately after.  e.g. .unused -s 1 -c";
+                    return "When using series flags, please enter the series number between 1 and 6 immediately after.  e.g. .unused -s 1 -c";
                 }
             } else {
                 min = 1;
-                max = 4999;
+                max = 5999;
                 flags.add("-r");
             }
         } else {
             min = 1;
-            max = 4999;
+            max = 5999;
             flags.add("-r");
         }
 
