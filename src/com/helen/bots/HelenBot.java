@@ -80,7 +80,7 @@ public class HelenBot extends PircBot {
                        String reason){
         Set<String> channels = Configs.getFastConfigs("logChannels");
         if(channels.contains(channel)){
-            try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("logMessage"), recipientNick, channel, recipientNick + " was kicked by " + kickerNick + " for:" +reason)){
+            try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("logMessage"), recipientNick, channel, recipientNick + " was kicked by " + kickerNick + " for: " +reason)){
                 if(stmt != null){
                     try {
                         stmt.executeUpdate();
