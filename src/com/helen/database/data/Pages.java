@@ -669,7 +669,7 @@ public class Pages {
 
     public static String getStoredInfo(String index, String username) {
         try {
-            Selectable s = storedEvents.get(username).get(Integer.parseInt(index) - 1);
+            Selectable s = storedEvents.get(username).remove(Integer.parseInt(index) - 1);
             if (s instanceof Page) {
                 return getPageInfo((String) s.selectResource());
             } else if (s instanceof Author) {

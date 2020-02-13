@@ -18,6 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -390,6 +391,14 @@ public class Command {
     @IRCCommand(command = ".help", startOfLine = true, securityLevel = 1)
     public void help(CommandData data) {
         helen.sendMessage(data.getResponseTarget(), data.getSender() + ": You can find a list of my job responsibilities here:  http://helenbot.wikidot.com/usage");
+    }
+
+    @IRCCommand(command = ".hlt", startOfLine = true, securityLevel = 1)
+    public void getTime(CommandData data) {
+        ZonedDateTime t = ZonedDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss yyyy-MM-dd");
+        String time = t.format(formatter);
+        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": To my knowledge, it is currently " + time + " in my local timezone: " + t.getZone().toString());
     }
 
     @IRCCommand(command = ".seen", startOfLine = true, securityLevel = 1)
