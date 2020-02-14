@@ -415,7 +415,7 @@ public class Command {
         helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getStoredInfo(data.getTarget(), data.getSender()));
     }
 
-    @IRCCommand(command = ".findBan", startOfLine = true, securityLevel = 1)
+    @IRCCommand(command = ".findBan", startOfLine = true, securityLevel = 2)
     public void findBan(CommandData data) {
         if(Configs.getFastConfigs("remchannels").contains(data.getChannel())){
             List<String> responses = Bans.queryBan(data);
@@ -430,7 +430,7 @@ public class Command {
         }
     }
 
-    @IRCCommand(command = ".addBan", startOfLine = true, securityLevel = 1)
+    @IRCCommand(command = ".addBan", startOfLine = true, securityLevel = 4)
     public void addBan(CommandData data) {
         if(Configs.getFastConfigs("remchannels").contains(data.getChannel())){
             String response = Bans.prepareBan(data);
@@ -438,7 +438,7 @@ public class Command {
 
         }
     }
-    @IRCCommand(command = ".updateBan", startOfLine = true, securityLevel = 1)
+    @IRCCommand(command = ".updateBan", startOfLine = true, securityLevel = 4)
     public void updateBan(CommandData data) {
         if(Configs.getFastConfigs("remchannels").contains(data.getChannel())){
             String response = Bans.updateBan(data);
