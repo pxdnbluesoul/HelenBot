@@ -284,17 +284,17 @@ public class Bans {
                 str.append(" Hostmasks: ").append(String.join(",",prep.getHostmasks()));
                 if(prep.getFlagSet().contains("o")){
                     str.append(" Thread: ").append(prep.getThread());
-                    CloseableStatement threadStmt = Connector.getStatement(Queries.getQuery("updateBanThread"), prep.getBanid(), prep.getThread());
+                    CloseableStatement threadStmt = Connector.getStatement(Queries.getQuery("updateBanThread"), prep.getThread(), prep.getBanid());
                     threadStmt.executeUpdate();
                 }
                 if(prep.getFlagSet().contains("r")){
                     str.append(" Reason: ").append(prep.getReason());
-                    CloseableStatement reasonStatement = Connector.getStatement(Queries.getQuery("updateBanReason"), prep.getBanid(), prep.getReason());
+                    CloseableStatement reasonStatement = Connector.getStatement(Queries.getQuery("updateBanReason"), prep.getReason(), prep.getBanid());
                     reasonStatement.executeUpdate();
                 }
                 if(prep.getFlagSet().contains("t") || prep.getFlagSet().contains("d")){
                     str.append(" Duration: ").append(prep.getT().format(timeFormatter));
-                    CloseableStatement durationStatement = Connector.getStatement(Queries.getQuery("updateBanDuration"), prep.getBanid(), prep.getT().format(timeFormatter));
+                    CloseableStatement durationStatement = Connector.getStatement(Queries.getQuery("updateBanDuration"),  prep.getT().format(timeFormatter), prep.getBanid());
                     durationStatement.executeUpdate();
                 }
                 updateBans();
