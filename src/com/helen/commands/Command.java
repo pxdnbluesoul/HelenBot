@@ -344,6 +344,8 @@ public class Command {
             );
         } catch (IOException e) {
             logger.error("Exception during web search", e);
+        }catch(RuntimeException e){
+            helen.sendMessage(data.getResponseTarget(), data.getSender() +": I'm sorry, it appears SOMEONE has used up my daily google search quota.  How rude.");
         }
     }
 
@@ -422,6 +424,36 @@ public class Command {
 
         }
     }
+
+    @IRCCommand(command = ".addBan", startOfLine = true, securityLevel = 1)
+    public void addBan(CommandData data) {
+        if(Configs.getFastConfigs("remchannels").contains(data.getChannel())){
+            String response = Bans.prepareBan(data);
+
+                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
+
+        }
+    }
+    @IRCCommand(command = ".confirm", startOfLine = true, securityLevel = 1)
+    public void confirmBan(CommandData data) {
+        if(Configs.getFastConfigs("remchannels").contains(data.getChannel())){
+            String response = Bans.enactConfirmedBan(data.getSender());
+
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
+
+        }
+    }
+
+    @IRCCommand(command = ".cancel", startOfLine = true, securityLevel = 1)
+    public void cancelBan(CommandData data) {
+        if(Configs.getFastConfigs("remchannels").contains(data.getChannel())){
+            String response = Bans.cancelBan(data.getSender());
+
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
+
+        }
+    }
+
 
     @IRCCommand(command = {".lc", ".l"}, startOfLine = true, securityLevel = 1)
     public void lastCreated(CommandData data) {

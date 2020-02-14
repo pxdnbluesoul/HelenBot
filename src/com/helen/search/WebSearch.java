@@ -36,6 +36,9 @@ public class WebSearch {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/json");
+            if(conn.getResponseCode() == 403){
+                throw new RuntimeException();
+            }
             BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
 
             GoogleResults searchResult = null;
@@ -65,7 +68,7 @@ public class WebSearch {
 
     }
 
-    public static Optional<GoogleResults> search(String searchTerm) throws IOException {
+    public static Optional<GoogleResults> search(String searchTerm) throws IOException, RuntimeException {
         return eitherSearch(searchTerm, false);
     }
 

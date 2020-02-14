@@ -239,13 +239,15 @@ public class Bans {
     }
 
 
-    private static String enactConfirmedBan(String username) {
+    public static String enactConfirmedBan(String username) {
         BanPrep prep = confirmations.remove(username);
-        //do the banning.
+        if(prep == null){
+            return "You have no pending ban confirmations.";
+        }else {
 
 
-
-        return "";
+            return "Everything worked as intended, now just write the add code, moron!";
+        }
     }
 
 
@@ -298,7 +300,7 @@ public class Bans {
 
     }
 
-    private static String prepareBan(CommandData data) {
+    public static String prepareBan(CommandData data) {
 
         try {
             BanPrep prep = new BanPrep(data);
@@ -314,7 +316,8 @@ public class Bans {
         }
     }
 
-    private static void cancelConfirm(String username) {
+    public static String cancelBan(String username) {
         confirmations.remove(username);
+        return "I have successfully removed your pending ban entry, " + username;
     }
 }
