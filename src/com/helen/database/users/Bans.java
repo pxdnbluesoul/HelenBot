@@ -217,11 +217,15 @@ public class Bans {
     }
 
     public static List<String> queryBan(CommandData data) {
-        BanPrep prep = new BanPrep(data);
+        BanPrep prep;
+        try{
+            prep = new BanPrep(data);
+        }catch(Exception e){
+            logger.error("Exception making chat ban prep:",e);
+            return Collections.singletonList("You must specify at least -u or -h to search for a ban.");
+        }
         if(prep.getFlagSet().contains("u") && prep.getFlagSet().contains("h")){
             return Collections.singletonList("You should specify EITHER -u or -h to search for a ban.");
-        }else if(!(prep.getFlagSet().contains("u") || prep.getFlagSet().contains("h"))){
-            return Collections.singletonList("You must specify at least -u or -h to search for a ban.");
         }
         String searchTerm = prep.getFlagSet().contains("u") ? "%" + prep.getUsers().get(0).toLowerCase() + "%" : "%" + prep.getHostmasks().get(0).toLowerCase() + "%";
         Map<Integer, BanInfo> returnInfo = new HashMap<>();

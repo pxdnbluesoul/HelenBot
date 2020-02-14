@@ -419,9 +419,12 @@ public class Command {
     public void findBan(CommandData data) {
         if(Configs.getFastConfigs("remchannels").contains(data.getChannel())){
             List<String> responses = Bans.queryBan(data);
-            for(String s : responses){
-                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + s);
-
+            if(responses.isEmpty()){
+                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I didn't find any bans for that query.");
+            }else {
+                for (String s : responses) {
+                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + s);
+                }
             }
 
         }
