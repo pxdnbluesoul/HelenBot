@@ -34,6 +34,7 @@ public class BanPrep {
 
                 switch (parts[0]) {
                     case "-i":
+                        flagSet.add("i");
                         banid = Integer.parseInt(parts[1]);
                         break;
                     case "-o":
