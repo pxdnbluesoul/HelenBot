@@ -20,6 +20,9 @@ public class WebSearch {
 
     final static Logger logger = Logger.getLogger(WebSearch.class);
 
+    public static void main(String[] args) throws IOException {
+        eitherSearch("testing",false);
+    }
     private static Optional<GoogleResults> eitherSearch(String searchTerm, boolean image) throws IOException {
         Optional<Config> googleUrl = Configs.getSingleProperty("googleurl");
         Optional<Config> apiKey = Configs.getSingleProperty("apiKey");
@@ -72,7 +75,7 @@ public class WebSearch {
         return eitherSearch(searchTerm, false);
     }
 
-    public static Optional<GoogleResults> imageSearch(String searchTerm) throws IOException {
+    public static Optional<GoogleResults> imageSearch(String searchTerm) throws IOException, RuntimeException {
         return eitherSearch(searchTerm, true);
     }
 }

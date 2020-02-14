@@ -1,5 +1,7 @@
 package com.helen.database.users;
 
+import org.jibble.pircbot.Colors;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -93,13 +95,12 @@ public class BanInfo {
 
     @Override
     public String toString() {
-        return "BanInfo{" +
-                "userNames=" + String.join(",",userNames) +
-                ", hostmasks=" + String.join(",",hostmasks) +
-                ", reason='" + reason + '\'' +
-                ", duration=" + duration +
-                ", thread='" + thread + '\'' +
-                ", channel='" + channel + '\'' +
-                '}';
+        return
+                Colors.BOLD + "Nicks:" + Colors.NORMAL + String.join(";",userNames) +
+                Colors.BOLD +" hostmasks:"+ Colors.NORMAL + String.join(";",hostmasks) +
+                Colors.BOLD +" reason:"+ Colors.NORMAL + reason + ";" +
+                Colors.BOLD +" duration:"+ Colors.NORMAL + duration + ";" +
+                Colors.BOLD +" thread:"+ Colors.NORMAL + thread + ";" +
+                Colors.BOLD +" channel:"+ Colors.NORMAL + channel + ";";
     }
 }

@@ -357,6 +357,8 @@ public class Command {
                     data.getSender() + ": " + (results.isPresent() ? results.get() : NOT_FOUND)
             );
         } catch (IOException e) {
+            helen.sendMessage(data.getResponseTarget(), data.getSender() +": I'm sorry, it appears SOMEONE has used up my daily google search quota.  How rude.");
+
             logger.error("Exception during image search", e);
         }
     }
@@ -429,8 +431,15 @@ public class Command {
     public void addBan(CommandData data) {
         if(Configs.getFastConfigs("remchannels").contains(data.getChannel())){
             String response = Bans.prepareBan(data);
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
 
-                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
+        }
+    }
+    @IRCCommand(command = ".updateBan", startOfLine = true, securityLevel = 1)
+    public void updateBan(CommandData data) {
+        if(Configs.getFastConfigs("remchannels").contains(data.getChannel())){
+            String response = Bans.updateBan(data);
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
 
         }
     }
@@ -876,7 +885,7 @@ public class Command {
 
     @IRCCommand(command = ".updateBans", startOfLine = true, securityLevel = 2, coexistWithJarvis = true)
     public void updateBans(CommandData data) {
-        try {
+       /* try {
             Bans.updateBans();
             helen.sendMessage(data.getResponseTarget(), "Ban List successfully updated.");
             if (!Bans.getProblematicEntries().isEmpty()) {
@@ -885,7 +894,8 @@ public class Command {
         } catch (Exception e) {
             helen.sendMessage(data.getChannel(), "Error parsing chat ban page. Please check the page for correct syntax.");
             logger.error("Exception attempting to update bans.", e);
-        }
+        }*/
+       helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I'm sorry this command is deprecated.  Please see my developer for more information.");
     }
 
     @IRCCommand(command = ".user", startOfLine = true, securityLevel = 1)

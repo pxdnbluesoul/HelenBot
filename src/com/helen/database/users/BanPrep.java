@@ -14,18 +14,13 @@ public class BanPrep {
     private List<String> hostmasks = new ArrayList<>();
     private Optional<String> time = Optional.empty();
     private Optional<String> duration = Optional.empty();
-
-    public Set<String> getFlagSet() {
-        return flagSet;
-    }
-
     private Set<String> flagSet = new HashSet<>();
     private LocalDate t = null;
     private String response = "";
     private String reason;
     private String thread;
+    private Integer banid;
     private String channel;
-
     public BanPrep(CommandData d) {
 
         String[] tokens = Arrays.stream(d.getMessageWithoutCommand().split("\\|")).map(String::trim).toArray(String[]::new);
@@ -38,6 +33,9 @@ public class BanPrep {
                 }
 
                 switch (parts[0]) {
+                    case "-i":
+                        banid = Integer.parseInt(parts[1]);
+                        break;
                     case "-o":
                         flagSet.add("o");
                         thread = parts[1].trim();
@@ -126,6 +124,26 @@ public class BanPrep {
         } catch (Exception e) {
             throw new RuntimeException();
         }
+    }
+
+    public Integer getBanid() {
+        return banid;
+    }
+
+    public Set<String> getFlagSet() {
+        return flagSet;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public String getThread() {
+        return thread;
+    }
+
+    public String getChannel() {
+        return channel;
     }
 
     public String getResponse() {

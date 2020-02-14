@@ -7,13 +7,11 @@ import com.helen.database.framework.CloseableStatement;
 import com.helen.database.framework.Connector;
 import com.helen.database.framework.Queries;
 import org.apache.log4j.Logger;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
+import org.jibble.pircbot.Colors;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.net.URL;
 import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -30,10 +28,8 @@ public class Bans {
     private static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public static void updateBans() throws IOException {
-
-
         bans.clear();
-
+/*
         URL url = new URL("http://05command.wikidot.com/chat-ban-page");
         Document result = Jsoup.parse(url, 3000);
         Element table19 = result.select("table").get(0);
@@ -44,7 +40,8 @@ public class Bans {
         bans.put("#thecritters", site19Bans);
         bans.put("#workshop", site19Bans);
         bans.put("#site17", populateBanList(table17, "#site17"));
-        /*
+
+ */
         try {
             CloseableStatement stmt = Connector.getStatement(Queries.getQuery("loadBans"));
             ResultSet rs = stmt.getResultSet();
@@ -81,9 +78,8 @@ public class Bans {
             bans.put("#workshop", completeMaps.get("#site19"));
             bans.put("#site17", completeMaps.get("#site17"));
         }catch(Exception e){
-            e.printStackTrace();
+            logger.error("There was an exception pulling bans from the database.",e);
         }
-*/
 
     }
 
@@ -194,62 +190,31 @@ public class Bans {
         return j == p.length();
     }
 
-    public static void main(String[] args) throws Exception {
-
-        List<String> responses = queryBan(CommandData.getTestData(".findBan -u djkaktus"));
-        int i = 0;
-       /* Map<Integer, BanInfo> returnInfo = new HashMap<>();
-        try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findBanByUsername"),"%djkaktus%", "%djkaktus%")){
-            try(ResultSet rs = stmt != null ? stmt.getResultSet() : null){
-                while(rs != null && rs.next()){
-                    int banId = rs.getInt("banid");
-                    String reason = rs.getString("reason");
-                    String duration = rs.getString("duration");
-                    String thread = rs.getString("thread");
-                    String value = rs.getString("value");
-                    String channel = rs.getString("channel");
-                    returnInfo.computeIfAbsent(banId, i -> new BanInfo(reason, duration, thread, channel));
-                    String type = rs.getString("type");
-                    switch (type) {
-                        case "username":
-                            returnInfo.get(banId).addUsername(value);
-                            break;
-                        case "hostmask":
-                            returnInfo.get(banId).addHostmask(value);
-                            break;
-                    }
-
-                }
-            }
-            List<String> responses = new ArrayList<>();
-            if(returnInfo.size() > 5) {
-                Iterator<Integer> itr = returnInfo.keySet().iterator();
-                for(int i = 0; i < 5; i++){
-                    responses.add(returnInfo.get(itr.next()).toString());
-                }
-                responses.add(" there were: " + (returnInfo.size() - 5) + " additional results.  You might want to be more specific.");
-            }else{
-                returnInfo.entrySet().forEach(entry -> responses.add(entry.getValue().toString()));
-            }
-
-            System.out.println(String.join("\n",responses));
-        }*/
-
-
-    }
-
-
     public static String enactConfirmedBan(String username) {
         BanPrep prep = confirmations.remove(username);
         if(prep == null){
             return "You have no pending ban confirmations.";
         }else {
+                try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("addBan"), prep.getReason(), prep.getChannel(), prep.getThread() == null ? "" : prep.getThread(), prep.getT().format(timeFormatter))) {
+                    ResultSet rs = stmt.execute();
+                    Integer value = (rs != null && rs.next()) ? rs.getInt("banid") : -1;
+                    for (String user : prep.getUsers()) {
+                        CloseableStatement usernamestmt = Connector.getStatement(Queries.getQuery("addUsernameBan"), value, user);
+                        usernamestmt.executeUpdate();
+                    }
+                    for (String hostmask : prep.getHostmasks()) {
+                        CloseableStatement hostmaskstmt = Connector.getStatement(Queries.getQuery("addHostmaskBan"), value, hostmask);
+                        hostmaskstmt.executeUpdate();
+                    }
+                    updateBans();
+                }catch(Exception e){
+                    logger.error("There was an exception enacting a ban.",e);
+                    return Command.ERROR;
+                }
 
-
-            return "Everything worked as intended, now just write the add code, moron!";
+            return "Ban enacted for preparation: " + prep.getResponse();
         }
     }
-
 
     public static List<String> queryBan(CommandData data) {
         BanPrep prep = new BanPrep(data);
@@ -286,11 +251,12 @@ public class Bans {
             if(returnInfo.size() > 5) {
                 Iterator<Integer> itr = returnInfo.keySet().iterator();
                 for(int i = 0; i < 5; i++){
-                    responses.add(returnInfo.get(itr.next()).toString());
+                    Integer banid = itr.next();
+                    responses.add(Colors.BOLD + banid + Colors.NORMAL + " :" + returnInfo.get(banid).toString());
                 }
                 responses.add(" there were: " + (returnInfo.size() - 5) + " additional results.  You might want to be more specific.");
             }else{
-                returnInfo.entrySet().forEach(entry -> responses.add(entry.getValue().toString()));
+                returnInfo.forEach((key, value) -> responses.add(Colors.BOLD + key + Colors.NORMAL + " :" + value.toString()));
             }
             return responses;
         }catch(Exception ex){
@@ -298,6 +264,48 @@ public class Bans {
         }
         return Collections.emptyList();
 
+    }
+
+    public static String updateBan(CommandData data){
+        try {
+            BanPrep prep = new BanPrep(data);
+            if(prep.getFlagSet().contains("i")){
+                StringBuilder str = new StringBuilder();
+                str.append("Added the following values for banid: " + prep.getBanid());
+                for (String user : prep.getUsers()) {
+                    CloseableStatement usernamestmt = Connector.getStatement(Queries.getQuery("addUsernameBan"), prep.getBanid(), user);
+                    usernamestmt.executeUpdate();
+                }
+                str.append(" Usernames: ").append(String.join(",",prep.getUsers()));
+                for (String hostmask : prep.getHostmasks()) {
+                    CloseableStatement hostmaskstmt = Connector.getStatement(Queries.getQuery("addHostmaskBan"), prep.getBanid(), hostmask);
+                    hostmaskstmt.executeUpdate();
+                }
+                str.append(" Hostmasks: ").append(String.join(",",prep.getHostmasks()));
+                if(prep.getFlagSet().contains("o")){
+                    str.append(" Thread: ").append(prep.getThread());
+                    CloseableStatement threadStmt = Connector.getStatement(Queries.getQuery("updateBanThread"), prep.getBanid(), prep.getThread());
+                    threadStmt.executeUpdate();
+                }
+                if(prep.getFlagSet().contains("r")){
+                    str.append(" Reason: ").append(prep.getReason());
+                    CloseableStatement reasonStatement = Connector.getStatement(Queries.getQuery("updateBanReason"), prep.getBanid(), prep.getReason());
+                    reasonStatement.executeUpdate();
+                }
+                if(prep.getFlagSet().contains("t") || prep.getFlagSet().contains("d")){
+                    str.append(" Duration: ").append(prep.getT().format(timeFormatter));
+                    CloseableStatement durationStatement = Connector.getStatement(Queries.getQuery("updateBanDuration"), prep.getBanid(), prep.getT().format(timeFormatter));
+                    durationStatement.executeUpdate();
+                }
+                updateBans();
+                return str.toString();
+            }else{
+                return "You must specify the banid with -i to update a ban.";
+            }
+        }catch(Exception e){
+            logger.error("Something went wrong updating a ban.",e);
+            return Command.ERROR;
+        }
     }
 
     public static String prepareBan(CommandData data) {
