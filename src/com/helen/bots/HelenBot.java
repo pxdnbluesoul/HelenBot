@@ -216,12 +216,12 @@ public class HelenBot extends PircBot {
             if (info != null) { // We have a match in the ban page that is still active.
 
                 //Kick them.
-                kick(channel, sender, info.getBanReason());
+                kick(channel, sender, info.getReason());
 
                 // Look at the hostmask from 05 and determine the appropriate banmask.
                 // We do this because without prepending the mask with the appropriate wildcards,
                 // pircbot sets an invalid mask.
-                if(info.getIPs().isEmpty()){
+                if(info.getHostmasks().isEmpty()){
                     ban(channel,sender);
                     timer.schedule(new TimerTask() {
                         @Override

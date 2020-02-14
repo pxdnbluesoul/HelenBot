@@ -411,6 +411,18 @@ public class Command {
         helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getStoredInfo(data.getTarget(), data.getSender()));
     }
 
+    @IRCCommand(command = ".findBan", startOfLine = true, securityLevel = 1)
+    public void findBan(CommandData data) {
+        if(Configs.getFastConfigs("remchannels").contains(data.getChannel())){
+            List<String> responses = Bans.queryBan(data);
+            for(String s : responses){
+                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + s);
+
+            }
+
+        }
+    }
+
     @IRCCommand(command = {".lc", ".l"}, startOfLine = true, securityLevel = 1)
     public void lastCreated(CommandData data) {
         Optional<ArrayList<String>> pages = Pages.lastCreated();

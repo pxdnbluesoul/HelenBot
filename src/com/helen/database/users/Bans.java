@@ -1,6 +1,11 @@
 package com.helen.database.users;
 
 
+import com.helen.commands.Command;
+import com.helen.commands.CommandData;
+import com.helen.database.framework.CloseableStatement;
+import com.helen.database.framework.Connector;
+import com.helen.database.framework.Queries;
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -9,12 +14,10 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Bans {
@@ -23,6 +26,8 @@ public class Bans {
     static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
     private static ConcurrentHashMap<String, HashSet<BanInfo>> bans = new ConcurrentHashMap<>();
     private static List<String> problematicEntries = new ArrayList<>();
+    private static Map<String, BanPrep> confirmations = new ConcurrentHashMap<>();
+    private static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public static void updateBans() throws IOException {
 
@@ -34,14 +39,55 @@ public class Bans {
         Element table19 = result.select("table").get(0);
         Element table17 = result.select("table").get(1);
 
-        HashSet<BanInfo> site19Bans = populateBanList(table19);
+        HashSet<BanInfo> site19Bans = populateBanList(table19, "#site19");
         bans.put("#site19", site19Bans);
         bans.put("#thecritters", site19Bans);
         bans.put("#workshop", site19Bans);
-        bans.put("#site17", populateBanList(table17));
+        bans.put("#site17", populateBanList(table17, "#site17"));
+        /*
+        try {
+            CloseableStatement stmt = Connector.getStatement(Queries.getQuery("loadBans"));
+            ResultSet rs = stmt.getResultSet();
+            Map<Integer, BanInfo> infoMap = new ConcurrentHashMap<>();
+
+            while (rs != null && rs.next()) {
+                int banId = rs.getInt("banid");
+                String reason = rs.getString("reason");
+                String duration = rs.getString("duration");
+                String thread = rs.getString("thread");
+                String value = rs.getString("value");
+                String channel = rs.getString("channel");
+                infoMap.computeIfAbsent(banId, i -> new BanInfo(reason, duration, thread, channel));
+                String type = rs.getString("type");
+                switch (type) {
+                    case "username":
+                        infoMap.get(banId).addUsername(value);
+                        break;
+                    case "hostmask":
+                        infoMap.get(banId).addHostmask(value);
+                        break;
+                }
+
+            }
+            Map<String, HashSet<BanInfo>> completeMaps = new ConcurrentHashMap<>();
+            for (Integer i : infoMap.keySet()) {
+                BanInfo info = infoMap.get(i);
+                completeMaps.computeIfAbsent(info.getChannel(), channel -> new HashSet<>());
+                completeMaps.get(info.getChannel()).add(info);
+            }
+
+            bans.put("#site19", completeMaps.get("#site19"));
+            bans.put("#thecritters", completeMaps.get("#site19"));
+            bans.put("#workshop", completeMaps.get("#site19"));
+            bans.put("#site17", completeMaps.get("#site17"));
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+*/
+
     }
 
-    private static HashSet<BanInfo> populateBanList(Element table) {
+    private static HashSet<BanInfo> populateBanList(Element table, String channel) {
         HashSet<BanInfo> banList = new HashSet<>();
         Elements rows = table.select("tr");
         problematicEntries.clear();
@@ -53,6 +99,7 @@ public class Bans {
             String ips = entries.get(1).text();
             String date = entries.get(2).text();
             String reason = entries.get(3).text();
+            String thread = entries.get(4).text();
             try {
                 List<String> nameList = Arrays.asList(names.split(" "));
                 List<String> ipList = Arrays.asList(ips.split(" "));
@@ -70,7 +117,7 @@ public class Bans {
                 } else {
                     bdate = LocalDate.parse("12/31/2999", formatter);
                 }
-                banList.add(new BanInfo(nameList, ipList, reason, bdate, isSpecial));
+                banList.add(new BanInfo(nameList, ipList, reason, bdate, isSpecial, thread, channel));
             } catch (Exception e) {
                 logger.error("There was an issue with this entry: " + names + " " + ips + " " + date + " " + reason);
                 problematicEntries.add(names + "|" + date);
@@ -94,10 +141,10 @@ public class Bans {
         LocalDate today = LocalDate.now();
         if (bans.containsKey(channel)) {
             for (BanInfo info : bans.get(channel)) {
-                if ((info.getIPs().contains(hostmask) || info.getUserNames().contains(username)) && info.getBanEnd().isAfter(today)) {
+                if ((info.getHostmasks().contains(hostmask) || info.getUserNames().contains(username)) && info.getDuration().isAfter(today)) {
                     return info;
                 } else if (info.isSpecial()) {
-                    for (String infoHostMask : info.getIPs()) {
+                    for (String infoHostMask : info.getHostmasks()) {
                         if (infoHostMask.contains("@")) {
                             if (infoHostMask.contains("@*")) {
                                 if (infoHostMask.split("@")[0].equalsIgnoreCase(login)) {
@@ -145,5 +192,129 @@ public class Bans {
             ++j;
         }
         return j == p.length();
+    }
+
+    public static void main(String[] args) throws Exception {
+
+        List<String> responses = queryBan(CommandData.getTestData(".findBan -u djkaktus"));
+        int i = 0;
+       /* Map<Integer, BanInfo> returnInfo = new HashMap<>();
+        try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findBanByUsername"),"%djkaktus%", "%djkaktus%")){
+            try(ResultSet rs = stmt != null ? stmt.getResultSet() : null){
+                while(rs != null && rs.next()){
+                    int banId = rs.getInt("banid");
+                    String reason = rs.getString("reason");
+                    String duration = rs.getString("duration");
+                    String thread = rs.getString("thread");
+                    String value = rs.getString("value");
+                    String channel = rs.getString("channel");
+                    returnInfo.computeIfAbsent(banId, i -> new BanInfo(reason, duration, thread, channel));
+                    String type = rs.getString("type");
+                    switch (type) {
+                        case "username":
+                            returnInfo.get(banId).addUsername(value);
+                            break;
+                        case "hostmask":
+                            returnInfo.get(banId).addHostmask(value);
+                            break;
+                    }
+
+                }
+            }
+            List<String> responses = new ArrayList<>();
+            if(returnInfo.size() > 5) {
+                Iterator<Integer> itr = returnInfo.keySet().iterator();
+                for(int i = 0; i < 5; i++){
+                    responses.add(returnInfo.get(itr.next()).toString());
+                }
+                responses.add(" there were: " + (returnInfo.size() - 5) + " additional results.  You might want to be more specific.");
+            }else{
+                returnInfo.entrySet().forEach(entry -> responses.add(entry.getValue().toString()));
+            }
+
+            System.out.println(String.join("\n",responses));
+        }*/
+
+
+    }
+
+
+    private static String enactConfirmedBan(String username) {
+        BanPrep prep = confirmations.remove(username);
+        //do the banning.
+
+
+
+        return "";
+    }
+
+
+    public static List<String> queryBan(CommandData data) {
+        BanPrep prep = new BanPrep(data);
+        if(prep.getFlagSet().contains("u") && prep.getFlagSet().contains("h")){
+            return Collections.singletonList("You should specify EITHER -u or -h to search for a ban.");
+        }else if(!(prep.getFlagSet().contains("u") || prep.getFlagSet().contains("h"))){
+            return Collections.singletonList("You must specify at least -u or -h to search for a ban.");
+        }
+        String searchTerm = prep.getFlagSet().contains("u") ? "%" + prep.getUsers().get(0).toLowerCase() + "%" : "%" + prep.getHostmasks().get(0).toLowerCase() + "%";
+        Map<Integer, BanInfo> returnInfo = new HashMap<>();
+        try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findBanByUsername"),searchTerm, searchTerm)){
+            try(ResultSet rs = stmt != null ? stmt.getResultSet() : null){
+                while(rs != null && rs.next()){
+                    int banId = rs.getInt("banid");
+                    String reason = rs.getString("reason");
+                    String duration = rs.getString("duration");
+                    String thread = rs.getString("thread");
+                    String value = rs.getString("value");
+                    String channel = rs.getString("channel");
+                    returnInfo.computeIfAbsent(banId, i -> new BanInfo(reason, duration, thread, channel));
+                    String type = rs.getString("type");
+                    switch (type) {
+                        case "username":
+                            returnInfo.get(banId).addUsername(value);
+                            break;
+                        case "hostmask":
+                            returnInfo.get(banId).addHostmask(value);
+                            break;
+                    }
+
+                }
+            }
+            List<String> responses = new ArrayList<>();
+            if(returnInfo.size() > 5) {
+                Iterator<Integer> itr = returnInfo.keySet().iterator();
+                for(int i = 0; i < 5; i++){
+                    responses.add(returnInfo.get(itr.next()).toString());
+                }
+                responses.add(" there were: " + (returnInfo.size() - 5) + " additional results.  You might want to be more specific.");
+            }else{
+                returnInfo.entrySet().forEach(entry -> responses.add(entry.getValue().toString()));
+            }
+            return responses;
+        }catch(Exception ex){
+            logger.error("Something blew up in the new ban search",ex);
+        }
+        return Collections.emptyList();
+
+    }
+
+    private static String prepareBan(CommandData data) {
+
+        try {
+            BanPrep prep = new BanPrep(data);
+            if (!prep.getResponse().isEmpty()) {
+                confirmations.put(data.getSender(), prep);
+                return prep.getResponse();
+            } else {
+                return Command.ERROR;
+            }
+        } catch (Exception e) {
+            logger.error("Something went pretty wrong: ", e);
+            return Command.ERROR;
+        }
+    }
+
+    private static void cancelConfirm(String username) {
+        confirmations.remove(username);
     }
 }
