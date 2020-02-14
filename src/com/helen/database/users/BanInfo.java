@@ -97,7 +97,6 @@ public class BanInfo {
     public String toString() {
         return
                 Colors.BOLD + "Nicks:" + Colors.NORMAL + String.join(";",userNames) +
-                Colors.BOLD +" hostmasks:"+ Colors.NORMAL + String.join(";",hostmasks) +
                 Colors.BOLD +" reason:"+ Colors.NORMAL + reason + ";" +
                 Colors.BOLD +" duration:"+ Colors.NORMAL + duration + ";" +
                 Colors.BOLD +" thread:"+ Colors.NORMAL + thread + ";" +
