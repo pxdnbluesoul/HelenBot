@@ -121,7 +121,7 @@ public class BanPrep {
                     str.append("until: ").append(t.getYear() == 2999 ? "forever" : DateTimeFormatter.ofPattern("yyyy-MM-dd").format(t));
                 }
                 if (!(str.length() == 0)) {
-                    response = str.toString();
+                    response = str.append(". Respond with .confirm to enact this ban, or .cancel to cancel the preparation.").toString();
                 }
 
 
