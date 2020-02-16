@@ -84,8 +84,10 @@ public class BanPrep {
                                     case "y":
                                         t = t.plusYears(Integer.parseInt(parts[1].substring(0, 1)));
                                         break;
-                                    case "p":
-                                        t = LocalDate.of(2999, 12, 31);
+                                    case "":
+                                        if(parts[1].equalsIgnoreCase("p")) {
+                                            t = LocalDate.of(2999, 12, 31);
+                                        }
                                         break;
 
                                 }
@@ -95,6 +97,7 @@ public class BanPrep {
                     default:
                         throw new RuntimeException();
                 }
+            }
                 StringBuilder str = new StringBuilder();
                 if (!users.isEmpty() || !hostmasks.isEmpty()) {
                     str.append("You are banning ");
@@ -120,7 +123,7 @@ public class BanPrep {
                 if (!(str.length() == 0)) {
                     response = str.toString();
                 }
-            }
+
 
         } catch (Exception e) {
             throw new RuntimeException();
