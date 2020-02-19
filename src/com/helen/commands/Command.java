@@ -434,7 +434,7 @@ public class Command {
     public void addBan(CommandData data) {
         if(Configs.getFastConfigs("remchannels").contains(data.getChannel())){
             String response = Bans.prepareBan(data);
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response + " Respond with .confirm to enact this ban, or .cancel to cancel the preparation.");
 
         }
     }
