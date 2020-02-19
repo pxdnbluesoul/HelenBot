@@ -229,7 +229,7 @@ public class Bans {
         }
         String searchTerm = prep.getFlagSet().contains("u") ? "%" + prep.getUsers().get(0).toLowerCase() + "%" : "%" + prep.getHostmasks().get(0).toLowerCase() + "%";
         Map<Integer, BanInfo> returnInfo = new HashMap<>();
-        try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findBanByUsername"),searchTerm, searchTerm)){
+        try(CloseableStatement stmt = prep.getFlagSet().contains("u") ? Connector.getStatement(Queries.getQuery("findBanByUsername"),searchTerm, searchTerm) : Connector.getStatement(Queries.getQuery("findBanByHostmask"),searchTerm,searchTerm)){
             try(ResultSet rs = stmt != null ? stmt.getResultSet() : null){
                 while(rs != null && rs.next()){
                     int banId = rs.getInt("banid");
