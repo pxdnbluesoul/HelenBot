@@ -4,8 +4,10 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.helen.commands.CommandData;
 import com.helen.database.framework.CloseableStatement;
+import com.helen.database.framework.Configs;
 import com.helen.database.framework.Connector;
 import com.helen.database.framework.Queries;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -108,21 +110,31 @@ public class Users {
 
     public static String seen(CommandData data) {
         try {
+            String channel;
+            if(data.getChannel() != null && Configs.getFastConfigs("staffchannels").contains(data.getChannel()) && data.getSplitMessage().length > 3){
+                    channel = data.getSplitMessage()[3].toLowerCase();
+            }else{
+                channel = data.getChannel();
+            }
+
+            if(StringUtils.isEmpty(channel)){
+                channel = data.getChannel();
+            }
             if (data.getSplitMessage()[1].equals("-f")) {
                 CloseableStatement stmt = Connector.getStatement(Queries.getQuery("seenFirst"),
-                        data.getSplitMessage()[2].toLowerCase(), data.getChannel().toLowerCase());
+                        data.getSplitMessage()[2].toLowerCase(), channel.toLowerCase());
                 ResultSet rs = stmt.executeQuery();
                 if (rs != null && rs.next()) {
-                    return "I first met " + data.getSplitMessage()[2] + " " + findTime(rs.getTimestamp("first_seen").getTime()) + " saying: " + rs.getString("first_message");
+                    return "I first met " + data.getSplitMessage()[2] + " " + findTime(rs.getTimestamp("first_seen").getTime()) + " in " + channel + " saying: " + rs.getString("first_message");
                 } else {
                     return "I have never seen someone by that name";
                 }
             } else {
                 CloseableStatement stmt = Connector.getStatement(Queries.getQuery("seen"),
-                        data.getSplitMessage()[1].toLowerCase(), data.getChannel().toLowerCase());
+                        data.getSplitMessage()[1].toLowerCase(), channel.toLowerCase());
                 ResultSet rs = stmt.executeQuery();
                 if (rs != null && rs.next()) {
-                    return "I last saw " + data.getSplitMessage()[1] + " " + findTime(rs.getTimestamp("last_seen").getTime()) + " saying: " + rs.getString("last_message");
+                    return "I last saw " + data.getSplitMessage()[1] + " " + findTime(rs.getTimestamp("last_seen").getTime()) + " in " + channel + " saying: " + rs.getString("last_message");
                 } else {
                     return "I have never seen someone by that name";
                 }
