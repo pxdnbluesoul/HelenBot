@@ -630,9 +630,14 @@ public class Command {
     public void exitBot(CommandData data) {
         for (String channel : helen.getChannels()) {
             helen.partChannel(channel, "Executing planned shutdown. Stay out of the revolver's sights...");
+            try {
+                Thread.sleep(100);
+            }catch(Exception e){
+
+            }
         }
         int sleeps = 0;
-        while (helen.getChannels().length > 0 || sleeps < 3){
+        while (helen.getChannels().length > 0 && sleeps < 5){
             logger.info(String.join(",", helen.getChannels()));
             sleeps++;
             try {
