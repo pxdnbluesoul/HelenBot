@@ -641,7 +641,7 @@ public class Command {
             logger.info(String.join(",", helen.getChannels()));
             sleeps++;
             try {
-                Thread.sleep(5000);
+                Thread.sleep(1000);
             } catch (Exception e) {
                 logger.error("Error sleeping.", e);
             }
