@@ -631,17 +631,18 @@ public class Command {
         for (String channel : helen.getChannels()) {
             helen.partChannel(channel, "Executing planned shutdown. Stay out of the revolver's sights...");
         }
-
-        if(helen.getChannels().length == 0){
-            helen.disconnect();
-            System.exit(0);
-        }else{
+        int sleeps = 0;
+        while (helen.getChannels().length > 0 || sleeps < 3){
+            logger.info(String.join(",", helen.getChannels()));
+            sleeps++;
             try {
                 Thread.sleep(5000);
             } catch (Exception e) {
                 logger.error("Error sleeping.", e);
             }
         }
+        helen.disconnect();
+        System.exit(0);
 
 
     }
