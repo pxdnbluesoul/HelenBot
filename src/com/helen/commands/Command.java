@@ -263,7 +263,6 @@ public class Command {
 
     @IRCCommand(command = {".deleteNicksAdmin"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
     public void deleteNicksAdmin(CommandData data) {
-
         helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Nicks.deleteAllNicks(data, false));
     }
 
@@ -293,13 +292,14 @@ public class Command {
     public void remember(CommandData data) {
         if (Configs.getProperty("remchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
             helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.addMemo(data.getSplitMessage()[1], data.getMessageWithoutCommand().substring(data.getMessageWithoutCommand().split(" ")[0].length() + 1), data.getChannel()));
+        }else{
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I'm sorry, rems aren't enabled in this channel.");
         }
     }
 
     @IRCCommand(command = {"meh"}, reg = true, matcherGroup = 1, securityLevel = 1, regex = "\\?(\\S+).*", startOfLine = true)
     public void getMemo(CommandData data) {
         if (Configs.getProperty("remchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
-
             helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.getMemo(data.getRegexTarget(), data.getChannel()));
         }
     }
@@ -307,8 +307,9 @@ public class Command {
     @IRCCommand(command = {".deleteRem"}, securityLevel = 1, startOfLine = true)
     public void removeMemo(CommandData data) {
         if (Configs.getProperty("remchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
-
             helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.deleteMemo(data.getTarget(), data.getChannel()));
+        }else{
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I'm sorry, rems aren't enabled in this channel.");
         }
     }
 
@@ -345,7 +346,7 @@ public class Command {
         } catch (IOException e) {
             logger.error("Exception during web search", e);
         }catch(RuntimeException e){
-            helen.sendMessage(data.getResponseTarget(), data.getSender() +": I'm sorry, it appears SOMEONE has used up my daily google search quota.  How rude.");
+            helen.sendMessage(data.getResponseTarget(), data.getSender() +": I'm overworked.  Here. " + "https://lmgtfy.com/?q=" + data.getMessageWithoutCommand().replace(" ","+"));
         }
     }
 
@@ -358,7 +359,6 @@ public class Command {
             );
         } catch (IOException e) {
             helen.sendMessage(data.getResponseTarget(), data.getSender() +": I'm sorry, it appears SOMEONE has used up my daily google search quota.  How rude.");
-
             logger.error("Exception during image search", e);
         }
     }
@@ -370,6 +370,7 @@ public class Command {
                     data.getSender() + ": " + WikipediaSearch.search(data, data.getMessage()));
         } catch (IOException e) {
             logger.error("Exception during Wikipedia search", e);
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I'm sorry there was some kind of error searchign wikipedia. Reach out to my developers if you feel this is in error.");
         }
     }
 
@@ -417,7 +418,7 @@ public class Command {
 
     @IRCCommand(command = ".findBan", startOfLine = true, securityLevel = 2)
     public void findBan(CommandData data) {
-        if(Configs.getFastConfigs("remchannels").contains(data.getChannel())){
+        if(Configs.getFastConfigs("staffchannels").contains(data.getChannel())){
             List<String> responses = Bans.queryBan(data);
             if(responses.isEmpty()){
                 helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I didn't find any bans for that query.");
@@ -426,43 +427,46 @@ public class Command {
                     helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + s);
                 }
             }
-
+        }else{
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
         }
     }
 
     @IRCCommand(command = ".addBan", startOfLine = true, securityLevel = 4)
     public void addBan(CommandData data) {
-        if(Configs.getFastConfigs("remchannels").contains(data.getChannel())){
+        if(Configs.getFastConfigs("staffchannels").contains(data.getChannel())){
             String response = Bans.prepareBan(data);
             helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response + " Respond with .confirm to enact this ban, or .cancel to cancel the preparation.");
-
+        }else{
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
         }
     }
     @IRCCommand(command = ".updateBan", startOfLine = true, securityLevel = 4)
     public void updateBan(CommandData data) {
-        if(Configs.getFastConfigs("remchannels").contains(data.getChannel())){
+        if(Configs.getFastConfigs("staffchannels").contains(data.getChannel())){
             String response = Bans.updateBan(data);
             helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
-
+        }else{
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
         }
     }
     @IRCCommand(command = ".confirm", startOfLine = true, securityLevel = 1)
     public void confirmBan(CommandData data) {
-        if(Configs.getFastConfigs("remchannels").contains(data.getChannel())){
+        if(Configs.getFastConfigs("staffchannels").contains(data.getChannel())){
             String response = Bans.enactConfirmedBan(data.getSender());
-
             helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
-
+        }else{
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
         }
     }
 
     @IRCCommand(command = ".cancel", startOfLine = true, securityLevel = 1)
     public void cancelBan(CommandData data) {
-        if(Configs.getFastConfigs("remchannels").contains(data.getChannel())){
+        if(Configs.getFastConfigs("staffchannels").contains(data.getChannel())){
             String response = Bans.cancelBan(data.getSender());
-
             helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
-
+        }else{
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
         }
     }
 
@@ -479,7 +483,6 @@ public class Command {
                 helen.sendMessage(data.getResponseTarget(), data.getSender()
                         + ": " + str);
             }
-
         } else {
             helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I can't do that yet.");
         }
@@ -600,7 +603,7 @@ public class Command {
 
     @IRCCommand(command = {".o5"}, startOfLine = true, securityLevel = 1)
     public void findO5Record(CommandData data) {
-        if (Configs.getProperty("remchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
+        if (Configs.getProperty("staffchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
             List<String> responses = Users.getUserO5Thread(data.getTarget());
             if(responses.isEmpty()){
                 helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I didn't find any 05 threads for the user: " + data.getTarget());
@@ -608,6 +611,8 @@ public class Command {
             for (String response : responses) {
                 helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
             }
+        }else{
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
         }
     }
 
@@ -624,15 +629,20 @@ public class Command {
     @IRCCommand(command = ".exit", startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
     public void exitBot(CommandData data) {
         for (String channel : helen.getChannels()) {
-            helen.partChannel(channel, "Stay out of the revolver's sights...");
+            helen.partChannel(channel, "Executing planned shutdown. Stay out of the revolver's sights...");
         }
-        try {
-            Thread.sleep(5000);
-        } catch (Exception e) {
-            logger.error("Error sleeping.", e);
+
+        if(helen.getChannels().length == 0){
+            helen.disconnect();
+            System.exit(0);
+        }else{
+            try {
+                Thread.sleep(5000);
+            } catch (Exception e) {
+                logger.error("Error sleeping.", e);
+            }
         }
-        helen.disconnect();
-        System.exit(0);
+
 
     }
 
