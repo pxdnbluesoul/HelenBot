@@ -637,7 +637,7 @@ public class Command {
             }
         }
         int sleeps = 0;
-        while (helen.getChannels().length > 0 && sleeps < 5){
+        while (helen.getChannels().length > 0 && sleeps < 10){
             logger.info(String.join(",", helen.getChannels()));
             sleeps++;
             try {
