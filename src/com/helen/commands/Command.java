@@ -350,6 +350,11 @@ public class Command {
         }
     }
 
+    @IRCCommand(command = {".lmgtfy"}, startOfLine = true, securityLevel = 4)
+    public void lmgtfy(CommandData data) {
+            helen.sendMessage(data.getResponseTarget(), data.getSender() +": https://lmgtfy.com/?q=" + data.getMessageWithoutCommand().replace(" ","+"));
+    }
+
     @IRCCommand(command = {".gis"}, startOfLine = true, securityLevel = 1)
     public void imageSearch(CommandData data) {
         try {
