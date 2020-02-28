@@ -843,7 +843,7 @@ public class Command {
             }
         }
     }
-
+/*
     @IRCCommand(command = ".discord", startOfLine = true, securityLevel = 2, coexistWithJarvis = true)
     public void showDiscordMessage(CommandData data) {
         helen.sendMessage(data.getChannel(), "There are currently no plans for an official SCP Discord." +
@@ -851,7 +851,7 @@ public class Command {
                 " and the resulting fracturing between IRC and Discord. There are also several concerns about " +
                 "the technical and financial viability of discord.");
     }
-
+*/
     @IRCCommand(command = {".q", ".quote"}, startOfLine = true, securityLevel = 1)
     public void getQuote(CommandData data) {
         String[] tokens = data.getSplitMessage();
