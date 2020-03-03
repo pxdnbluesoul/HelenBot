@@ -1,6 +1,7 @@
 package com.helen.commands;
 
-import com.helen.bots.HelenBot;
+import com.helen.bots.BotFramework;
+import com.helen.database.data.DotCommand;
 import com.helen.database.data.Memo;
 import com.helen.database.data.Pages;
 import com.helen.database.data.Quotes;
@@ -38,20 +39,16 @@ public class Command {
     private static HashMap<String, Method> regexCommands = new HashMap<>();
     private static ConcurrentHashMap<String, ConcurrentHashMap<String, Long>> cooldowns = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<String, String> dotCommands = new ConcurrentHashMap<>();
-
-
+    private static Method constructedMethod;
     static {
         logger.info("Initializing commandList.");
-        dotCommands.put(".passcode","As written above the chat in big red letters, we will not help you find the passcode." +
-                " It is located here: http://scp-wiki.net/guide-for-newbies and is clearly stated." +
-                " If you can't find it, slow down, don't skim, and try reading it out loud.");
-        dotCommands.put(".email", Configs.getSingleProperty("emailMessage").get().getValue());
-        dotCommands.put(".account","At this time, we've been made aware there's a technical issue with logging in to scp-wiki.net as opposed" +
-        "to scp-wiki.wikidot.com on chrome.  Please use this link to access the wiki and login there, which should solve the issue: http://scp-wiki.wikidot.com .");
-        Method constructedMethod;
+
+
+
         try {
             constructedMethod = Command.class.getMethod("dotCommand", CommandData.class);
-            dotCommands.keySet().forEach(key -> hashableCommandList.put(key, constructedMethod));
+            Optional<Map<String, String>> commandList = DotCommand.getDotCommands();
+            commandList.ifPresent(stringStringMap -> stringStringMap.keySet().forEach(key -> hashableCommandList.put(key, constructedMethod)));
         }catch(NoSuchMethodException e){
             logger.error("You fucked up bruh.", e);
         }
@@ -79,11 +76,11 @@ public class Command {
     }
 
     Pattern p = Pattern.compile("(scp|SCP)-([0-9]+)(-(ex|EX|j|J|arc|ARC))?");
-    private HelenBot helen;
+    private BotFramework helen;
     private boolean adminMode = false;
     private int bullets = 6;
 
-    public Command(HelenBot ircBot) {
+    public Command(BotFramework ircBot) {
         helen = ircBot;
     }
 
@@ -91,11 +88,11 @@ public class Command {
         ArrayList<Tell> tells = Tells.getTells(data.getSender());
 
         if (tells.size() > 0) {
-            helen.sendNotice(data.getSender(), "You have " + tells.size() + " pending tell(s).");
+            helen.sendOutgoingNotice(data.getSender(), "You have " + tells.size() + " pending tell(s).");
         }
         for (Tell tell : tells) {
             Tells.clearTells(tell.getTarget());
-            helen.sendMessage(tell.getTarget(), tell.toString());
+            helen.sendOutgoingMessage(tell.getTarget(), tell.toString());
 
         }
     }
@@ -135,7 +132,7 @@ public class Command {
     private User[] getUserlist(CommandData data) {
         User[] list = null;
         if (!(data.getChannel() == null || data.getChannel().isEmpty())) {
-            list = helen.getUsers(data.getChannel());
+            list = helen.getChannelUsers(data.getChannel());
         }
         return list;
     }
@@ -217,10 +214,10 @@ public class Command {
         if (!data.getChannel().isEmpty()) {
             Optional<Config> version = Configs.getSingleProperty("version");
             if (version.isPresent()) {
-                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Greetings, I am HelenBot v"
+                helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": Greetings, I am HelenBot v"
                         + version.get().getValue());
             } else {
-                helen.sendMessage(data.getResponseTarget(), "I'm sorry there appears to be some kind of configuration issue.  Magnus, a word?");
+                helen.sendOutgoingMessage(data.getResponseTarget(), "I'm sorry there appears to be some kind of configuration issue.  Magnus, a word?");
             }
         }
     }
@@ -228,113 +225,144 @@ public class Command {
     @IRCCommand(command = {".modeToggle"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 3)
     public void toggleMode(CommandData data) {
         adminMode = !adminMode;
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + " I am now in " + (adminMode ? "Admin Only" : "Any User") + " mode.");
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + " I am now in " + (adminMode ? "Admin Only" : "Any User") + " mode.");
+    }
+
+
+    @IRCCommand(command = {".addCommand"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
+    public void addCommand(CommandData data) {
+        CommandResponse response = DotCommand.setDotCommand(data);
+        if(response.isSuccess()) {
+            hashableCommandList.put(Arrays.stream(data.getMessageWithoutCommand().split("\\|")).map(String::trim).toArray(String[]::new)[0].toLowerCase(),
+                    constructedMethod);
+        }
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + response.getMessage());
+    }
+
+    @IRCCommand(command = {".deleteCommand"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
+    public void deleteCommand(CommandData data) {
+        CommandResponse response = DotCommand.deleteCommand(data);
+        if(response.isSuccess()) {
+            hashableCommandList.remove(data.getMessageWithoutCommand().toLowerCase().trim());
+        }
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + response.getMessage());
+    }
+
+    @IRCCommand(command = {".getcommands",".listcommands",".commands"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
+    public void getCommandList(CommandData data) {
+        Optional<Map<String,String>> commands = DotCommand.getDotCommands();
+        if(commands.isPresent()){
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": I currently have the following specified as simple retreival commands: " + String.join("|",commands.get().keySet()));
+        }else{
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": I don't seem to have any commands configured, or something went wrong retreiving them.");
+        }
+
     }
 
     @IRCCommand(command = {".ch", ".choose"}, startOfLine = true, securityLevel = 1)
     public void choose(CommandData data) {
         String[] choices = data.getMessage().substring(data.getMessage().indexOf(" ")).split(",");
-        helen.sendMessage(data.getResponseTarget(),
+        helen.sendOutgoingMessage(data.getResponseTarget(),
                 data.getSender() + ": " + choices[new Random().nextInt(choices.length)].trim());
     }
 
     @IRCCommand(command = {".mode"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
     public void displayMode(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(),
+        helen.sendOutgoingMessage(data.getResponseTarget(),
                 data.getSender() + ": I am currently in " + (adminMode ? "Admin" : "Any User") + " mode.");
     }
 
     @IRCCommand(command = {".msg"}, startOfLine = true, securityLevel = 1)
-    public void sendMessage(CommandData data) {
+    public void sendOutgoingMessage(CommandData data) {
         String target = data.getTarget();
         String payload = data.getPayload();
-        helen.sendMessage(target, data.getSender() + " said:" + payload);
+        helen.sendOutgoingMessage(target, data.getSender() + " said:" + payload);
     }
 
     @IRCCommand(command = {".addNick"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
     public void addNick(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Nicks.addNick(data));
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Nicks.addNick(data));
     }
 
     @IRCCommand(command = {".deleteNick"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
     public void deleteNick(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Nicks.deleteNick(data));
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Nicks.deleteNick(data));
     }
 
     @IRCCommand(command = {".deleteAllNicks"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
     public void deleteAllNicks(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Nicks.deleteAllNicks(data, true));
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Nicks.deleteAllNicks(data, true));
     }
 
     @IRCCommand(command = {".nicks"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
     public void getNicksList(CommandData data) {
         List<String> nicks = Nicks.getNicksByUsername(data.getTarget());
         if (nicks.isEmpty()) {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I didn't find any nicks for " + data.getTarget());
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": I didn't find any nicks for " + data.getTarget());
         } else {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + data.getTarget() + " uses the following nicks: " + String.join(", ", nicks));
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + data.getTarget() + " uses the following nicks: " + String.join(", ", nicks));
         }
 
     }
 
     @IRCCommand(command = {".deleteNicksAdmin"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
     public void deleteNicksAdmin(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Nicks.deleteAllNicks(data, false));
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Nicks.deleteAllNicks(data, false));
     }
 
     @IRCCommand(command = {".roll"}, startOfLine = true, securityLevel = 1)
     public void roll(CommandData data) {
         Roll roll = new Roll(data.getMessage());
         if (roll.getDiceThrows() > 100) {
-            helen.kick(data.getChannel(), data.getSender(), "Begone..");
-            helen.sendMessage(data.getResponseTarget(), "Ops, " + data.getSender() + " sent over 100 dice rolls potentially crashing me.");
+            helen.kickUser(data.getChannel(), data.getSender(), "Begone..");
+            helen.sendOutgoingMessage(data.getResponseTarget(), "Ops, " + data.getSender() + " sent over 100 dice rolls potentially crashing me.");
         } else if (roll.getDiceThrows() > 20) {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": How's about no.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": How's about no.");
         } else {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + roll.getResult());
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + roll.getResult());
         }
     }
 
     @IRCCommand(command = {".hugme"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
     public void hugMe(CommandData data) {
         if (data.isHugList()) {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Hugs.storeHugmessage(data));
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Hugs.storeHugmessage(data));
         } else {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": You're not authorized to do that.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": You're not authorized to do that.");
         }
     }
 
     @IRCCommand(command = {".rem"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
     public void remember(CommandData data) {
         if (Configs.getProperty("remchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.addMemo(data.getSplitMessage()[1], data.getMessageWithoutCommand().substring(data.getMessageWithoutCommand().split(" ")[0].length() + 1), data.getChannel()));
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.addMemo(data.getSplitMessage()[1], data.getMessageWithoutCommand().substring(data.getMessageWithoutCommand().split(" ")[0].length() + 1), data.getChannel()));
         }else{
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I'm sorry, rems aren't enabled in this channel.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": I'm sorry, rems aren't enabled in this channel.");
         }
     }
 
     @IRCCommand(command = {"meh"}, reg = true, matcherGroup = 1, securityLevel = 1, regex = "\\?(\\S+).*", startOfLine = true)
     public void getMemo(CommandData data) {
         if (Configs.getProperty("remchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.getMemo(data.getRegexTarget(), data.getChannel()));
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.getMemo(data.getRegexTarget(), data.getChannel()));
         }
     }
 
     @IRCCommand(command = {".deleteRem"}, securityLevel = 1, startOfLine = true)
     public void removeMemo(CommandData data) {
         if (Configs.getProperty("remchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.deleteMemo(data.getTarget(), data.getChannel()));
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.deleteMemo(data.getTarget(), data.getChannel()));
         }else{
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I'm sorry, rems aren't enabled in this channel.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": I'm sorry, rems aren't enabled in this channel.");
         }
     }
 
     @IRCCommand(command = {".hugHelen", ".helenhug", ".hugsplox"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
     public void hug(CommandData data) {
         if (data.isHugList()) {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Hugs.getHugMessage(data.getSender().toLowerCase()));
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Hugs.getHugMessage(data.getSender().toLowerCase()));
         } else if (data.isWhiteList()) {
-            helen.sendAction(data.getResponseTarget(), "hugs " + data.getSender() + ".");
+            helen.sendBotAction(data.getResponseTarget(), "hugs " + data.getSender() + ".");
         } else {
             String[] messages = new String[]{
                     "Thank you for the display of affection.",
@@ -348,7 +376,7 @@ public class Command {
                     "Yes, yes, here's your reassuring meat-squish.",
                     "I'm billing you for my next bottle of gun oil."};
 
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + messages[new Random().nextInt(messages.length)]);
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + messages[new Random().nextInt(messages.length)]);
         }
     }
 
@@ -356,30 +384,30 @@ public class Command {
     public void webSearch(CommandData data) {
         try {
             Optional<GoogleResults> results = WebSearch.search(data.getMessage());
-            helen.sendMessage(data.getResponseTarget(),
+            helen.sendOutgoingMessage(data.getResponseTarget(),
                     data.getSender() + ": " + (results.isPresent() ? results.get() : NOT_FOUND)
             );
         } catch (IOException e) {
             logger.error("Exception during web search", e);
         }catch(RuntimeException e){
-            helen.sendMessage(data.getResponseTarget(), data.getSender() +": I'm overworked.  Here. " + "https://lmgtfy.com/?q=" + data.getMessageWithoutCommand().replace(" ","+"));
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() +": I'm overworked.  Here. " + "https://lmgtfy.com/?q=" + data.getMessageWithoutCommand().replace(" ","+"));
         }
     }
 
     @IRCCommand(command = {".lmgtfy"}, startOfLine = true, securityLevel = 4)
     public void lmgtfy(CommandData data) {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() +": https://lmgtfy.com/?q=" + data.getMessageWithoutCommand().replace(" ","+"));
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() +": https://lmgtfy.com/?q=" + data.getMessageWithoutCommand().replace(" ","+"));
     }
 
     @IRCCommand(command = {".gis"}, startOfLine = true, securityLevel = 1)
     public void imageSearch(CommandData data) {
         try {
             Optional<GoogleResults> results = WebSearch.imageSearch(data.getMessage());
-            helen.sendMessage(data.getResponseTarget(),
+            helen.sendOutgoingMessage(data.getResponseTarget(),
                     data.getSender() + ": " + (results.isPresent() ? results.get() : NOT_FOUND)
             );
         } catch (IOException e) {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() +": I'm sorry, it appears SOMEONE has used up my daily google search quota.  How rude.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() +": I'm sorry, it appears SOMEONE has used up my daily google search quota.  How rude.");
             logger.error("Exception during image search", e);
         }
     }
@@ -387,24 +415,24 @@ public class Command {
     @IRCCommand(command = {".w", ".wiki", ".wikipedia"}, startOfLine = true, securityLevel = 1)
     public void wikipediaSearch(CommandData data) {
         try {
-            helen.sendMessage(data.getResponseTarget(),
+            helen.sendOutgoingMessage(data.getResponseTarget(),
                     data.getSender() + ": " + WikipediaSearch.search(data, data.getMessage()));
         } catch (IOException e) {
             logger.error("Exception during Wikipedia search", e);
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I'm sorry there was some kind of error searchign wikipedia. Reach out to my developers if you feel this is in error.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": I'm sorry there was some kind of error searchign wikipedia. Reach out to my developers if you feel this is in error.");
         }
     }
 
     @IRCCommand(command = {".y", ".yt", ".youtube"}, startOfLine = true, securityLevel = 1)
     public void youtubeSearch(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(),
+        helen.sendOutgoingMessage(data.getResponseTarget(),
                 data.getSender() + ": " + YouTubeSearch.youtubeSearch(data.getMessage()));
     }
 
     @IRCCommand(command = "YTREGEX", reg = true, securityLevel = 1, startOfLine = true, matcherGroup = 1,
             regex = "http(?:s?):\\/\\/(?:www\\.)?youtu(?:be\\.com\\/watch\\?v=|\\.be\\/)([\\w\\-\\_]*)(&(amp;)?[\\w\\?‌​=]*)?")
     public void youtubeFind(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(),
+        helen.sendOutgoingMessage(data.getResponseTarget(),
                 data.getSender() + ": " + YouTubeSearch.youtubeFind(data.getRegexTarget()));
 
     }
@@ -416,7 +444,7 @@ public class Command {
 
     @IRCCommand(command = ".help", startOfLine = true, securityLevel = 1)
     public void help(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": You can find a list of my job responsibilities here:  http://helenbot.wikidot.com/usage");
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": You can find a list of my job responsibilities here:  http://helenbot.wikidot.com/usage");
     }
 
     @IRCCommand(command = ".hlt", startOfLine = true, securityLevel = 1)
@@ -424,17 +452,17 @@ public class Command {
         ZonedDateTime t = ZonedDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss yyyy-MM-dd");
         String time = t.format(formatter);
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": To my knowledge, it is currently " + time + " in my local timezone: " + t.getZone().toString());
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": To my knowledge, it is currently " + time + " in my local timezone: " + t.getZone().toString());
     }
 
     @IRCCommand(command = ".seen", startOfLine = true, securityLevel = 1)
     public void seen(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(), Users.seen(data));
+        helen.sendOutgoingMessage(data.getResponseTarget(), Users.seen(data));
     }
 
     @IRCCommand(command = ".sm", startOfLine = true, securityLevel = 1)
     public void selectResult(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getStoredInfo(data.getTarget(), data.getSender()));
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getStoredInfo(data.getTarget(), data.getSender()));
     }
 
     @IRCCommand(command = ".findBan", startOfLine = true, securityLevel = 2)
@@ -442,14 +470,14 @@ public class Command {
         if(Configs.getFastConfigs("staffchannels").contains(data.getChannel())){
             List<String> responses = Bans.queryBan(data);
             if(responses.isEmpty()){
-                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I didn't find any bans for that query.");
+                helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": I didn't find any bans for that query.");
             }else {
                 for (String s : responses) {
-                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + s);
+                    helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + s);
                 }
             }
         }else{
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
         }
     }
 
@@ -457,27 +485,27 @@ public class Command {
     public void addBan(CommandData data) {
         if(Configs.getFastConfigs("staffchannels").contains(data.getChannel())){
             String response = Bans.prepareBan(data);
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response + " Respond with .confirm to enact this ban, or .cancel to cancel the preparation.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + response + " Respond with .confirm to enact this ban, or .cancel to cancel the preparation.");
         }else{
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
         }
     }
     @IRCCommand(command = ".updateBan", startOfLine = true, securityLevel = 4)
     public void updateBan(CommandData data) {
         if(Configs.getFastConfigs("staffchannels").contains(data.getChannel())){
             String response = Bans.updateBan(data);
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + response);
         }else{
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
         }
     }
     @IRCCommand(command = ".confirm", startOfLine = true, securityLevel = 1)
     public void confirmBan(CommandData data) {
         if(Configs.getFastConfigs("staffchannels").contains(data.getChannel())){
             String response = Bans.enactConfirmedBan(data.getSender());
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + response);
         }else{
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
         }
     }
 
@@ -485,9 +513,9 @@ public class Command {
     public void cancelBan(CommandData data) {
         if(Configs.getFastConfigs("staffchannels").contains(data.getChannel())){
             String response = Bans.cancelBan(data.getSender());
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + response);
         }else{
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
         }
     }
 
@@ -495,12 +523,12 @@ public class Command {
     public void lastCreated(CommandData data) {
         if(data.getChannel() != null){
             cooldowns.computeIfAbsent("lastlc", p -> new ConcurrentHashMap<>());
-            cooldowns.get("lastlc").computeIfAbsent(data.getChannel(), k -> 0L);
+            cooldowns.get("lastlc").putIfAbsent(data.getChannel(), 0L);
             if ((cooldowns.get("lastlc").get(data.getChannel()) + 15000) < System.currentTimeMillis()) {
                 cooldowns.get("lastlc").put(data.getChannel(),System.currentTimeMillis());
                 getLastCreated(data);
             } else {
-                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I can't do that yet.");
+                helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": I can't do that yet.");
             }
         }else{
             getLastCreated(data);
@@ -514,66 +542,66 @@ public class Command {
             infoz.add(Pages.getPageInfo(str, data));
         }
         for (String str : infoz) {
-            helen.sendMessage(data.getResponseTarget(), data.getSender()
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender()
                     + ": " + str);
         }
     }
 
     @IRCCommand(command = {".unused",".unu"}, startOfLine = true, securityLevel = 1)
     public void unused(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(),
+        helen.sendOutgoingMessage(data.getResponseTarget(),
                 data.getSender() + ": " + Pages.getUnused(data));
     }
 
     @IRCCommand(command = ".au", startOfLine = true, securityLevel = 1)
     public void authorDetail(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getAuthorDetail(
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getAuthorDetail(
                 data, data.getSplitMessage().length == 1 ? data.getSender() : data.getMessageWithoutCommand()));
     }
 
     @IRCCommand(command = "SCPPAGEREGEX", startOfLine = true, reg = true, regex = {"http(?:s?):\\/\\/(?:www\\.)?scp-wiki\\.net\\/(.*)"}, securityLevel = 1, matcherGroup = 1)
     public void getPageInfo(CommandData data) {
         if (!data.getRegexTarget().contains("/") && !data.getRegexTarget().contains("forum")) {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getRegexTarget()));
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getRegexTarget()));
         }
     }
 
     @IRCCommand(command = "SCP", startOfLine = true, reg = true, regex = {"(scp|SCP)-([0-9]+)(-(ex|EX|j|J|arc|ARC))?"}, securityLevel = 1)
     public void scpSearch(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getCommand()));
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getCommand()));
     }
 
     @IRCCommand(command = {".s", ".sea"}, startOfLine = true, securityLevel = 1)
     public void findSkip(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPotentialTargets(data.getSplitMessage(), data.getSender()));
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPotentialTargets(data.getSplitMessage(), data.getSender()));
     }
 
     @IRCCommand(command = {".hs", ".hsea"}, coexistWithJarvis = true, startOfLine = true, securityLevel = 1)
     public void findSkipHelen(CommandData data) {
         if (p.matcher(data.getTarget()).matches()) {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getTarget()));
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getTarget()));
         } else {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPotentialTargets(data.getSplitMessage(), data.getSender()));
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPotentialTargets(data.getSplitMessage(), data.getSender()));
         }
     }
 
     @IRCCommand(command = {".pronouns", ".pronoun"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
     public void getPronouns(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " +
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " +
                 Pronouns.getPronouns((data.getSplitMessage().length > 1) ? data.getTarget() : data.getSender()));
     }
 
     @IRCCommand(command = ".myPronouns", startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
     public void myPronouns(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.getPronouns(data.getSender()));
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.getPronouns(data.getSender()));
     }
 
     @IRCCommand(command = ".helenconf", startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
     public void configure(CommandData data) {
         if (data.getSplitMessage().length == 1) {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + "{shoot|lcratings}");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + "{shoot|lcratings}");
         } else {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Configs.insertToggle(data, data.getTarget(),
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Configs.insertToggle(data, data.getTarget(),
                     data.getSplitMessage()[2].equalsIgnoreCase("true")));
         }
     }
@@ -590,21 +618,21 @@ public class Command {
 
                 }
             }
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + response);
         }
     }
 
     @IRCCommand(command = ".clearPronouns", startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
     public void clearPronouns(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.clearPronouns(data.getSender()));
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.clearPronouns(data.getSender()));
     }
 
     @IRCCommand(command = ".deletePronouns", startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
     public void removePronouns(CommandData data) {
         if (data.getTarget() != null) {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.clearPronouns(data.getTarget()));
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Pronouns.clearPronouns(data.getTarget()));
         } else {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Please specify the user to delete pronouns for.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": Please specify the user to delete pronouns for.");
         }
 
     }
@@ -614,22 +642,22 @@ public class Command {
         try {
             Optional<GoogleResults> results = WebSearch.search(".g definition " + data.getMessageWithoutCommand());
 
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + (results.isPresent() ? results.get() : NOT_FOUND));
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + (results.isPresent() ? results.get() : NOT_FOUND));
         }catch(Exception e){
-            helen.sendMessage(data.getResponseTarget(), data.getSender() +  ": I'm sorry something went wrong.  This function is experimental.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() +  ": I'm sorry something went wrong.  This function is experimental.");
         }
     }
 
     // Authentication Required Commands
     @IRCCommand(command = ".join", startOfLine = true, coexistWithJarvis = true, securityLevel = 3)
     public void enterChannel(CommandData data) {
-        helen.joinChannel(data.getTarget());
+        helen.joinAChannel(data.getTarget());
 
     }
 
     @IRCCommand(command = ".leave", startOfLine = true, coexistWithJarvis = true, securityLevel = 3)
     public void leaveChannel(CommandData data) {
-        helen.partChannel(data.getTarget());
+        helen.leaveChannel(data.getTarget(), "Leaving, per request.");
     }
 
     @IRCCommand(command = {".o5"}, startOfLine = true, securityLevel = 1)
@@ -637,39 +665,39 @@ public class Command {
         if (Configs.getProperty("staffchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
             List<String> responses = Users.getUserO5Thread(data.getTarget());
             if(responses.isEmpty()){
-                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I didn't find any 05 threads for the user: " + data.getTarget());
+                helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": I didn't find any 05 threads for the user: " + data.getTarget());
             }
             for (String response : responses) {
-                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + response);
+                helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + response);
             }
         }else{
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
         }
     }
 
     @IRCCommand(command = {".tell"}, startOfLine = true, securityLevel = 1)
     public void multiTell(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Tells.sendMultitell(data));
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Tells.sendMultitell(data));
     }
 
     @IRCCommand(command = {".masstell", ".mtell"}, startOfLine = true, securityLevel = 1)
     public void massTell(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Tells.sendMassTell(data));
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Tells.sendMassTell(data));
     }
 
     @IRCCommand(command = ".exit", startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
     public void exitBot(CommandData data) {
-        for (String channel : helen.getChannels()) {
-            helen.partChannel(channel, "Executing planned shutdown. Stay out of the revolver's sights...");
+        for (String channel : helen.getConnectedChannels()) {
+            helen.leaveChannel(channel, "Executing planned shutdown. Stay out of the revolver's sights...");
             try {
                 Thread.sleep(100);
             }catch(Exception e){
-
+                logger.error("Exception sleeping!",e);
             }
         }
         int sleeps = 0;
-        while (helen.getChannels().length > 0 && sleeps < 10){
-            logger.info(String.join(",", helen.getChannels()));
+        while (helen.getConnectedChannels().length > 0 && sleeps < 10){
+            logger.info(String.join(",", helen.getConnectedChannels()));
             sleeps++;
             try {
                 Thread.sleep(1000);
@@ -677,7 +705,7 @@ public class Command {
                 logger.error("Error sleeping.", e);
             }
         }
-        helen.disconnect();
+        helen.disconnectFromServer();
         System.exit(0);
 
 
@@ -686,7 +714,7 @@ public class Command {
     @IRCCommand(command = ".property", startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
     public void getProperty(CommandData data) {
         List<Config> properties = Configs.getProperty(data.getTarget());
-        helen.sendMessage(data.getResponseTarget(),
+        helen.sendOutgoingMessage(data.getResponseTarget(),
                 data.getSender() + ": Configured properties: " + buildResponse(properties));
     }
 
@@ -694,20 +722,20 @@ public class Command {
     public void setProperty(CommandData data) {
         String properties = Configs.setProperty(data.getSplitMessage()[1], data.getSplitMessage()[2],
                 data.getSplitMessage()[3]);
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + properties);
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + properties);
     }
 
     @IRCCommand(command = ".updateProperty", startOfLine = true, coexistWithJarvis = true, securityLevel = 4)
     public void updateProperty(CommandData data) {
         String properties = Configs.updateSingle(data.getSplitMessage()[1], data.getSplitMessage()[2],
                 data.getSplitMessage()[3]);
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + properties);
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + properties);
     }
 
     @IRCCommand(command = ".deleteProperty", startOfLine = true, securityLevel = 4)
     public void deleteProperty(CommandData data) {
         String properties = Configs.removeProperty(data.getSplitMessage()[1], data.getSplitMessage()[2]);
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + properties);
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + properties);
     }
 
     @IRCCommand(command = {".clearCache", ".clear"}, startOfLine = true, securityLevel = 4)
@@ -722,36 +750,36 @@ public class Command {
         if (data.getTarget().equalsIgnoreCase("Secretary_Helen") || data.getTarget().equalsIgnoreCase("DrMagnus")
                 || data.getTarget().equalsIgnoreCase("magnus") || data.getTarget().equalsIgnoreCase("helen")) {
             if (data.getSender().equalsIgnoreCase("DrMagnus")) {
-                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Really boss?");
+                helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": Really boss?");
             } else {
                 bullets--;
-                helen.sendAction(data.getChannel(), "shoots stormfallen.");
+                helen.sendBotAction(data.getChannel(), "shoots stormfallen.");
                 if (bullets < 1) {
                     reload(data);
                 }
             }
 
         } else if (Configs.commandEnabled(data, "shoot")) {
-            helen.sendAction(data.getChannel(), "shoots " + data.getTarget());
+            helen.sendBotAction(data.getChannel(), "shoots " + data.getTarget());
             bullets--;
             if (bullets < 1) {
                 reload(data);
             }
-            helen.sendMessage(data.getChannel(), "Be careful " + data.getTarget() + ". I still have " +
+            helen.sendOutgoingMessage(data.getChannel(), "Be careful " + data.getTarget() + ". I still have " +
                     (bullets > 1 ? bullets + " bullets left." : "one in the chamber."));
         }
     }
 
     @IRCCommand(command = ".reload", startOfLine = true, securityLevel = 4)
     public void reload(CommandData data) {
-        helen.sendAction(data.getChannel(), "reloads all six cylinders.");
+        helen.sendBotAction(data.getChannel(), "reloads all six cylinders.");
         bullets = 6;
     }
 
     @IRCCommand(command = ".setTimezone", startOfLine = true, securityLevel = 1)
     public void setTimezone(CommandData data) {
         if (!(data.getSplitMessage().length > 1)) {
-            helen.sendMessage(data.getResponseTarget(), "Please specify a timezone to set, e.g. .settimezone GMT-05:00");
+            helen.sendOutgoingMessage(data.getResponseTarget(), "Please specify a timezone to set, e.g. .settimezone GMT-05:00");
         }
         String timezone = data.getTarget();
         String regex = "GMT[+-][0-9]{2}:[0-9]{2}\\b";
@@ -760,9 +788,9 @@ public class Command {
 
         if (mat.matches()) {
             String message = Timezone.setTimezone(data.getSender(), data.getTarget());
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + message);
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + message);
         } else {
-            helen.sendMessage(data.getResponseTarget(), "I'm sorry that's not a valid timezone abbreviation.  Please enter timezone as GMT Plus or Minus 24 hour time e.g. GMT-05:00");
+            helen.sendOutgoingMessage(data.getResponseTarget(), "I'm sorry that's not a valid timezone abbreviation.  Please enter timezone as GMT Plus or Minus 24 hour time e.g. GMT-05:00");
         }
 
     }
@@ -771,7 +799,7 @@ public class Command {
     public void getTimezone(CommandData data) {
         Set<String> timezones = Timezone.getTimezone(data.getTarget());
         if (timezones.isEmpty()) {
-            helen.sendMessage(data.getResponseTarget(), "I have no record of timezone for that user, or something went wrong.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), "I have no record of timezone for that user, or something went wrong.");
         }
         Instant now = Instant.now();
         Set<String> responses = new HashSet<>();
@@ -780,11 +808,11 @@ public class Command {
             responses.add(DATE_TIME_FORMATTER.format(now.atOffset(offset)));
         }
         if (responses.size() > 1) {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + data.getTarget() + " has the following timezones set: " + String.join(", ", timezones) + ". The times at those zones are: " + String.join(", ", responses));
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + data.getTarget() + " has the following timezones set: " + String.join(", ", timezones) + ". The times at those zones are: " + String.join(", ", responses));
         } else {
             String timezone = timezones.iterator().next();
             String response = responses.iterator().next();
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + data.getTarget() + " Has the following timezone set: " + timezone + ". It is currently: " + response + " in that timezone.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + data.getTarget() + " Has the following timezone set: " + timezone + ". It is currently: " + response + " in that timezone.");
 
         }
     }
@@ -797,16 +825,16 @@ public class Command {
             String channel = bits[0].trim();
             if(remchannels.contains(channel)){
                 if(!data.getChannel().equals(channel)){
-                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I'm sorry, you can only request logs of staff channels from that channel.");
+                    helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": I'm sorry, you can only request logs of staff channels from that channel.");
                 }else{
                     String start = bits[1].trim();
                     String end = bits[2].trim();
-                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Logs.getPasteForTimeRangeAndChannel(channel, start, end));
+                    helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Logs.getPasteForTimeRangeAndChannel(channel, start, end));
                 }
             }else {
                 String start = bits[1].trim();
                 String end = bits[2].trim();
-                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Logs.getPasteForTimeRangeAndChannel(channel, start, end));
+                helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Logs.getPasteForTimeRangeAndChannel(channel, start, end));
             }
         }
     }
@@ -825,16 +853,16 @@ public class Command {
             }
             if(remchannels.contains(channel)){
                 if(!data.getChannel().equals(channel)){
-                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I'm sorry, you can only request logs of staff channels from that channel.");
+                    helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": I'm sorry, you can only request logs of staff channels from that channel.");
                 }else{
                     String start = bits[1].trim();
                     String end = bits[2].trim();
-                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Logs.getFormattedPasteForTimeRangeAndChannel(channel, start, end,usernames));
+                    helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Logs.getFormattedPasteForTimeRangeAndChannel(channel, start, end,usernames));
                 }
             }else {
                 String start = bits[1].trim();
                 String end = bits[2].trim();
-                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Logs.getFormattedPasteForTimeRangeAndChannel(channel, start, end, usernames));
+                helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Logs.getFormattedPasteForTimeRangeAndChannel(channel, start, end, usernames));
             }
         }
     }
@@ -843,21 +871,21 @@ public class Command {
     public void dotCommand(CommandData data) {
         if(data.getChannel() != null) {
             cooldowns.computeIfAbsent(data.getCommand(), p -> new ConcurrentHashMap<>());
-            cooldowns.get(data.getCommand()).computeIfAbsent(data.getChannel(), k -> 0L);
+            cooldowns.get(data.getCommand()).putIfAbsent(data.getChannel(), 0L);
             if ((cooldowns.get(data.getCommand()).get(data.getChannel()) + 15000) < System.currentTimeMillis()) {
                 cooldowns.get(data.getCommand()).put(data.getChannel(),System.currentTimeMillis());
-                helen.sendMessage(data.getResponseTarget(), dotCommands.get(data.getCommand()));
+                helen.sendOutgoingMessage(data.getResponseTarget(), DotCommand.getDotCommands().get().get(data.getCommand()));
             } else {
-                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Hold on a second, before doing that again...");
+                helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": Hold on a second, before doing that again...");
             }
         }else{
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + dotCommands.get(data.getCommand()));
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + DotCommand.getDotCommands().get().get(data.getCommand()));
         }
     }
 
     @IRCCommand(command = ".deleteTimezone", startOfLine = true, securityLevel = 4)
     public void deleteTimezone(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Timezone.deleteMemo(data.getTarget()));
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Timezone.deleteMemo(data.getTarget()));
     }
 
     @IRCCommand(command = ".unload", startOfLine = true, securityLevel = 4, coexistWithJarvis = true)
@@ -865,28 +893,20 @@ public class Command {
         if (Configs.commandEnabled(data, "shoot")) {
             if (data.getTarget().equalsIgnoreCase("Secretary_Helen") || data.getTarget().equalsIgnoreCase("drmagnus")) {
                 bullets--;
-                helen.sendAction(data.getChannel(), "shoots " + data.getSender());
+                helen.sendBotAction(data.getChannel(), "shoots " + data.getSender());
                 if (bullets < 1) {
                     reload(data);
                 }
             } else {
-                helen.sendAction(data.getChannel(), "calmly thumbs back the hammer and unleashes"
+                helen.sendBotAction(data.getChannel(), "calmly thumbs back the hammer and unleashes"
                         + (bullets == 6 ? " all six cylinders on " : " the remaining " + bullets + " cylinders on ")
                         + data.getTarget() + ".");
-                helen.sendMessage(data.getChannel(), "Stay out of the revolver's sights.");
+                helen.sendOutgoingMessage(data.getChannel(), "Stay out of the revolver's sights.");
                 reload(data);
             }
         }
     }
-/*
-    @IRCCommand(command = ".discord", startOfLine = true, securityLevel = 2, coexistWithJarvis = true)
-    public void showDiscordMessage(CommandData data) {
-        helen.sendMessage(data.getChannel(), "There are currently no plans for an official SCP Discord." +
-                " Staff feel that, at this time, the benefits of Discord do not outweigh the difficulties of moderation," +
-                " and the resulting fracturing between IRC and Discord. There are also several concerns about " +
-                "the technical and financial viability of discord.");
-    }
-*/
+
     @IRCCommand(command = {".q", ".quote"}, startOfLine = true, securityLevel = 1)
     public void getQuote(CommandData data) {
         String[] tokens = data.getSplitMessage();
@@ -894,23 +914,23 @@ public class Command {
             if (Configs.getProperty("quoteChannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
                 if (tokens.length > 1) {
                     if (tokens.length > 2) {
-                        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(tokens[1], Integer.parseInt(tokens[2]), data.getChannel()));
+                        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(tokens[1], Integer.parseInt(tokens[2]), data.getChannel()));
                     } else {
-                        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(tokens[1], data.getChannel()));
+                        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(tokens[1], data.getChannel()));
                     }
                 } else if (tokens.length == 1){
-                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(data.getSender().toLowerCase(), data.getChannel()));
+                    helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(data.getSender().toLowerCase(), data.getChannel()));
                 }else {
-                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Please specify a username and optionally an index.  E.g. .q username 1");
+                    helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": Please specify a username and optionally an index.  E.g. .q username 1");
                 }
             }
         }else{
             if (tokens.length > 3) {
-                    helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(tokens[1], Integer.parseInt(tokens[3]), tokens[2].toLowerCase()));
+                    helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(tokens[1], Integer.parseInt(tokens[3]), tokens[2].toLowerCase()));
             } else if(tokens.length == 3){
-                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(tokens[1], tokens[2].toLowerCase()));
+                helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.getQuote(tokens[1], tokens[2].toLowerCase()));
             } else{
-                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Please specify a username and channel, optinally an index.  E.g. .q username #channel 1");
+                helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": Please specify a username and channel, optinally an index.  E.g. .q username #channel 1");
             }
         }
 
@@ -921,10 +941,10 @@ public class Command {
         String[] tokens = data.getSplitMessage();
         if (tokens.length > 2) {
             if (data.getChannel() != null && Configs.getProperty("quoteChannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
-                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.setQuote(tokens[1].toLowerCase(), Arrays.stream(tokens).skip(2).collect(Collectors.joining(" ")), data.getChannel()));
+                helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.setQuote(tokens[1].toLowerCase(), Arrays.stream(tokens).skip(2).collect(Collectors.joining(" ")), data.getChannel()));
             }
         } else {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Please specify a username and message.  E.g. .aq DrMagnus Butts-hole");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": Please specify a username and message.  E.g. .aq DrMagnus Butts-hole");
         }
 
     }
@@ -935,10 +955,10 @@ public class Command {
         if (tokens.length > 2) {
             if (data.getChannel() != null && Configs.getProperty("quoteChannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
                 logger.info("I got the following as the message: " + Arrays.toString(data.getSplitMessage()));
-                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.deleteQuote(tokens[1], Integer.parseInt(tokens[2]), data.getChannel()));
+                helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.deleteQuote(tokens[1], Integer.parseInt(tokens[2]), data.getChannel()));
             }
         } else {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Please specify a username and index.  E.g. .rq DrMagnus 1");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": Please specify a username and index.  E.g. .rq DrMagnus 1");
         }
     }
 
@@ -946,37 +966,37 @@ public class Command {
     public void updateBans(CommandData data) {
        /* try {
             Bans.updateBans();
-            helen.sendMessage(data.getResponseTarget(), "Ban List successfully updated.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), "Ban List successfully updated.");
             if (!Bans.getProblematicEntries().isEmpty()) {
-                helen.sendMessage(data.getResponseTarget(), "There are problematic entries for the following: " + Bans.getProblematicEntries().toString());
+                helen.sendOutgoingMessage(data.getResponseTarget(), "There are problematic entries for the following: " + Bans.getProblematicEntries().toString());
             }
         } catch (Exception e) {
-            helen.sendMessage(data.getChannel(), "Error parsing chat ban page. Please check the page for correct syntax.");
+            helen.sendOutgoingMessage(data.getChannel(), "Error parsing chat ban page. Please check the page for correct syntax.");
             logger.error("Exception attempting to update bans.", e);
         }*/
-       helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I'm sorry this command is deprecated.  Please see my developer for more information.");
+       helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": I'm sorry this command is deprecated.  Please see my developer for more information.");
     }
 
     @IRCCommand(command = ".user", startOfLine = true, securityLevel = 1)
     public void getUserName(CommandData data) {
         String[] words = data.getSplitMessage();
         List<String> list = new ArrayList<>(Arrays.asList(words).subList(1, words.length));
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": http://www.wikidot.com/user:info/" + StringUtils.join(list, "_"));
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": http://www.wikidot.com/user:info/" + StringUtils.join(list, "_"));
     }
 
     @IRCCommand(command = ".contest", startOfLine = true, securityLevel = 1)
     public void getContestInformation(CommandData data) {
         Optional<Config> property = Configs.getSingleProperty("contests");
         if (!property.isPresent()) {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": There is no contest currently running.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": There is no contest currently running.");
         } else {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + property.get().getValue());
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + property.get().getValue());
         }
     }
 
     @IRCCommand(command = ".blackbox", startOfLine = true, securityLevel = 1)
     public void getBlackbox(CommandData data) {
-        helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + "█");
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + "█");
     }
 
     private String buildResponse(List<Config> dbo) {

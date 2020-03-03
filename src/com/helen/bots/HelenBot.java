@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import org.jibble.pircbot.IrcException;
 import org.jibble.pircbot.NickAlreadyInUseException;
 import org.jibble.pircbot.PircBot;
+import org.jibble.pircbot.User;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -19,13 +20,19 @@ import java.util.TimerTask;
 
 import static com.helen.database.users.Bans.getSuperUserBan;
 
-public class HelenBot extends PircBot {
+public class HelenBot extends PircBot implements BotFramework{
 
     private static final Logger logger = Logger.getLogger(HelenBot.class);
     private static Command cmd = null;
     private static Timer timer = new Timer();
 
     public HelenBot() throws IOException,
+            IrcException, InterruptedException {
+
+        configure();
+    }
+
+    private void configure() throws IOException,
             IrcException, InterruptedException {
         Optional<Config> version = Configs.getSingleProperty("version");
         if (version.isPresent()) {
@@ -40,7 +47,6 @@ public class HelenBot extends PircBot {
             logger.error("Version info is missing, please check configs.");
             System.exit(1);
         }
-
     }
 
     private void connect() throws IOException,
@@ -151,11 +157,52 @@ public class HelenBot extends PircBot {
         if (getSuperUserBan(sender, hostname, login)) {
             CommandData d = new CommandData(channel, sender, login, hostname,
                     message);
-            sendMessage(d.getResponseTarget(), "I am sorry " + sender + " but users banned in both 17 and 19 are not permitted to use the bot.");
+            sendOutgoingMessage(d.getResponseTarget(), "I am sorry " + sender + " but users banned in both 17 and 19 are not permitted to use the bot.");
         } else {
             cmd.dispatchTable(new CommandData(channel, sender, login, hostname,
                     message));
         }
+    }
+
+    public User[] getChannelUsers(String channel){
+        return super.getUsers(channel);
+    }
+
+    public void kickUser(String channel, String sender, String message){
+        super.kick(channel,sender,message);
+    }
+
+    @Override
+    public String[] getConnectedChannels() {
+        return super.getChannels();
+    }
+
+    @Override
+    public void leaveChannel(String channel, String message) {
+        super.partChannel(channel,message);
+    }
+
+    @Override
+    public void disconnectFromServer() {
+        super.disconnect();
+    }
+
+    @Override
+    public void sendBotAction(String channel, String message) {
+        super.sendAction(channel,message);
+    }
+
+    @Override
+    public void joinAChannel(String channel) {
+        super.joinChannel(channel);
+    }
+
+    public void sendOutgoingNotice(String target, String message){
+        super.sendNotice(target, message);
+    }
+
+    public void sendOutgoingMessage(String target, String message){
+        super.sendMessage(target, message);
     }
 
     public void onPrivateMessage(String sender, String login, String hostname,
@@ -202,6 +249,12 @@ public class HelenBot extends PircBot {
                        String sourceLogin,
                        String sourceHostname,
                        String reason) {
+
+    }
+
+    public static void main(String[] args) throws IOException {
+        Bans.updateBans();
+        int i = 0;
 
     }
 

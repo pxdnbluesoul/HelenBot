@@ -6,12 +6,7 @@ import com.helen.database.framework.Configs;
 import com.helen.database.framework.Connector;
 import com.helen.database.framework.Queries;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public class Quotes {
 
@@ -25,41 +20,6 @@ public class Quotes {
             }
         } catch (Exception e) {
             return "Hmm, I didn't quite get that.  Magnus, a word?";
-        }
-    }
-
-    public static void mm(String[] args) throws SQLException {
-        String csvFile = "C:/Users/chris/Desktop/quote1.csv";
-        BufferedReader br = null;
-        String line = "";
-        String cvsSplitBy = ";";
-
-        try {
-
-            br = new BufferedReader(new FileReader(csvFile));
-            br.readLine();
-            while ((line = br.readLine()) != null) {
-
-                // use comma as separator
-                String[] country = line.split(cvsSplitBy);
-                CloseableStatement stmt = Connector.getStatement(Queries.getQuery("quoteRestore"), country[1], country[4], country[2],country[3]);
-
-                stmt.executeUpdate();
-
-            }
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 

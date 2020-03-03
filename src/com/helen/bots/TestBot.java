@@ -1,25 +1,59 @@
 package com.helen.bots;
 
-import org.jibble.pircbot.PircBot;
+import org.jibble.pircbot.User;
 
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-
-public class TestBot extends PircBot {
+public class TestBot implements BotFramework {
 
 
-    public static void main(String[] args) throws Exception {
-        String timezone = "GMT-05:00";
-        String t = timezone.substring(3, 6);
-        String m = timezone.substring(7, 8);
-        ZoneOffset offset = ZoneOffset.ofHoursMinutes(Integer.parseInt(timezone.substring(3, 6)), Integer.parseInt(timezone.substring(7, 8)));
-        System.out.println(t);
-        System.out.println(m);
+    public TestBot() {
+    }
 
-        DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        System.out.println(DATE_TIME_FORMATTER.format(Instant.now().atOffset(offset)) + " in that timezone");
+
+    public void sendOutgoingMessage(String target, String message) {
+        System.out.println("Target: " + target + " Message: " + message);
+    }
+
+    @Override
+    public void sendOutgoingNotice(String target, String message) {
+        System.out.println("Target: " + target + " Message: " + message);
 
     }
+
+
+    @Override
+    public User[] getChannelUsers(String channel) {
+        return null;
+    }
+
+    public void kickUser(String channel, String sender, String message){
+
+    }
+
+    @Override
+    public String[] getConnectedChannels() {
+        return new String[0];
+    }
+
+    @Override
+    public void leaveChannel(String channel, String message) {
+
+    }
+
+    @Override
+    public void disconnectFromServer() {
+
+    }
+
+    @Override
+    public void sendBotAction(String channel, String message) {
+        System.out.println("Target: " + channel + " Message: " + message);
+
+    }
+
+    @Override
+    public void joinAChannel(String channel) {
+
+    }
+
 
 }
