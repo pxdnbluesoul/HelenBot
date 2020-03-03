@@ -643,12 +643,12 @@ public class Pages {
             storedEvents.put(username, potentialPages);
             StringBuilder str = new StringBuilder();
             str.append("Did you mean : ");
-
+            int i = 1;
             for (Selectable p : potentialPages) {
                 Page page = (Page) p;
                 str.append(Colors.BOLD);
                 str.append(page.getScpPage() ? page.getTitle()
-                        + ": " + page.getScpTitle() : page.getTitle());
+                        + ": " + i++ + ") " + page.getScpTitle() : page.getTitle());
                 str.append(Colors.NORMAL);
                 str.append(", ");
             }

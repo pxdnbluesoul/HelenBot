@@ -495,7 +495,7 @@ public class Command {
     public void lastCreated(CommandData data) {
         if(data.getChannel() != null){
             cooldowns.computeIfAbsent("lastlc", p -> new ConcurrentHashMap<>());
-            cooldowns.get("lastlc").computeIfAbsent(data.getChannel(), k -> System.currentTimeMillis());
+            cooldowns.get("lastlc").computeIfAbsent(data.getChannel(), k -> 0L);
             if ((cooldowns.get("lastlc").get(data.getChannel()) + 15000) < System.currentTimeMillis()) {
                 cooldowns.get("lastlc").put(data.getChannel(),System.currentTimeMillis());
                 getLastCreated(data);
