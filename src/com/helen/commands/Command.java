@@ -21,6 +21,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -35,10 +36,25 @@ public class Command {
     private static HashMap<String, Method> hashableCommandList = new HashMap<>();
     private static HashMap<String, Method> slowCommands = new HashMap<>();
     private static HashMap<String, Method> regexCommands = new HashMap<>();
+    private static ConcurrentHashMap<String, ConcurrentHashMap<String, Long>> cooldowns = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, String> dotCommands = new ConcurrentHashMap<>();
 
 
     static {
         logger.info("Initializing commandList.");
+        dotCommands.put(".passcode","As written above the chat in big red letters, we will not help you find the passcode." +
+                " It is located here: http://scp-wiki.net/guide-for-newbies and is clearly stated." +
+                " If you can't find it, slow down, don't skim, and try reading it out loud.");
+        dotCommands.put(".email", Configs.getSingleProperty("emailMessage").get().getValue());
+        dotCommands.put(".account","At this time, we've been made aware there's a technical issue with logging in to scp-wiki.net as opposed" +
+        "to scp-wiki.wikidot.com on chrome.  Please use this link to access the wiki and login there, which should solve the issue: http://scp-wiki.wikidot.com .");
+        Method constructedMethod;
+        try {
+            constructedMethod = Command.class.getMethod("dotCommand", CommandData.class);
+            dotCommands.keySet().forEach(key -> hashableCommandList.put(key, constructedMethod));
+        }catch(NoSuchMethodException e){
+            logger.error("You fucked up bruh.", e);
+        }
         for (Method m : Command.class.getDeclaredMethods()) {
             if (m.isAnnotationPresent(IRCCommand.class)) {
                 if (m.getAnnotation(IRCCommand.class).startOfLine() && !m.getAnnotation(IRCCommand.class).reg()) {
@@ -475,21 +491,31 @@ public class Command {
         }
     }
 
-
     @IRCCommand(command = {".lc", ".l"}, startOfLine = true, securityLevel = 1)
     public void lastCreated(CommandData data) {
+        if(data.getChannel() != null){
+            cooldowns.computeIfAbsent("lastlc", p -> new ConcurrentHashMap<>());
+            cooldowns.get("lastlc").computeIfAbsent(data.getChannel(), k -> System.currentTimeMillis());
+            if ((cooldowns.get("lastlc").get(data.getChannel()) + 15000) < System.currentTimeMillis()) {
+                cooldowns.get("lastlc").put(data.getChannel(),System.currentTimeMillis());
+                getLastCreated(data);
+            } else {
+                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I can't do that yet.");
+            }
+        }else{
+            getLastCreated(data);
+        }
+    }
+
+    private void getLastCreated(CommandData data) {
         Optional<ArrayList<String>> pages = Pages.lastCreated();
         ArrayList<String> infoz = new ArrayList<>();
-        if (pages.isPresent()) {
-            for (String str : pages.get()) {
-                infoz.add(Pages.getPageInfo(str, data));
-            }
-            for (String str : infoz) {
-                helen.sendMessage(data.getResponseTarget(), data.getSender()
-                        + ": " + str);
-            }
-        } else {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": I can't do that yet.");
+        for (String str : pages.get()) {
+            infoz.add(Pages.getPageInfo(str, data));
+        }
+        for (String str : infoz) {
+            helen.sendMessage(data.getResponseTarget(), data.getSender()
+                    + ": " + str);
         }
     }
 
@@ -813,16 +839,19 @@ public class Command {
         }
     }
 
-    private static long lastPasscode = 0L;
-    @IRCCommand(command = ".passcode", startOfLine = true, securityLevel = 1)
-    public void passcode(CommandData data) {
-        if((lastPasscode + 15000) < System.currentTimeMillis()) {
-            lastPasscode = System.currentTimeMillis();
-        helen.sendMessage(data.getResponseTarget(), "As written above the chat in big red letters, we will not help you find the passcode." +
-                " It is located here: http://scp-wiki.net/guide-for-newbies and is clearly stated." +
-                " If you can't find it, slow down, don't skim, and try reading it out loud.");
+    @IRCCommand(command = ".dotCommand", startOfLine = true, securityLevel = 1)
+    public void dotCommand(CommandData data) {
+        if(data.getChannel() != null) {
+            cooldowns.computeIfAbsent(data.getCommand(), p -> new ConcurrentHashMap<>());
+            cooldowns.get(data.getCommand()).computeIfAbsent(data.getChannel(), k -> 0L);
+            if ((cooldowns.get(data.getCommand()).get(data.getChannel()) + 15000) < System.currentTimeMillis()) {
+                cooldowns.get(data.getCommand()).put(data.getChannel(),System.currentTimeMillis());
+                helen.sendMessage(data.getResponseTarget(), dotCommands.get(data.getCommand()));
+            } else {
+                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Hold on a second, before doing that again...");
+            }
         }else{
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Hold on a second, before doing that again...");
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + dotCommands.get(data.getCommand()));
         }
     }
 
@@ -942,21 +971,6 @@ public class Command {
             helen.sendMessage(data.getResponseTarget(), data.getSender() + ": There is no contest currently running.");
         } else {
             helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + property.get().getValue());
-        }
-    }
-    private static long lastEmail = 0L;
-    @IRCCommand(command = ".email", startOfLine = true, securityLevel = 1)
-    public void getEmailMessage(CommandData data) {
-        if((lastEmail + 15000) < System.currentTimeMillis()) {
-            lastEmail = System.currentTimeMillis();
-            Optional<Config> property = Configs.getSingleProperty("emailMessage");
-            if (property.isPresent()) {
-                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + property.get().getValue());
-            } else {
-                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Someone needs to set the emailMessage property");
-            }
-        }else{
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Hold on a second, before doing that again...");
         }
     }
 

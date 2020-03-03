@@ -82,7 +82,6 @@ public class Pages {
         if (!setupComplete) {
             return Optional.empty();
         }
-        if (System.currentTimeMillis() - lastLc > 15000) {
             ArrayList<String> pagelist = new ArrayList<>();
             try {
                 String regex = "<td style=\"vertical-align: top;\"><a href=\"\\/(.+)\">(.+)<\\/a><\\/td>";
@@ -110,9 +109,6 @@ public class Pages {
             }
             lastLc = System.currentTimeMillis();
             return Optional.of(pagelist);
-        }
-
-        return Optional.empty();
 
     }
 
