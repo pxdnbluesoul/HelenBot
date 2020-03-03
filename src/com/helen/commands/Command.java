@@ -813,11 +813,17 @@ public class Command {
         }
     }
 
+    private static long lastPasscode = 0L;
     @IRCCommand(command = ".passcode", startOfLine = true, securityLevel = 1)
     public void passcode(CommandData data) {
+        if((lastPasscode + 15000) < System.currentTimeMillis()) {
+            lastPasscode = System.currentTimeMillis();
         helen.sendMessage(data.getResponseTarget(), "As written above the chat in big red letters, we will not help you find the passcode." +
                 " It is located here: http://scp-wiki.net/guide-for-newbies and is clearly stated." +
                 " If you can't find it, slow down, don't skim, and try reading it out loud.");
+        }else{
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Hold on a second, before doing that again...");
+        }
     }
 
     @IRCCommand(command = ".deleteTimezone", startOfLine = true, securityLevel = 4)
@@ -938,14 +944,19 @@ public class Command {
             helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + property.get().getValue());
         }
     }
-
+    private static long lastEmail = 0L;
     @IRCCommand(command = ".email", startOfLine = true, securityLevel = 1)
     public void getEmailMessage(CommandData data) {
-        Optional<Config> property = Configs.getSingleProperty("emailMessage");
-        if (property.isPresent()) {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + property.get().getValue());
-        } else {
-            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Someone needs to set the emailMessage property");
+        if((lastEmail + 15000) < System.currentTimeMillis()) {
+            lastEmail = System.currentTimeMillis();
+            Optional<Config> property = Configs.getSingleProperty("emailMessage");
+            if (property.isPresent()) {
+                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": " + property.get().getValue());
+            } else {
+                helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Someone needs to set the emailMessage property");
+            }
+        }else{
+            helen.sendMessage(data.getResponseTarget(), data.getSender() + ": Hold on a second, before doing that again...");
         }
     }
 
