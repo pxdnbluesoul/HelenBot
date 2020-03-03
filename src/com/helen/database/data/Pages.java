@@ -647,9 +647,9 @@ public class Pages {
             for (Selectable p : potentialPages) {
                 Page page = (Page) p;
                 str.append(Colors.BOLD);
-                str.append(page.getScpPage() ? page.getTitle()
-                        + ": " + i++ + ") " + page.getScpTitle() : page.getTitle());
+                str.append(i++).append(") ");
                 str.append(Colors.NORMAL);
+                str.append(page.getScpPage() ? page.getTitle() + ": " +  page.getScpTitle() : page.getTitle());
                 str.append(", ");
             }
             str.append("?");
