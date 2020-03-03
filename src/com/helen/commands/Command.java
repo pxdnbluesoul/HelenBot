@@ -233,7 +233,7 @@ public class Command {
     public void addCommand(CommandData data) {
         CommandResponse response = DotCommand.setDotCommand(data);
         if(response.isSuccess()) {
-            hashableCommandList.put(Arrays.stream(data.getMessageWithoutCommand().split("\\|")).map(String::trim).toArray(String[]::new)[0].toLowerCase(),
+            hashableCommandList.put("." + Arrays.stream(data.getMessageWithoutCommand().split("\\|")).map(String::trim).toArray(String[]::new)[0].toLowerCase(),
                     constructedMethod);
         }
         helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + response.getMessage());
