@@ -243,7 +243,11 @@ public class Command {
     public void deleteCommand(CommandData data) {
         CommandResponse response = DotCommand.deleteCommand(data);
         if(response.isSuccess()) {
-            hashableCommandList.remove(data.getMessageWithoutCommand().toLowerCase().trim());
+            String s = data.getMessageWithoutCommand().toLowerCase().toLowerCase();
+            if(!s.contains(".")){
+                s = "." + s;
+            }
+            hashableCommandList.remove(s);
         }
         helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + response.getMessage());
     }
