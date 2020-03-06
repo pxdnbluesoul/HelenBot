@@ -6,6 +6,7 @@ import com.helen.commands.CommandData;
 import com.helen.database.framework.CloseableStatement;
 import com.helen.database.framework.Connector;
 import com.helen.database.framework.Queries;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jibble.pircbot.Colors;
 import org.jsoup.nodes.Element;
@@ -316,6 +317,15 @@ public class Bans {
 
         try {
             BanPrep prep = new BanPrep(data);
+            if(prep.getT() == null){
+                return "You forgot to specify a time.";
+            }
+            if(prep.getUsers().isEmpty() && prep.getHostmasks().isEmpty()){
+                return "You didn't specify usernames or hostmasks.";
+            }
+            if(StringUtils.isEmpty(prep.getChannel())){
+                return "You didn't specify a channel.";
+            }
             if (!prep.getResponse().isEmpty()) {
                 confirmations.put(data.getSender(), prep);
                 return prep.getResponse();

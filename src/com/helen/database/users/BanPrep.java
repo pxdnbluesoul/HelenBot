@@ -103,22 +103,22 @@ public class BanPrep {
                     str.append("You are banning ");
                 }
                 if (!users.isEmpty()) {
-                    str.append("usernames: ").append(String.join(",", users)).append(" ");
+                    str.append("usernames: ").append(String.join(",", users)).append("; ");
                 }
                 if (!hostmasks.isEmpty()) {
-                    str.append("; with hostmasks: ").append(String.join(",", hostmasks)).append(" ");
+                    str.append("hostmasks: ").append(String.join(",", hostmasks)).append("; ");
                 }
                 if(!StringUtils.isEmpty(channel)) {
-                    str.append("; from: ").append(channel).append(" ");
+                    str.append("from: ").append(channel).append("; ");
                 }
                 if (!StringUtils.isEmpty(reason)) {
-                    str.append("; for the reason of: ").append(reason).append(" ");
+                    str.append(" for the reason of: ").append(reason).append("; ");
                 }
                 if (!StringUtils.isEmpty(thread)) {
-                    str.append("; with O5 thread: ").append(thread).append(" ");
+                    str.append(" with O5 thread: ").append(thread).append("; ");
                 }
                 if (t != null) {
-                    str.append("; until: ").append(t.getYear() == 2999 ? "forever" : DateTimeFormatter.ofPattern("yyyy-MM-dd").format(t));
+                    str.append(" until: ").append(t.getYear() == 2999 ? "forever" : DateTimeFormatter.ofPattern("yyyy-MM-dd").format(t));
                 }
                 if (!(str.length() == 0)) {
                     response = str.toString();
