@@ -3,6 +3,7 @@ package com.helen.database.users;
 
 import com.helen.commands.Command;
 import com.helen.commands.CommandData;
+import com.helen.commands.CommandResponse;
 import com.helen.database.framework.CloseableStatement;
 import com.helen.database.framework.Connector;
 import com.helen.database.framework.Queries;
@@ -313,28 +314,28 @@ public class Bans {
         }
     }
 
-    public static String prepareBan(CommandData data) {
+    public static CommandResponse prepareBan(CommandData data) {
 
         try {
             BanPrep prep = new BanPrep(data);
             if(prep.getT() == null){
-                return "You forgot to specify a time.";
+                return new CommandResponse(false,"You forgot to specify a time.");
             }
             if(prep.getUsers().isEmpty() && prep.getHostmasks().isEmpty()){
-                return "You didn't specify usernames or hostmasks.";
+                return new CommandResponse(false,"You didn't specify usernames or hostmasks.");
             }
             if(StringUtils.isEmpty(prep.getChannel())){
-                return "You didn't specify a channel.";
+                return new CommandResponse(false,"You didn't specify a channel.");
             }
             if (!prep.getResponse().isEmpty()) {
                 confirmations.put(data.getSender(), prep);
-                return prep.getResponse();
+                return new CommandResponse(true,prep.getResponse());
             } else {
-                return Command.ERROR;
+                return new CommandResponse(false, Command.ERROR);
             }
         } catch (Exception e) {
             logger.error("Something went pretty wrong: ", e);
-            return Command.ERROR;
+            return new CommandResponse(false,Command.ERROR);
         }
     }
 
