@@ -489,7 +489,7 @@ public class Command {
     public void addBan(CommandData data) {
         if(Configs.getFastConfigs("staffchannels").contains(data.getChannel())){
             CommandResponse response = Bans.prepareBan(data);
-            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + response + (response.isSuccess() ?  " Respond with .confirm to enact this ban, or .cancel to cancel the preparation." : ""));
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + response.getMessage() + (response.isSuccess() ?  " Respond with .confirm to enact this ban, or .cancel to cancel the preparation." : ""));
         }else{
             helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
         }
