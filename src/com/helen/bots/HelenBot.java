@@ -147,7 +147,7 @@ public class HelenBot extends PircBot implements BotFramework{
                 }
             }
         }
-        if(!checkBan(channel,sender,login,"")){
+        if(!checkBan(channel,sender,login,hostname)){
             cmd.dispatchTable(new CommandData(channel, sender, login, hostname,message));
         }
     }
