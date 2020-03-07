@@ -48,9 +48,6 @@ public class Bans {
                         break;
                     case "hostmask":
                         infoMap.get(banId).addHostmask(value);
-                        if(value.contains("@") || value.contains("*")){
-                            infoMap.get(banId).setSpecial(true);
-                        }
                         break;
                 }
 
