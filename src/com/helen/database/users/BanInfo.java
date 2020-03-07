@@ -2,8 +2,7 @@ package com.helen.database.users;
 
 import org.jibble.pircbot.Colors;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +11,7 @@ public class BanInfo {
     List<String> hostmasks = new ArrayList<>();
     private boolean isSpecial = false;
     private String reason = "";
-    private LocalDate duration;
+    private LocalDateTime duration;
     private String thread;
 
     public void setSpecial(boolean special) {
@@ -23,7 +22,7 @@ public class BanInfo {
         this.reason = reason;
     }
 
-    public void setDuration(LocalDate duration) {
+    public void setDuration(LocalDateTime duration) {
         this.duration = duration;
     }
 
@@ -44,25 +43,12 @@ public class BanInfo {
     }
 
     private String channel;
-    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public BanInfo(String reason, String duration, String thread, String channel){
         this.thread = thread;
-        this.duration = LocalDate.from(formatter.parse(duration));
+        this.duration = LocalDateTime.from(Bans.timeFormatter.parse(duration));
         this.reason = reason;
         this.channel = channel;
-    }
-
-
-
-    BanInfo(List<String> userNames, List<String> hostmasks, String reason, LocalDate bdate, boolean isSpecial, String thread, String channel) {
-        this.userNames = userNames;
-        this.hostmasks = hostmasks;
-        this.reason = reason;
-        this.duration = bdate;
-        this.isSpecial = isSpecial;
-        this.channel = channel;
-        this.thread = thread;
     }
 
     public List<String> getUserNames() {
@@ -77,7 +63,7 @@ public class BanInfo {
         return reason;
     }
 
-    public LocalDate getDuration() {
+    public LocalDateTime getDuration() {
         return duration;
     }
 

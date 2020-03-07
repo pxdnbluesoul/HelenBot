@@ -2,20 +2,21 @@ package com.helen.database.users;
 
 import com.helen.commands.CommandData;
 import org.apache.commons.lang.StringUtils;
+import org.jibble.pircbot.Colors;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class BanPrep {
 
-    private static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd;HH:mm:ss");
     private List<String> users = new ArrayList<>();
     private List<String> hostmasks = new ArrayList<>();
     private Optional<String> time = Optional.empty();
     private Optional<String> duration = Optional.empty();
     private Set<String> flagSet = new HashSet<>();
-    private LocalDate t = null;
+    private LocalDateTime endTime = null;
     private String response = "";
     private String reason;
     private String thread;
@@ -62,7 +63,7 @@ public class BanPrep {
                         if (duration.isPresent()) {
                             throw new RuntimeException();
                         } else {
-                            t = LocalDate.from(timeFormatter.parse(parts[1].trim()));
+                            endTime = LocalDateTime.from(timeFormatter.parse(parts[1].trim()));
                         }
                         break;
                     case "-d":
@@ -70,23 +71,23 @@ public class BanPrep {
                         if (time.isPresent()) {
                             throw new RuntimeException();
                         } else {
-                            t = LocalDate.now();
+                            endTime = LocalDateTime.now();
                             if (parts[1].length() > 2) {
                                 throw new RuntimeException();
                             } else {
                                 switch (parts[1].substring(1).toLowerCase()) {
                                     case "d":
-                                        t = t.plusDays(Integer.parseInt(parts[1].substring(0, 1)));
+                                        endTime = endTime.plusDays(Integer.parseInt(parts[1].substring(0, 1)));
                                         break;
                                     case "w":
-                                        t = t.plusWeeks(Integer.parseInt(parts[1].substring(0, 1)));
+                                        endTime = endTime.plusWeeks(Integer.parseInt(parts[1].substring(0, 1)));
                                         break;
                                     case "y":
-                                        t = t.plusYears(Integer.parseInt(parts[1].substring(0, 1)));
+                                        endTime = endTime.plusYears(Integer.parseInt(parts[1].substring(0, 1)));
                                         break;
                                     case "":
                                         if(parts[1].equalsIgnoreCase("p")) {
-                                            t = LocalDate.of(2999, 12, 31);
+                                            endTime = LocalDateTime.of(2999, 12, 31,0,0,0);
                                         }
                                         break;
 
@@ -103,22 +104,22 @@ public class BanPrep {
                     str.append("You are banning ");
                 }
                 if (!users.isEmpty()) {
-                    str.append("usernames: ").append(String.join(",", users)).append("; ");
+                    str.append("usernames: ").append(Colors.BOLD).append(String.join(",", users)).append(Colors.NORMAL).append("; ");
                 }
                 if (!hostmasks.isEmpty()) {
-                    str.append("hostmasks: ").append(String.join(",", hostmasks)).append("; ");
+                    str.append("hostmasks: ").append(Colors.BOLD).append(String.join(",", hostmasks)).append(Colors.NORMAL).append("; ");
                 }
                 if(!StringUtils.isEmpty(channel)) {
-                    str.append("from: ").append(channel).append("; ");
+                    str.append("from: ").append(Colors.BOLD).append(channel).append(Colors.NORMAL).append("; ");
                 }
                 if (!StringUtils.isEmpty(reason)) {
-                    str.append(" for the reason of: ").append(reason).append("; ");
+                    str.append(" for the reason of: ").append(Colors.BOLD).append(reason).append(Colors.NORMAL).append("; ");
                 }
                 if (!StringUtils.isEmpty(thread)) {
-                    str.append(" with O5 thread: ").append(thread).append("; ");
+                    str.append(" with O5 thread: ").append(Colors.BOLD).append(thread).append(Colors.NORMAL).append("; ");
                 }
-                if (t != null) {
-                    str.append(" until: ").append(t.getYear() == 2999 ? "forever" : DateTimeFormatter.ofPattern("yyyy-MM-dd").format(t));
+                if (endTime != null) {
+                    str.append(" EndTime: ").append(Colors.BOLD).append(endTime.getYear() == 2999 ? "forever" : DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(endTime)).append(Colors.NORMAL);
                 }
                 if (!(str.length() == 0)) {
                     response = str.toString();
@@ -170,7 +171,7 @@ public class BanPrep {
         return duration;
     }
 
-    public LocalDate getT() {
-        return t;
+    public LocalDateTime getEndTime() {
+        return endTime;
     }
 }

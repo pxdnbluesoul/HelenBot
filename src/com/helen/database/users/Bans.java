@@ -10,12 +10,10 @@ import com.helen.database.framework.Queries;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jibble.pircbot.Colors;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.sql.ResultSet;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,27 +21,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Bans {
 
     private static final Logger logger = Logger.getLogger(Bans.class);
-    static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
     private static ConcurrentHashMap<String, HashSet<BanInfo>> bans = new ConcurrentHashMap<>();
-    private static List<String> problematicEntries = new ArrayList<>();
     private static Map<String, BanPrep> confirmations = new ConcurrentHashMap<>();
-    private static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    public static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static void updateBans() throws IOException {
         bans.clear();
-/*
-        URL url = new URL("http://05command.wikidot.com/chat-ban-page");
-        Document result = Jsoup.parse(url, 3000);
-        Element table19 = result.select("table").get(0);
-        Element table17 = result.select("table").get(1);
 
-        HashSet<BanInfo> site19Bans = populateBanList(table19, "#site19");
-        bans.put("#site19", site19Bans);
-        bans.put("#thecritters", site19Bans);
-        bans.put("#workshop", site19Bans);
-        bans.put("#site17", populateBanList(table17, "#site17"));
-
- */
         try {
             CloseableStatement stmt = Connector.getStatement(Queries.getQuery("loadBans"));
             ResultSet rs = stmt.getResultSet();
@@ -85,58 +69,14 @@ public class Bans {
 
     }
 
-    private static HashSet<BanInfo> populateBanList(Element table, String channel) {
-        HashSet<BanInfo> banList = new HashSet<>();
-        Elements rows = table.select("tr");
-        problematicEntries.clear();
-        for (int i = 2; i < rows.size(); i++) {
-            Element row = rows.get(i);
-            //skip first two rows
-            Elements entries = row.select("td");
-            String names = entries.get(0).text();
-            String ips = entries.get(1).text();
-            String date = entries.get(2).text();
-            String reason = entries.get(3).text();
-            String thread = entries.get(4).text();
-            try {
-                List<String> nameList = Arrays.asList(names.split(" "));
-                List<String> ipList = Arrays.asList(ips.split(" "));
-                boolean isSpecial = false;
-                for (String s : ipList) {
-                    if (s.contains("@") || s.contains("*")) {
-                        isSpecial = true;
-                        break;
-                    }
-                }
-                LocalDate bdate;
-
-                if (date.contains("/")) {
-                    bdate = LocalDate.parse(date, formatter);
-                } else {
-                    bdate = LocalDate.parse("12/31/2999", formatter);
-                }
-                banList.add(new BanInfo(nameList, ipList, reason, bdate, isSpecial, thread, channel));
-            } catch (Exception e) {
-                logger.error("There was an issue with this entry: " + names + " " + ips + " " + date + " " + reason);
-                problematicEntries.add(names + "|" + date);
-            }
-
-        }
-        return banList;
-    }
 
     public static boolean getSuperUserBan(String username, String hostmask, String login) {
         return getUserBan(username, hostmask, "#site19", login) != null &&
                 getUserBan(username, hostmask, "#site17", login) != null;
     }
 
-
-    public static List<String> getProblematicEntries() {
-        return problematicEntries;
-    }
-
     public static BanInfo getUserBan(String username, String hostmask, String channel, String login) {
-        LocalDate today = LocalDate.now();
+        LocalDateTime today = LocalDateTime.now();
         if (bans.containsKey(channel)) {
             for (BanInfo info : bans.get(channel)) {
                 if ((info.getHostmasks().contains(hostmask) || info.getUserNames().contains(username)) && info.getDuration().isAfter(today)) {
@@ -197,7 +137,7 @@ public class Bans {
         if(prep == null){
             return "You have no pending ban confirmations.";
         }else {
-                try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("addBan"), prep.getReason(), prep.getChannel(), prep.getThread() == null ? "" : prep.getThread(), prep.getT().format(timeFormatter))) {
+                try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("addBan"), prep.getReason(), prep.getChannel(), prep.getThread() == null ? "" : prep.getThread(), prep.getEndTime().format(timeFormatter))) {
                     ResultSet rs = stmt.execute();
                     Integer value = (rs != null && rs.next()) ? rs.getInt("banid") : -1;
                     for (String user : prep.getUsers()) {
@@ -282,25 +222,29 @@ public class Bans {
                     CloseableStatement usernamestmt = Connector.getStatement(Queries.getQuery("addUsernameBan"), prep.getBanid(), user);
                     usernamestmt.executeUpdate();
                 }
-                str.append(" Usernames: ").append(String.join(",",prep.getUsers()));
+                if(!prep.getUsers().isEmpty()) {
+                    str.append(" Usernames: ").append(Colors.BOLD).append(String.join(",", prep.getUsers())).append(Colors.NORMAL);
+                }
                 for (String hostmask : prep.getHostmasks()) {
                     CloseableStatement hostmaskstmt = Connector.getStatement(Queries.getQuery("addHostmaskBan"), prep.getBanid(), hostmask);
                     hostmaskstmt.executeUpdate();
                 }
-                str.append(" Hostmasks: ").append(String.join(",",prep.getHostmasks()));
+                if(!prep.getHostmasks().isEmpty()) {
+                    str.append(" Hostmasks: ").append(Colors.BOLD).append(String.join(",", prep.getHostmasks()));
+                }
                 if(prep.getFlagSet().contains("o")){
-                    str.append(" Thread: ").append(prep.getThread());
+                    str.append(" Thread: ").append(Colors.BOLD).append(prep.getThread()).append(Colors.NORMAL);
                     CloseableStatement threadStmt = Connector.getStatement(Queries.getQuery("updateBanThread"), prep.getThread(), prep.getBanid());
                     threadStmt.executeUpdate();
                 }
                 if(prep.getFlagSet().contains("r")){
-                    str.append(" Reason: ").append(prep.getReason());
+                    str.append(" Reason: ").append(Colors.BOLD).append(prep.getReason()).append(Colors.NORMAL);
                     CloseableStatement reasonStatement = Connector.getStatement(Queries.getQuery("updateBanReason"), prep.getReason(), prep.getBanid());
                     reasonStatement.executeUpdate();
                 }
                 if(prep.getFlagSet().contains("t") || prep.getFlagSet().contains("d")){
-                    str.append(" Duration: ").append(prep.getT().format(timeFormatter));
-                    CloseableStatement durationStatement = Connector.getStatement(Queries.getQuery("updateBanDuration"),  prep.getT().format(timeFormatter), prep.getBanid());
+                    str.append(" EndTime: ").append(Colors.BOLD).append(prep.getEndTime().format(timeFormatter)).append(Colors.NORMAL);
+                    CloseableStatement durationStatement = Connector.getStatement(Queries.getQuery("updateBanDuration"),  prep.getEndTime().format(timeFormatter), prep.getBanid());
                     durationStatement.executeUpdate();
                 }
                 updateBans();
@@ -318,7 +262,7 @@ public class Bans {
 
         try {
             BanPrep prep = new BanPrep(data);
-            if(prep.getT() == null){
+            if(prep.getEndTime() == null){
                 return new CommandResponse(false,"You forgot to specify a time.");
             }
             if(prep.getUsers().isEmpty() && prep.getHostmasks().isEmpty()){
