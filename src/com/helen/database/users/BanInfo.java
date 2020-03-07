@@ -82,10 +82,10 @@ public class BanInfo {
     @Override
     public String toString() {
         return
-                Colors.BOLD + "Nicks:" + Colors.NORMAL + String.join(";",userNames) +
-                Colors.BOLD +" reason:"+ Colors.NORMAL + reason + ";" +
-                Colors.BOLD +" duration:"+ Colors.NORMAL + duration + ";" +
-                Colors.BOLD +" thread:"+ Colors.NORMAL + thread + ";" +
-                Colors.BOLD +" channel:"+ Colors.NORMAL + channel + ";";
-    }
+                 "Nicks:" + Colors.BOLD + String.join(";",userNames) + Colors.NORMAL +
+                     " reason: "+  Colors.BOLD + reason + Colors.NORMAL +";" +
+                     " duration: "+ Colors.BOLD + duration + Colors.NORMAL +";" +
+                     " thread: " + Colors.BOLD + thread + Colors.NORMAL + ";" +
+                     " channel: " + Colors.BOLD + channel + Colors.NORMAL + ";";
+        }
 }

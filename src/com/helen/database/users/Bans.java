@@ -48,6 +48,9 @@ public class Bans {
                         break;
                     case "hostmask":
                         infoMap.get(banId).addHostmask(value);
+                        if(value.contains("@") || value.contains("*")){
+                            infoMap.get(banId).setSpecial(true);
+                        }
                         break;
                 }
 
@@ -202,7 +205,7 @@ public class Bans {
                 }
                 responses.add(" there were: " + (returnInfo.size() - 5) + " additional results.  You might want to be more specific.");
             }else{
-                returnInfo.forEach((key, value) -> responses.add(Colors.BOLD + key + Colors.NORMAL + " :" + value.toString()));
+                returnInfo.forEach((key, value) -> responses.add(Colors.BOLD + key + Colors.NORMAL + " : " + value.toString()));
             }
             return responses;
         }catch(Exception ex){
