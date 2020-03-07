@@ -90,7 +90,7 @@ public class Users {
                         data.getSplitMessage()[2].toLowerCase(), channel.toLowerCase());
                 ResultSet rs = stmt.executeQuery();
                 if (rs != null && rs.next()) {
-                    return "I first met " + data.getSplitMessage()[2] + " " + findTime(rs.getTimestamp("first_seen").getTime()) + " in " + channel + " saying: " + rs.getString("first_message");
+                    return "I first met " + data.getSplitMessage()[2] + " " + findTime(rs.getTimestamp("timestamp").getTime()) + " in " + channel + " saying: " + rs.getString("message");
                 } else {
                     return "I have never seen someone by that name";
                 }
@@ -99,7 +99,7 @@ public class Users {
                         data.getSplitMessage()[1].toLowerCase(), channel.toLowerCase());
                 ResultSet rs = stmt.executeQuery();
                 if (rs != null && rs.next()) {
-                    return "I last saw " + data.getSplitMessage()[1] + " " + findTime(rs.getTimestamp("last_seen").getTime()) + " in " + channel + " saying: " + rs.getString("last_message");
+                    return "I last saw " + data.getSplitMessage()[1] + " " + findTime(rs.getTimestamp("timestamp").getTime()) + " in " + channel + " saying: " + rs.getString("message");
                 } else {
                     return "I have never seen someone by that name";
                 }
