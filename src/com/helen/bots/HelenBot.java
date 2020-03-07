@@ -5,7 +5,6 @@ import com.helen.commands.CommandData;
 import com.helen.database.framework.*;
 import com.helen.database.users.BanInfo;
 import com.helen.database.users.Bans;
-import com.helen.database.users.Users;
 import org.apache.log4j.Logger;
 import org.jibble.pircbot.IrcException;
 import org.jibble.pircbot.NickAlreadyInUseException;
@@ -17,8 +16,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import static com.helen.database.users.Bans.getSuperUserBan;
 
 public class HelenBot extends PircBot implements BotFramework{
 
@@ -150,17 +147,8 @@ public class HelenBot extends PircBot implements BotFramework{
                 }
             }
         }
-
-        if (channel != null) {
-            Users.insertUser(sender, hostname, message, channel.toLowerCase());
-        }
-        if (getSuperUserBan(sender, hostname, login)) {
-            CommandData d = new CommandData(channel, sender, login, hostname,
-                    message);
-            sendOutgoingMessage(d.getResponseTarget(), "I am sorry " + sender + " but users banned in both 17 and 19 are not permitted to use the bot.");
-        } else {
-            cmd.dispatchTable(new CommandData(channel, sender, login, hostname,
-                    message));
+        if(!checkBan(channel,sender,login,"")){
+            cmd.dispatchTable(new CommandData(channel, sender, login, hostname,message));
         }
     }
 
@@ -261,9 +249,11 @@ public class HelenBot extends PircBot implements BotFramework{
     public void onJoin(String channel, String sender, String login,
                        String hostmask) {
 
-        //removing extraneous logging
-        //logger.info("JOINED: " + sender + " LOGIN: " + login + " HOSTNAME: " + hostmask + " CHANNEL: " + channel);
-        //Testing in separate channel
+        checkBan(channel,sender,login,hostmask);
+    }
+
+    private boolean checkBan(String channel, String sender, String login,
+                          String hostmask){
         try {
             BanInfo info = Bans.getUserBan(sender, hostmask, channel, login);
             if (info != null) { // We have a match in the ban page that is still active.
@@ -298,10 +288,13 @@ public class HelenBot extends PircBot implements BotFramework{
                         }
                     }, 900000);
                 }
+                return true;
             }
         } catch (Exception e) {
             logger.error("Exception attempting onjoin for " + channel + " , " + sender + " " + login + " " + hostmask, e);
+            return false;
         }
+        return false;
     }
 
 }

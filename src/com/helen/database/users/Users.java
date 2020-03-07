@@ -31,41 +31,6 @@ public class Users {
     private static final Long DAYS = 1000 * 60 * 60 * 24l;
     private static final Long HOURS = 1000 * 60l * 60;
     private static final Long MINUTES = 1000 * 60l;
-    private static final Gson gson = new Gson();
-
-    private static final String query_text = "insert into hostmasks (username, hostmask, established) values (?,?,?);\n" +
-            " on conflict (username, hostmask) \n" +
-            "do update set (username, hostmask, established) = (?,?,?) where username = ?;";
-
-    public static void insertUser(String username, String hostmask, String message, String channel) {
-        try {
-            java.sql.Timestamp time = new java.sql.Timestamp(System.currentTimeMillis());
-            CloseableStatement stmt = Connector.getStatement(Queries.getQuery("insertUser"),
-                    username.toLowerCase(),
-                    time,
-                    time,
-                    message,
-                    message,
-                    channel,
-                    time,
-                    message,
-                    username.toLowerCase(),
-                    channel);
-            if (stmt.executeUpdate()) {
-                CloseableStatement hostStatement = Connector.getStatement(Queries.getQuery("insertHostmask"),
-                        username.toLowerCase(),
-                        hostmask,
-                        time,
-                        username.toLowerCase(),
-                        hostmask,
-                        time);
-                hostStatement.executeUpdate();
-            }
-
-        } catch (Exception e) {
-            logger.error("Exception updating users", e);
-        }
-    }
 
     public static List<String> getUserO5Thread(String searchquery){
         List<String> returnStrings = new ArrayList<>();
