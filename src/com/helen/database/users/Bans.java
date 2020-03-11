@@ -61,7 +61,7 @@ public class Bans {
                 completeMaps.computeIfAbsent(info.getChannel(), channel -> new HashSet<>());
                 completeMaps.get(info.getChannel()).add(info);
             }
-
+            bans.put("#ethicscommittee", completeMaps.get("#site19"));
             bans.put("#site19", completeMaps.get("#site19"));
             bans.put("#thecritters", completeMaps.get("#site19"));
             bans.put("#workshop", completeMaps.get("#site19"));
