@@ -81,6 +81,9 @@ public class Users {
             }else{
                 channel = data.getChannel();
             }
+            if(!(Configs.getFastConfigs("staffchannels").contains(data.getChannel()) || Configs.getFastConfigs("logChannels").contains(data.getChannel()))){
+                return "I'm sorry, .seen doesn't work in channels without logging enabled.";
+            }
 
             if(StringUtils.isEmpty(channel)){
                 channel = data.getChannel();
