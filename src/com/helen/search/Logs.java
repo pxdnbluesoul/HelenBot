@@ -44,7 +44,7 @@ public class Logs {
                 try (ResultSet rs = stmt != null ? stmt.getResultSet() : null) {
                     while (rs != null && rs.next()) {
 
-                        str.append("> ").append(rs.getString("timestamp")).append(" ");
+                        str.append("> ").append(rs.getString("timestamp").split("\\.")[0]).append(" ");
                         String user = rs.getString("username");
                         if (usernamesToHighlight.contains(user.toLowerCase())) {
                             String color = "**##red|";
