@@ -345,7 +345,7 @@ public class Command {
         }
     }
 
-    @IRCCommand(command = {"meh"}, reg = true, matcherGroup = 1, securityLevel = 1, regex = "\\?(\\S+).*", startOfLine = true)
+    @IRCCommand(command = {"meh"}, reg = true, matcherGroup = 1, securityLevel = 1, regex = "\\?([a-zA-Z0-9]]+).*", startOfLine = true)
     public void getMemo(CommandData data) {
         if (Configs.getProperty("remchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
             helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.getMemo(data.getRegexTarget(), data.getChannel()));
