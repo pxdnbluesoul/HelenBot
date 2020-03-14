@@ -256,9 +256,9 @@ public class Command {
     public void getCommandList(CommandData data) {
         Optional<Map<String,String>> commands = DotCommand.getDotCommands();
         if(commands.isPresent()){
-            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": I currently have the following specified as simple retreival commands: " + String.join("|",commands.get().keySet()));
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": I currently have the following specified as simple retrieval commands: " + String.join("|",commands.get().keySet()));
         }else{
-            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": I don't seem to have any commands configured, or something went wrong retreiving them.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": I don't seem to have any commands configured, or something went wrong retrieving them.");
         }
 
     }
