@@ -231,12 +231,14 @@ public class Command {
 
     @IRCCommand(command = {".addCommand"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
     public void addCommand(CommandData data) {
-        CommandResponse response = DotCommand.setDotCommand(data);
-        if(response.isSuccess()) {
-            hashableCommandList.put("." + Arrays.stream(data.getMessageWithoutCommand().split("\\|")).map(String::trim).toArray(String[]::new)[0].toLowerCase(),
-                    constructedMethod);
+        if(Configs.getFastConfigs("staffchannels").contains(data.getChannel())) {
+            CommandResponse response = DotCommand.setDotCommand(data);
+            if (response.isSuccess()) {
+                hashableCommandList.put("." + Arrays.stream(data.getMessageWithoutCommand().split("\\|")).map(String::trim).toArray(String[]::new)[0].toLowerCase(),
+                        constructedMethod);
+            }
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + response.getMessage());
         }
-        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + response.getMessage());
     }
 
     @IRCCommand(command = {".deleteCommand"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 2)
