@@ -65,6 +65,7 @@ public class Bans {
             bans.put("#site19", completeMaps.get("#site19"));
             bans.put("#thecritters", completeMaps.get("#site19"));
             bans.put("#workshop", completeMaps.get("#site19"));
+            bans.put("#site20", completeMaps.get("#site19"));
             bans.put("#site17", completeMaps.get("#site17"));
         }catch(Exception e){
             logger.error("There was an exception pulling bans from the database.",e);
