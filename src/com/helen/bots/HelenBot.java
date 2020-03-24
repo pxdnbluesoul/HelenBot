@@ -133,10 +133,10 @@ public class HelenBot extends PircBot implements BotFramework{
         }
     }
 
-    public void onAction(String channel, String sender, String login, String hostname, String message){
+    public void onAction(String sender, String login, String hostname, String target, String action){
         Set<String> channels = Configs.getFastConfigs("logChannels");
-        if(channels.contains(channel)){
-            try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("logMessage"), sender, channel, message)){
+        if(channels.contains(target)){
+            try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("logMessage"), sender, target, action)){
                 if(stmt != null){
                     try {
                         stmt.executeUpdate();
