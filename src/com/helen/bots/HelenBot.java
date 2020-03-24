@@ -133,6 +133,21 @@ public class HelenBot extends PircBot implements BotFramework{
         }
     }
 
+    public void onAction(String channel, String sender, String login, String hostname, String message){
+        Set<String> channels = Configs.getFastConfigs("logChannels");
+        if(channels.contains(channel)){
+            try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("logMessage"), sender, channel, message)){
+                if(stmt != null){
+                    try {
+                        stmt.executeUpdate();
+                    }catch(Exception e){
+                        logger.error("There wsa an error logging a line",e);
+                    }
+                }
+            }
+        }
+    }
+
     public void onMessage(String channel, String sender, String login,
                           String hostname, String message) {
         Set<String> channels = Configs.getFastConfigs("logChannels");
@@ -146,6 +161,9 @@ public class HelenBot extends PircBot implements BotFramework{
                     }
                 }
             }
+        }
+        if(sender.equalsIgnoreCase("nickserv") || sender.equalsIgnoreCase("chanserv")){
+            logger.info(sender + ": " + message);
         }
         if(!checkBan(channel,sender,login,hostname)){
             cmd.dispatchTable(new CommandData(channel, sender, login, hostname,message));

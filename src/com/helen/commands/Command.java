@@ -278,11 +278,12 @@ public class Command {
                 data.getSender() + ": I am currently in " + (adminMode ? "Admin" : "Any User") + " mode.");
     }
 
-    @IRCCommand(command = {".msg"}, startOfLine = true, securityLevel = 1)
+    @IRCCommand(command = {".msg"}, startOfLine = true, securityLevel = 4)
     public void sendOutgoingMessage(CommandData data) {
         String target = data.getTarget();
         String payload = data.getPayload();
-        helen.sendOutgoingMessage(target, data.getSender() + " said:" + payload);
+        logger.info("DIRECT MESSAGE USED BY " + data.getSender() + ".");
+        helen.sendOutgoingMessage(target, payload);
     }
 
     @IRCCommand(command = {".addNick"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
