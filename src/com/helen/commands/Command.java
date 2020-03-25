@@ -341,6 +341,7 @@ public class Command {
 
     @IRCCommand(command = {".rem"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
     public void remember(CommandData data) {
+        logger.info(data.toString());
         if (Configs.getProperty("remchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
             helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.addMemo(data.getSplitMessage()[1], data.getMessageWithoutCommand().substring(data.getMessageWithoutCommand().split(" ")[0].length() + 1), data.getChannel()));
         }else{
@@ -350,6 +351,7 @@ public class Command {
 
     @IRCCommand(command = {"meh"}, reg = true, matcherGroup = 1, securityLevel = 1, regex = "\\?([a-zA-Z0-9]+).*", startOfLine = true)
     public void getMemo(CommandData data) {
+        logger.info(data.toString());
         if (Configs.getProperty("remchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
             helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.getMemo(data.getRegexTarget(), data.getChannel()));
         }
