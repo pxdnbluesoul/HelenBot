@@ -275,6 +275,9 @@ public class Bans {
             if(StringUtils.isEmpty(prep.getChannel())){
                 return new CommandResponse(false,"You didn't specify a channel.");
             }
+            if(StringUtils.isEmpty(prep.getReason())){
+                return new CommandResponse(false,"You didn't specify a reason for this ban.");
+            }
             if (!prep.getResponse().isEmpty()) {
                 confirmations.put(data.getSender(), prep);
                 return new CommandResponse(true,prep.getResponse());

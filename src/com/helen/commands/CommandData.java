@@ -117,4 +117,8 @@ public class CommandData {
         return new CommandData("#site19","drmagnus","test","test", message);
     }
 
+    public static CommandData getTestData(String message, String channel){
+        return new CommandData(channel,"drmagnus","test","test", message);
+    }
+
 }

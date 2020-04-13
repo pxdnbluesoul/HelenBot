@@ -73,6 +73,11 @@ public class Users {
         return returnStrings;
     }
 
+    public static void main(String[] args) {
+        System.out.println(seen(CommandData.getTestData(".seen -c hammermaiden #site19", "#site67")));
+        int i = 0;
+    }
+
     public static String seen(CommandData data) {
         try {
             String channel;

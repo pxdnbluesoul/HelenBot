@@ -82,6 +82,8 @@ public class BanPrep {
                                     case "w":
                                         endTime = endTime.plusWeeks(Integer.parseInt(parts[1].substring(0, 1)));
                                         break;
+                                    case "m":
+                                        endTime = endTime.plusMonths(Integer.parseInt(parts[1].substring(0,1)));
                                     case "y":
                                         endTime = endTime.plusYears(Integer.parseInt(parts[1].substring(0, 1)));
                                         break;
