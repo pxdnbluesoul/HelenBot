@@ -341,7 +341,6 @@ public class Command {
 
     @IRCCommand(command = {".rem"}, startOfLine = true, coexistWithJarvis = true, securityLevel = 1)
     public void remember(CommandData data) {
-        logger.info(data.toString());
         if (Configs.getProperty("remchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
             helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.addMemo(data.getSplitMessage()[1], data.getMessageWithoutCommand().substring(data.getMessageWithoutCommand().split(" ")[0].length() + 1), data.getChannel()));
         }else{
@@ -351,7 +350,6 @@ public class Command {
 
     @IRCCommand(command = {"meh"}, reg = true, matcherGroup = 1, securityLevel = 1, regex = "\\?([a-zA-Z0-9]+).*", startOfLine = true)
     public void getMemo(CommandData data) {
-        logger.info(data.toString());
         if (Configs.getProperty("remchannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
             helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Memo.getMemo(data.getRegexTarget(), data.getChannel()));
         }
@@ -749,9 +747,14 @@ public class Command {
 
     @IRCCommand(command = {".clearCache", ".clear"}, startOfLine = true, securityLevel = 4)
     public void clearCache(CommandData data) {
-        Queries.clear();
-        Configs.clear();
-        Pronouns.reload();
+        try {
+            Queries.clear();
+            Configs.clear();
+            Pronouns.reload();
+            Bans.updateBans();
+        }catch(Exception e){
+            logger.error("Exception updating the caches.",e);
+        }
     }
 
     @IRCCommand(command = ".shoot", startOfLine = true, securityLevel = 4, coexistWithJarvis = true)
@@ -963,7 +966,6 @@ public class Command {
         String[] tokens = data.getSplitMessage();
         if (tokens.length > 2) {
             if (data.getChannel() != null && Configs.getProperty("quoteChannels").stream().anyMatch(config -> config.getValue().equalsIgnoreCase(data.getChannel()))) {
-                logger.info("I got the following as the message: " + Arrays.toString(data.getSplitMessage()));
                 helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Quotes.deleteQuote(tokens[1], Integer.parseInt(tokens[2]), data.getChannel()));
             }
         } else {

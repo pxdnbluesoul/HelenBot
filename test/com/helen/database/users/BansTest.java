@@ -1,12 +1,15 @@
 package com.helen.database.users;
 
 
+import com.helen.commands.CommandData;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class BansTest {
 
@@ -37,7 +40,7 @@ public class BansTest {
     @Test
     public void testIpBanWithWildcards(){
         System.out.println("Ban with wildcards, should return xeno.");
-        BanInfo info = Bans.getUserBan("a","2.1.233CF8C2.IP","#site17","");
+        BanInfo info = Bans.getUserBan("a","abcdefg.1909396C.863D485C.IP","#site19","");
         assertNotNull(info);
         System.out.println(info);
 
@@ -46,5 +49,14 @@ public class BansTest {
         info = Bans.getUserBan("a","190.92.8.17","#site19","");
         assertNotNull(info);
         System.out.println(info);
+    }
+
+    @Test
+    public void testMonthsForBan(){
+        LocalDateTime now = LocalDateTime.now();
+        CommandData data = CommandData.getTestData(".addban -u test|-d 1m|-r reason|-c #site19","#site19");
+        BanPrep prep = new BanPrep(data);
+
+        assertTrue(prep != null && prep.getEndTime().compareTo(now.plusMonths(1)) > 0);
     }
 }

@@ -592,7 +592,6 @@ public class Pages {
         String[] lowerterms = new String[terms.length - indexOffset];
         for (int i = indexOffset; i < terms.length; i++) {
             lowerterms[i - indexOffset] = terms[i].toLowerCase();
-            logger.info(lowerterms[i - indexOffset]);
         }
         try {
             ResultSet rs;
@@ -602,7 +601,6 @@ public class Pages {
             if (exact) {
                 stmt = Connector.getArrayStatement(
                         Queries.getQuery("findskips"), lowerterms);
-                logger.info(stmt.toString());
                 rs = stmt.getResultSet();
             } else {
                 String query = "select pagename,title,scptitle,scppage from pages where";
@@ -617,7 +615,6 @@ public class Pages {
                 for (int j = indexOffset; j < terms.length; j++) {
                     state.setString(j - (indexOffset - 1), "%" + terms[j].toLowerCase() + "%");
                 }
-                logger.info(state.toString());
                 rs = state.executeQuery();
             }
             while (rs != null && rs.next()) {

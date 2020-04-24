@@ -48,7 +48,6 @@ public class UserNick {
         } catch (Exception e) {
             logger.error("Exception instantiating usernick", e);
         }
-        logger.info("groupid " + groupId + ". NickToGroup: " + nickToGroup);
     }
 
     public static List<String> getUserNicks(String username) {
