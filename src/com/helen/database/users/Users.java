@@ -73,16 +73,12 @@ public class Users {
         return returnStrings;
     }
 
-    public static void main(String[] args) {
-        System.out.println(seen(CommandData.getTestData(".seen -c hammermaiden #site19", "#site67")));
-        int i = 0;
-    }
 
     public static String seen(CommandData data) {
         try {
             String channel;
             if(data.getChannel() != null && Configs.getFastConfigs("staffchannels").contains(data.getChannel()) && data.getSplitMessage().length > 3){
-                    channel = data.getSplitMessage()[3].toLowerCase();
+                    channel = data.getSplitMessage()[1].equalsIgnoreCase("-f") ? data.getSplitMessage()[4] : data.getSplitMessage()[3].toLowerCase();
             }else{
                 channel = data.getChannel();
             }
