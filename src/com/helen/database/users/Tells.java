@@ -40,8 +40,8 @@ public class Tells {
     }
 
     public static String sendMultiTell(String sender, String target, String message, boolean privateMessage){
-        if(message.length() > 100){
-            return "I'm sorry, I only sent tells of one hundred or less characters.  Please shorten your message.";
+        if(message.length() > 400){
+            return "I'm sorry, I only send tells of four hundred or less characters.  Please shorten your message.";
         }
         Integer id = Nicks.getNickGroup(target);
         if (id == null || id == -1) {
