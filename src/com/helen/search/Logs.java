@@ -42,10 +42,12 @@ public class Logs {
                 }
             }
             if(str.toString().isEmpty() ) {
+                logger.info("Thing was empty!");
                 return "I'm sorry I have no data for that time period....was I taking a nap?";
             }else{
                 logger.info("This is my string: _" + str.toString() + "_");
             }
+            logger.info("Sending with message: " + str.toString());
             return PastebinUtils.getPasteForLog(str.toString(), "Requested Log");
         } catch (Exception e) {
             logger.error("Issue with the date: " + channel + " " + start + " " + end, e);
