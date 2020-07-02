@@ -15,6 +15,10 @@ public class Logs {
 
     private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    public static void main(String[] args) {
+        getPasteForTimeRangeAndChannel("#site19","2020-07-01 19:59:59","2020-07-01 20:04:02");
+        int i = 0;
+    }
     public static String getPasteForTimeRangeAndChannel(String channel, String start, String end) {
         try {
             formatter.parse(start);
@@ -28,12 +32,18 @@ public class Logs {
                     }
                 }
             }
+            if(str.toString().isEmpty() ) {
+                return "I'm sorry I have no data for that time period....was I taking a nap?";
+            }
             return PastebinUtils.getPasteForLog(str.toString(), "Requested Log");
         } catch (Exception e) {
             logger.error("Issue with the date: " + channel + " " + start + " " + end, e);
             return "There was a problem making the call.  Consult with my developers for how to use this function.";
         }
     }
+
+
+
 
     public static String getFormattedPasteForTimeRangeAndChannel(String channel, String start, String end, List<String> usernamesToHighlight) {
         try {
