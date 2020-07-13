@@ -574,9 +574,9 @@ public class Command {
     public void findUnderatedArticle(CommandData data) {
         List<Page> pages = Pages.findUnderratedArticles(data);
         if(pages == null){
-            helen.sendOutgoingMessage(data.getRegexTarget(), data.getSender() + ": There was an issue making the call.  Check your syntax.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": There was an issue making the call.  Check your syntax.");
         }else if(pages.size() == 0){
-            helen.sendOutgoingMessage(data.getRegexTarget(), data.getSender() + ": I didn't find anything with those parameters.  Try again?.");
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": I didn't find anything with those parameters.  Try again?.");
         }else {
             for (Page p : pages) {
                 helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender()
