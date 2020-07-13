@@ -265,13 +265,51 @@ public class Pages {
         ResultSet rs = stmt.execute();
 
         while(rs != null && rs.next()){
-            pages.add(new Page(rs.getString("pagename"),
+
+            Page p = new Page(rs.getString("pagename"),
                     rs.getString("title"),
                     rs.getInt("rating"),
                     rs.getString("created_by"),
                     rs.getTimestamp("created_on"),
                     rs.getBoolean("scppage"),
-                    rs.getString("scptitle")));
+                    rs.getString("scptitle"));
+            stmt = Connector.getStatement(Queries.getQuery("findAuthors"), p.getPageLink());
+            ResultSet authorRs = stmt.getResultSet();
+            List<Metadata> authorFinalMetas = new LinkedList<>();
+            while (authorRs != null && authorRs.next()) {
+                Metadata m = new Metadata(authorRs.getString("pagename"),
+                        authorRs.getString("username"),
+                        authorRs.getString("metadata_type"),
+                        authorRs.getString("authorage_date"));
+
+                authorFinalMetas.add(m);
+            }
+            p.setAuthorMetadata(authorFinalMetas);
+            stmt = Connector.getStatement(Queries.getQuery("findRewrite"), p.getPageLink());
+            ResultSet dateRs = stmt.getResultSet();
+            Metadata meta = null;
+            List<Metadata> finalMetas = new LinkedList<>();
+            while (dateRs != null && dateRs.next()) {
+                Metadata m = new Metadata(dateRs.getString("pagename"),
+                        dateRs.getString("username"),
+                        dateRs.getString("metadata_type"),
+                        dateRs.getString("authorage_date"));
+
+                LocalDate newDate = LocalDate.parse(m.getDate());
+                if (meta == null || LocalDate.parse(meta.getDate()).compareTo(newDate) < 0) {
+                    meta = m;
+                } else if (LocalDate.parse(meta.getDate()).compareTo(newDate) == 0) {
+                    finalMetas.clear();
+                    finalMetas.add(meta);
+                    finalMetas.add(m);
+                }
+            }
+
+            if (finalMetas.isEmpty() && meta != null) {
+                finalMetas.add(meta);
+            }
+            p.setDateMetadata(finalMetas);
+            pages.add(p);
         }
 
         }catch(Exception e){

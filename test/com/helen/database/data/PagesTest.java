@@ -43,7 +43,8 @@ public class PagesTest {
                 ".ur -t -s",
                 ".ur -t -s -g",
                 ".ur -t -s -g -r10;30",
-                ".ur -r20;40"
+                ".ur -r20;40",
+                ".ur -r294;297 -s"
         };
 
         for (String message : testStrings) {

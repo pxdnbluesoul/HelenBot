@@ -3,6 +3,11 @@ package com.helen.database.data;
 import com.helen.database.Selectable;
 import org.jibble.pircbot.Colors;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static com.helen.database.data.Pages.findTime;
 
 public class Page implements Selectable {
@@ -15,6 +20,8 @@ public class Page implements Selectable {
     private java.sql.Timestamp createdAt;
     private Boolean scpPage;
     private String scpTitle;
+    private List<Metadata> authorMetadata;
+    private List<Metadata> dateMetadata;
 
     public Page(String pageLink, String title, Boolean scpPage, String scpTitle) {
         this.pageLink = pageLink;
@@ -61,6 +68,14 @@ public class Page implements Selectable {
     public String getCreatedBy() {
         return createdBy;
     }
+
+    public void setAuthorMetadata(List<Metadata> data){
+        this.authorMetadata = data;
+    }
+
+    public void setDateMetadata(List<Metadata> data){
+        this.dateMetadata = data;
+    }
     
     public String getPageAsLine(){
         StringBuilder returnString = new StringBuilder();
@@ -80,7 +95,50 @@ public class Page implements Selectable {
         returnString.append("Written ");
         returnString.append(findTime(this.getCreatedAt().getTime()));
         returnString.append("By: ");
-        returnString.append(this.getCreatedBy());
+        Metadata finalDateMetadata = null;
+        List<Metadata> finalDateMetadataList = new ArrayList<>();
+        for(Metadata data : dateMetadata) {
+            LocalDate newDate = LocalDate.parse(data.getDate());
+            if (finalDateMetadata == null || LocalDate.parse(finalDateMetadata.getDate()).compareTo(newDate) < 0) {
+                finalDateMetadata = data;
+            } else if (LocalDate.parse(finalDateMetadata.getDate()).compareTo(newDate) == 0) {
+                finalDateMetadataList.clear();
+                finalDateMetadataList.add(finalDateMetadata);
+                finalDateMetadataList.add(data);
+            }
+        }
+
+        if (finalDateMetadataList.isEmpty() && finalDateMetadata != null) {
+            finalDateMetadataList.add(finalDateMetadata);
+        }
+
+
+        if (!authorMetadata.isEmpty()) {
+
+            if (authorMetadata.size() == 1) {
+                returnString.append(authorMetadata.get(0).getUsername());
+            } else if (authorMetadata.size() == 2) {
+                returnString.append(authorMetadata.get(0).getUsername()).append(" and ").append(authorMetadata.get(1).getUsername());
+            } else {
+                returnString.append(authorMetadata.stream().map(Metadata::getUsername).collect(Collectors.joining(", ")));
+            }
+        } else {
+            returnString.append(this.getCreatedBy());
+        }
+
+        if (finalDateMetadata != null) {
+            returnString.append(" rewritten on: ");
+            returnString.append(finalDateMetadata.getDate());
+            returnString.append(" by ");
+            if (finalDateMetadataList.size() == 1) {
+                returnString.append(finalDateMetadataList.get(0).getUsername());
+            } else if (finalDateMetadataList.size() == 2) {
+                returnString.append(finalDateMetadataList.get(0).getUsername()).append(" and ").append(finalDateMetadataList.get(1).getUsername());
+            } else {
+                returnString.append(finalDateMetadataList.stream().map(Metadata::getUsername).collect(Collectors.joining(", ")));
+            }
+        }
+
         returnString.append(")");
         returnString.append(" - ");
         returnString.append("http://scp-wiki.wikidot.com/");
