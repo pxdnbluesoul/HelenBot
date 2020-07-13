@@ -7,6 +7,7 @@ import com.helen.database.framework.*;
 import com.helen.search.WikipediaAmbiguous;
 import com.helen.search.WikipediaSearch;
 import com.helen.search.XmlRpcTypeNil;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
@@ -222,6 +223,64 @@ public class Pages {
 
     public static String getPageInfo(String pagename) {
         return getPageInfo(pagename, true);
+    }
+
+    public static List<Page> findUnderratedArticles(CommandData data) {
+        String[] tokens = Arrays.stream(data.getMessageWithoutCommand().split(" ")).map(String::trim).toArray(String[]::new);
+        Set<String> tagset = new HashSet<>();
+        String minimum = "10";
+        String maximum = "30";
+        List<Page> pages = new ArrayList<>();
+        try {
+
+            for (String flags : tokens) {
+                String[] parts = flags.split(" ", 2);
+                if (!parts[0].startsWith("-")) {
+                    throw new RuntimeException();
+                }
+
+                switch (parts[0]) {
+                    case "-t":
+                        tagset.add("'tale'");
+                        break;
+                    case "-s":
+                        tagset.add("'scp'");
+                        break;
+                    case "-g":
+                        tagset.add("'goi-format'");
+                        break;
+                    case "-r":
+                        String range = flags.substring(2);
+                        minimum = range.split(";")[0];
+                        maximum = range.split(";")[1];
+                        break;
+                    default:
+                        throw new RuntimeException();
+                }
+            }
+        if(tagset.isEmpty()){
+            tagset.add("'tale'");
+            tagset.add("'scp'");
+            tagset.add("'goi-format'");
+        }
+        CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findUnderrated"),minimum,maximum,StringUtils.join(tagset,","));
+        ResultSet rs = stmt.execute();
+
+        while(rs != null && rs.next()){
+            pages.add(new Page(rs.getString("pagename"),
+                    rs.getString("title"),
+                    rs.getInt("rating"),
+                    rs.getString("created_by"),
+                    rs.getTimestamp("created_on"),
+                    rs.getBoolean("scppage"),
+                    rs.getString("scptitle")));
+        }
+
+        }catch(Exception e){
+            return null;
+        }
+
+        return pages;
     }
 
     public static String getPageInfo(String pagename, boolean ratingEnabled) {

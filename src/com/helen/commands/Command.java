@@ -1,10 +1,7 @@
 package com.helen.commands;
 
 import com.helen.bots.BotFramework;
-import com.helen.database.data.DotCommand;
-import com.helen.database.data.Memo;
-import com.helen.database.data.Pages;
-import com.helen.database.data.Quotes;
+import com.helen.database.data.*;
 import com.helen.database.framework.Config;
 import com.helen.database.framework.Configs;
 import com.helen.database.framework.Queries;
@@ -571,6 +568,23 @@ public class Command {
         if (!data.getRegexTarget().contains("/") && !data.getRegexTarget().contains("forum")) {
             helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getRegexTarget()));
         }
+    }
+
+    @IRCCommand(command = ".ur", startOfLine = true, securityLevel = 1)
+    public void findUnderatedArticle(CommandData data) {
+        List<Page> pages = Pages.findUnderratedArticles(data);
+        if(pages == null){
+            helen.sendOutgoingMessage(data.getRegexTarget(), data.getSender() + ": There was an issue making the call.  Check your syntax.");
+        }else if(pages.size() == 0){
+            helen.sendOutgoingMessage(data.getRegexTarget(), data.getSender() + ": I didn't find anything with those parameters.  Try again?.");
+        }else {
+            for (Page p : pages) {
+                helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender()
+                        + ": " + p.getPageAsLine());
+
+            }
+        }
+        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getCommand()));
     }
 
     @IRCCommand(command = "SCP", startOfLine = true, reg = true, regex = {"(scp|SCP)-([0-9]+)(-(ex|EX|j|J|arc|ARC))?"}, securityLevel = 1)
