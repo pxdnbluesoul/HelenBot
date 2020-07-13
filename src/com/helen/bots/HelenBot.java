@@ -208,7 +208,9 @@ public class HelenBot extends PircBot implements BotFramework{
     }
 
     public void sendOutgoingMessage(String target, String message){
-        super.sendMessage(target, message);
+        if(target != null) {
+            super.sendMessage(target, message);
+        }
     }
 
     public void onPrivateMessage(String sender, String login, String hostname,

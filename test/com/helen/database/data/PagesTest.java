@@ -3,6 +3,9 @@ package com.helen.database.data;
 import com.helen.commands.CommandData;
 import org.junit.Test;
 
+import java.util.List;
+
+import static com.helen.database.data.Pages.findUnderratedArticles;
 import static com.helen.database.data.Pages.getUnused;
 import static org.junit.Assert.assertNotNull;
 
@@ -29,6 +32,27 @@ public class PagesTest {
         for (String message : testStrings) {
             CommandData d = new CommandData("", "Drmagnus", "test", "blah", message);
             assertNotNull(getUnused(d));
+        }
+    }
+
+    @Test
+    public void underrated(){
+        String[] testStrings = new String[]{
+                ".ur",
+                ".ur -t",
+                ".ur -t -s",
+                ".ur -t -s -g",
+                ".ur -t -s -g -r10;30",
+                ".ur -r20;40"
+        };
+
+        for (String message : testStrings) {
+            System.out.println(message);
+            CommandData d = new CommandData("", "Drmagnus", "test", "blah", message);
+            List<Page> returnString = findUnderratedArticles(d);
+            assertNotNull(returnString);
+            returnString.forEach(p -> System.out.println(p.getPageAsLine()));
+            System.out.println("=============================");
         }
     }
 }

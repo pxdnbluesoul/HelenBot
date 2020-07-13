@@ -226,44 +226,42 @@ public class Pages {
     }
 
     public static List<Page> findUnderratedArticles(CommandData data) {
-        String[] tokens = Arrays.stream(data.getMessageWithoutCommand().split(" ")).map(String::trim).toArray(String[]::new);
+        String[] tokens = Arrays.stream(data.getMessage().split(" ")).map(String::trim).toArray(String[]::new);
         Set<String> tagset = new HashSet<>();
         String minimum = "10";
         String maximum = "30";
         List<Page> pages = new ArrayList<>();
         try {
 
-            for (String flags : tokens) {
-                String[] parts = flags.split(" ", 2);
-                if (!parts[0].startsWith("-")) {
-                    throw new RuntimeException();
-                }
-
-                switch (parts[0]) {
+            for (String flag : tokens) {
+                switch (flag) {
                     case "-t":
-                        tagset.add("'tale'");
+                        tagset.add("tale");
                         break;
                     case "-s":
-                        tagset.add("'scp'");
+                        tagset.add("scp");
                         break;
                     case "-g":
-                        tagset.add("'goi-format'");
+                        tagset.add("goi-format");
                         break;
-                    case "-r":
-                        String range = flags.substring(2);
-                        minimum = range.split(";")[0];
-                        maximum = range.split(";")[1];
-                        break;
+                    case ".ur":
+                            break;
                     default:
+                        if(flag.startsWith("-r")){
+                            String range = flag.substring(2);
+                            minimum = range.split(";")[0];
+                            maximum = range.split(";")[1];
+                            break;
+                        }
                         throw new RuntimeException();
                 }
             }
         if(tagset.isEmpty()){
-            tagset.add("'tale'");
-            tagset.add("'scp'");
-            tagset.add("'goi-format'");
+            tagset.add("tale");
+            tagset.add("scp");
+            tagset.add("goi-format");
         }
-        CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findUnderrated"),minimum,maximum,StringUtils.join(tagset,","));
+        CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findUnderrated"),Integer.parseInt(minimum),Integer.parseInt(maximum),StringUtils.join(tagset,","));
         ResultSet rs = stmt.execute();
 
         while(rs != null && rs.next()){

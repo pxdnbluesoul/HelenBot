@@ -584,7 +584,6 @@ public class Command {
 
             }
         }
-        helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Pages.getPageInfo(data.getCommand()));
     }
 
     @IRCCommand(command = "SCP", startOfLine = true, reg = true, regex = {"(scp|SCP)-([0-9]+)(-(ex|EX|j|J|arc|ARC))?"}, securityLevel = 1)
