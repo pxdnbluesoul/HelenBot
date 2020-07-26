@@ -844,18 +844,12 @@ public class Command {
 
     @IRCCommand(command = ".log", startOfLine = true, securityLevel = 2)
     public void getLog(CommandData data){
-        Set<String> remchannels = Configs.getFastConfigs("remchannels");
-        if(remchannels.contains(data.getChannel())){
+        Set<String> staffchannels = Configs.getFastConfigs("staffchannels");
+        if(staffchannels.contains(data.getChannel())){
             String[] bits = data.getMessageWithoutCommand().split(";");
             String channel = bits[0].trim();
-            if(remchannels.contains(channel)){
-                if(!data.getChannel().equals(channel)){
-                    helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": I'm sorry, you can only request logs of staff channels from that channel.");
-                }else{
-                    String start = bits[1].trim();
-                    String end = bits[2].trim();
-                    helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Logs.getPasteForTimeRangeAndChannel(channel, start, end));
-                }
+            if(staffchannels.contains(channel)){
+                helen.sendOutgoingMessage(data.getResponseTarget(), "I'm sorry, but due to pastebin not allowing private posts, I do not allow pastes of staff channels.");
             }else {
                 String start = bits[1].trim();
                 String end = bits[2].trim();
@@ -866,8 +860,8 @@ public class Command {
 
     @IRCCommand(command = ".flog", startOfLine = true, securityLevel = 2)
     public void getFormattedLog(CommandData data){
-        Set<String> remchannels = Configs.getFastConfigs("remchannels");
-        if(remchannels.contains(data.getChannel())){
+        Set<String> staffchannels = Configs.getFastConfigs("staffchannels");
+        if(staffchannels.contains(data.getChannel())){
             String[] bits = data.getMessageWithoutCommand().split(";");
             String channel = bits[0].trim();
             List<String> usernames = new ArrayList<>();
@@ -876,14 +870,8 @@ public class Command {
                     usernames.add(bits[i].trim().toLowerCase());
                 }
             }
-            if(remchannels.contains(channel)){
-                if(!data.getChannel().equals(channel)){
-                    helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": I'm sorry, you can only request logs of staff channels from that channel.");
-                }else{
-                    String start = bits[1].trim();
-                    String end = bits[2].trim();
-                    helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + Logs.getFormattedPasteForTimeRangeAndChannel(channel, start, end,usernames));
-                }
+            if(staffchannels.contains(channel)){
+                helen.sendOutgoingMessage(data.getResponseTarget(), "I'm sorry, but due to pastebin not allowing private posts, I do not allow pastes of staff channels.");
             }else {
                 String start = bits[1].trim();
                 String end = bits[2].trim();

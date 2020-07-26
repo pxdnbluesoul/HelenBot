@@ -1,7 +1,6 @@
 package com.helen.search;
 
 
-
 import com.helen.database.framework.Configs;
 import org.apache.commons.lang.StringUtils;
 
@@ -9,15 +8,18 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.joining;
 
 
 public class PastebinUtils {
-    public static final String API_POST_URL = "http://pastebin.com/api/api_post.php";
+    public static final String API_POST_URL = "https://pastebin.com/api/api_post.php";
 
-    public static final String API_LOGIN_URL = "http://pastebin.com/api/api_login.php";
+    public static final String API_LOGIN_URL = "https://pastebin.com/api/api_login.php";
 
     public static class GuestPaste extends Paste {}
 
@@ -83,10 +85,6 @@ public class PastebinUtils {
         if (StringUtils.isNotBlank(paste.getTitle()))
             parameters.put(PasteBinApiParams.PASTE_NAME, paste.getTitle());
 
-
-        if (paste.getVisibility() != null)
-            parameters.put("api_paste_private", paste.getVisibility());
-
         final String pasteUrl = requiresValidResponse(post(API_POST_URL, parameters)).get();
 
         // Update the paste key from the URL to the paste
@@ -113,6 +111,7 @@ public class PastebinUtils {
         USER_KEY("api_user_key"),
         OPTION("api_option"),
         USER_NAME("api_user_name"),
+        API_PASTE_PRIVATE("api_paste_private"),
         USER_PASSWORD("api_user_password");
 
         private final String param;
@@ -151,7 +150,6 @@ public class PastebinUtils {
 
             urlConnection.setRequestMethod("POST");
             urlConnection.addRequestProperty("User-Agent", "Mozilla/5.0");
-            urlConnection.addRequestProperty("Accept", Locale.getDefault().getLanguage());
             urlConnection.setConnectTimeout(30000);
 
             final String params = getParams(parameters);
