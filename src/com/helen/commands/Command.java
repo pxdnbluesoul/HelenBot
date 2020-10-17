@@ -136,61 +136,66 @@ public class Command {
 
     public void dispatchTable(CommandData data) {
 
-        checkTells(data);
-        User[] userList = getUserlist(data);
-        int securityLevel = getSecurityLevel(userList, data);
-        //logger.info("Entering dispatch table with command: \"" + data.getCommand() + "\"");
+        try {
+            checkTells(data);
+            User[] userList = getUserlist(data);
+            int securityLevel = getSecurityLevel(userList, data);
+            //logger.info("Entering dispatch table with command: \"" + data.getCommand() + "\"");
 
-        // If we can use hashcommands, do so
-        int adminSecurity = 2;
-        if (hashableCommandList.containsKey(data.getCommand().toLowerCase())) {
-            try {
+            // If we can use hashcommands, do so
+            int adminSecurity = 2;
+            if (hashableCommandList.containsKey(data.getCommand().toLowerCase())) {
+                try {
 
-                Method m = hashableCommandList.get(data.getCommand().toLowerCase());
+                    Method m = hashableCommandList.get(data.getCommand().toLowerCase());
 
-                checkSecurityLevelAndExecute(data, securityLevel, adminSecurity, m);
+                    checkSecurityLevelAndExecute(data, securityLevel, adminSecurity, m);
 
 
-            } catch (Exception e) {
-                logger.error("Exception invoking start-of-line command: " + data.getCommand(), e);
-            }
-            // otherwise, run the command string against all the contains
-            // commands
-        } else {
-            for (String command : slowCommands.keySet()) {
-                if (data.getMessage().toLowerCase().contains(command.toLowerCase())) {
-                    try {
-                        Method m = slowCommands.get(command);
-                        checkSecurityLevelAndExecute(data, securityLevel, adminSecurity, m);
-                    } catch (Exception e) {
-                        logger.error("Exception invoking command: " + command, e);
-                    }
+                } catch (Exception e) {
+                    logger.error("Exception invoking start-of-line command: " + data.getCommand(), e);
                 }
-            }
-
-            // lastly check the string against any regex commands
-            for (String regex : regexCommands.keySet()) {
-                Pattern r = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-
-                Matcher match = r.matcher(data.getSplitMessage()[0]);
-                if (match.matches()) {
-                    try {
-                        Method m = regexCommands.get(regex);
-
-                        if (m.getAnnotation(IRCCommand.class).matcherGroup() != -1) {
-                            data.setRegexTarget(match.group(m.getAnnotation(IRCCommand.class).matcherGroup()));
+                // otherwise, run the command string against all the contains
+                // commands
+            } else {
+                for (String command : slowCommands.keySet()) {
+                    if (data.getMessage().toLowerCase().contains(command.toLowerCase())) {
+                        try {
+                            Method m = slowCommands.get(command);
+                            checkSecurityLevelAndExecute(data, securityLevel, adminSecurity, m);
+                        } catch (Exception e) {
+                            logger.error("Exception invoking command: " + command, e);
                         }
-
-                        checkSecurityLevelAndExecute(data, securityLevel, adminSecurity, m);
-
-                    } catch (Exception e) {
-                        logger.error("Exception invoking command: "
-                                + Arrays.toString(regexCommands.get(regex).getAnnotation(IRCCommand.class).command()), e);
                     }
                 }
 
+                // lastly check the string against any regex commands
+                for (String regex : regexCommands.keySet()) {
+                    Pattern r = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+
+                    Matcher match = r.matcher(data.getSplitMessage()[0]);
+                    if (match.matches()) {
+                        try {
+                            Method m = regexCommands.get(regex);
+
+                            if (m.getAnnotation(IRCCommand.class).matcherGroup() != -1) {
+                                data.setRegexTarget(match.group(m.getAnnotation(IRCCommand.class).matcherGroup()));
+                            }
+
+                            checkSecurityLevelAndExecute(data, securityLevel, adminSecurity, m);
+
+                        } catch (Exception e) {
+                            logger.error("Exception invoking command: "
+                                    + Arrays.toString(regexCommands.get(regex).getAnnotation(IRCCommand.class).command()), e);
+                        }
+                    }
+
+                }
             }
         }
+        catch(Exception e){
+            logger.error(e);
+            }
     }
 
     private void checkSecurityLevelAndExecute(CommandData data, int securityLevel, int adminSecurity, Method m) throws IllegalAccessException, InvocationTargetException {
