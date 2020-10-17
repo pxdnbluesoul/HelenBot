@@ -275,7 +275,7 @@ public class HelenBot extends PircBot implements BotFramework{
     private boolean checkBan(String channel, String sender, String login,
                           String hostmask){
         try {
-            BanInfo info = Bans.getUserBan(sender, hostmask, channel, login);
+            BanInfo info = Bans.getUserBan(sender.toLowerCase(), hostmask.toLowerCase(), channel, login);
             if (info != null) { // We have a match in the ban page that is still active.
 
                 //Kick them.

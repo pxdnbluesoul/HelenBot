@@ -44,10 +44,10 @@ public class Bans {
                 String type = rs.getString("type");
                 switch (type) {
                     case "username":
-                        infoMap.get(banId).addUsername(value);
+                        infoMap.get(banId).addUsername(value.toLowerCase());
                         break;
                     case "hostmask":
-                        infoMap.get(banId).addHostmask(value);
+                        infoMap.get(banId).addHostmask(value.toLowerCase());
                         if(value.contains("@") || value.contains("*")){
                             infoMap.get(banId).setSpecial(true);
                         }
@@ -286,7 +286,7 @@ public class Bans {
             }
         } catch (Exception e) {
             logger.error("Something went pretty wrong: ", e);
-            return new CommandResponse(false,Command.ERROR);
+            return new CommandResponse(false,e.getMessage());
         }
     }
 
