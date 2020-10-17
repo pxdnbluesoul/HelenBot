@@ -60,6 +60,7 @@ public class HelenBot extends PircBot implements BotFramework{
             } catch (NickAlreadyInUseException e) {
                 this.identify(pass.get().getValue());
             }
+            this.sendRawLine("/MODE Secretary_Helen +B");
             Thread.sleep(1000L);
             this.identify(pass.get().getValue());
             Thread.sleep(2000L);
