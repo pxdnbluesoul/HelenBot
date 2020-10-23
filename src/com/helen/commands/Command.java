@@ -494,7 +494,16 @@ public class Command {
     public void addBan(CommandData data) {
         if(Configs.getFastConfigs("staffchannels").contains(data.getChannel())){
             CommandResponse response = Bans.prepareBan(data);
-            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + response.getMessage() + (response.isSuccess() ?  " Respond with .confirm to enact this ban, or .cancel to cancel the preparation." : ""));
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + response.getMessage() + (response.isSuccess() ?  " Respond with .confirmAdd to enact this ban, or .cancelAdd to cancel the preparation." : ""));
+        }else{
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
+        }
+    }
+    @IRCCommand(command = ".deleteBan", startOfLine = true, securityLevel = 4)
+    public void deleteBan(CommandData data) {
+        if(Configs.getFastConfigs("staffchannels").contains(data.getChannel())){
+            String response = Bans.beginDeleteBan(data);
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + response);
         }else{
             helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
         }
@@ -508,8 +517,8 @@ public class Command {
             helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
         }
     }
-    @IRCCommand(command = ".confirm", startOfLine = true, securityLevel = 1)
-    public void confirmBan(CommandData data) {
+    @IRCCommand(command = ".confirmAdd", startOfLine = true, securityLevel = 1)
+    public void confirmAddBan(CommandData data) {
         if(Configs.getFastConfigs("staffchannels").contains(data.getChannel())){
             String response = Bans.enactConfirmedBan(data.getSender());
             helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + response);
@@ -518,10 +527,30 @@ public class Command {
         }
     }
 
-    @IRCCommand(command = ".cancel", startOfLine = true, securityLevel = 1)
-    public void cancelBan(CommandData data) {
+    @IRCCommand(command = ".confirmDelete", startOfLine = true, securityLevel = 1)
+    public void confirmDeleteBan(CommandData data) {
+        if(Configs.getFastConfigs("staffchannels").contains(data.getChannel())){
+            String response = Bans.enactDeleteBan(data.getSender());
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + response);
+        }else{
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
+        }
+    }
+
+    @IRCCommand(command = ".cancelAdd", startOfLine = true, securityLevel = 1)
+    public void cancelAddBan(CommandData data) {
         if(Configs.getFastConfigs("staffchannels").contains(data.getChannel())){
             String response = Bans.cancelBan(data.getSender());
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + response);
+        }else{
+            helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");
+        }
+    }
+
+    @IRCCommand(command = ".cancelDelete", startOfLine = true, securityLevel = 1)
+    public void cancelDeleteBan(CommandData data) {
+        if(Configs.getFastConfigs("staffchannels").contains(data.getChannel())){
+            String response = Bans.cancelDeleteBan(data.getSender());
             helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": " + response);
         }else{
             helen.sendOutgoingMessage(data.getResponseTarget(), data.getSender() + ": That command is not enabled here.");

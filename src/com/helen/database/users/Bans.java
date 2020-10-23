@@ -22,7 +22,8 @@ public class Bans {
 
     private static final Logger logger = Logger.getLogger(Bans.class);
     private static ConcurrentHashMap<String, HashSet<BanInfo>> bans = new ConcurrentHashMap<>();
-    private static Map<String, BanPrep> confirmations = new ConcurrentHashMap<>();
+    private static Map<String, BanPrep> additionConfirmations = new ConcurrentHashMap<>();
+    private static Map<String, Integer> deletionConfirmations = new ConcurrentHashMap<>();
     public static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static void updateBans() throws IOException {
@@ -136,8 +137,29 @@ public class Bans {
         return j == p.length();
     }
 
+    public static String enactDeleteBan(String username){
+        Integer id = deletionConfirmations.remove(username);
+        if(id == null){
+            return "You have no pending ban confirmations.";
+        }else {
+            try (CloseableStatement deleteStatement = Connector.getStatement(Queries.getQuery("deleteBan"), id)) {
+                if (deleteStatement != null) {
+                    if (deleteStatement.executeDelete()) {
+                        return "Deleted all ban usernames, hostmasks, and entries for banid: " + id;
+                    }
+                } else {
+                    return "Something went wrong trying to construct the delete query.  Magnus, a word?";
+                }
+            } catch (Exception e) {
+                logger.error(e);
+                return "Something went wrong attempting to delete the ban.  Magnus, a word?";
+            }
+            return "I believe something went wrong, but I'm not sure. Magnus?";
+        }
+    }
+
     public static String enactConfirmedBan(String username) {
-        BanPrep prep = confirmations.remove(username);
+        BanPrep prep = additionConfirmations.remove(username);
         if(prep == null){
             return "You have no pending ban confirmations.";
         }else {
@@ -216,6 +238,40 @@ public class Bans {
 
     }
 
+    public static void main(String[] args) {
+        CommandData data = CommandData.getTestData(".confirmDelete");
+        System.out.println(enactDeleteBan(data.getSender()));
+    }
+
+    public static String beginDeleteBan(CommandData data){
+        int id;
+        try {
+             id = Integer.parseInt(data.getMessageWithoutCommand().trim());
+        }catch(NumberFormatException e){
+            return "I'm pretty sure that \"" + data.getMessageWithoutCommand().trim() + "\" is not a number.";
+        }
+        try(CloseableStatement stmt = Connector.getStatement(Queries.getQuery("findPossibleBans"),id)){
+            try(ResultSet rs = stmt != null ? stmt.getResultSet() : null) {
+                if (rs != null && rs.next()) {
+                    int count = rs.getInt("count");
+                    if (count == 0) {
+                        return "I didn't find any bans for BanId: " + id;
+                    }else{
+                        deletionConfirmations.put(data.getSender(),id);
+                        return "You are going to attempt to delete ban " + id + ". Please respond with .confirmDelete to enact this command.";
+                    }
+
+                }else{
+                    logger.error("Something went very wrong trying to delete banid " + id);
+                    return "I'm sorry something has gone quite wrong.  Magnus, a word?";
+                }
+            }
+        }catch(Exception e){
+            logger.error(e);
+            return "Something has gone quite wrong.  Magnus, a word?";
+        }
+    }
+
     public static String updateBan(CommandData data){
         try {
             BanPrep prep = new BanPrep(data);
@@ -279,7 +335,7 @@ public class Bans {
                 return new CommandResponse(false,"You didn't specify a reason for this ban.");
             }
             if (!prep.getResponse().isEmpty()) {
-                confirmations.put(data.getSender(), prep);
+                additionConfirmations.put(data.getSender(), prep);
                 return new CommandResponse(true,prep.getResponse());
             } else {
                 return new CommandResponse(false, Command.ERROR);
@@ -291,7 +347,12 @@ public class Bans {
     }
 
     public static String cancelBan(String username) {
-        confirmations.remove(username);
+        additionConfirmations.remove(username);
         return "I have successfully removed your pending ban entry, " + username;
+    }
+
+    public static String cancelDeleteBan(String username) {
+        deletionConfirmations.remove(username);
+        return "I have successfully removed your pending ban deletion, " + username;
     }
 }

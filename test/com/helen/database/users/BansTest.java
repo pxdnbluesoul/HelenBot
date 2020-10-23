@@ -2,6 +2,7 @@ package com.helen.database.users;
 
 
 import com.helen.commands.CommandData;
+import com.helen.commands.CommandResponse;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -58,5 +59,41 @@ public class BansTest {
         BanPrep prep = new BanPrep(data);
 
         assertTrue(prep != null && prep.getEndTime().compareTo(now.plusMonths(1)) > 0);
+    }
+
+    @Test
+    public void cantDeleteNonInteger(){
+        CommandData data = CommandData.getTestData(".deleteban john");
+        String response = Bans.beginDeleteBan(data);
+        System.out.println(response);
+        assertTrue(response.contains("not a number"));
+    }
+
+    @Test
+    public void cantDeleteNonExistantBan(){
+        CommandData data = CommandData.getTestData(".deleteban -1");
+        String response = Bans.beginDeleteBan(data);
+        System.out.println(response);
+        assertTrue(response.contains("I didn't find any bans for BanId"));
+    }
+
+    @Test
+    public void canGetBanDeletion(){
+        CommandData data = CommandData.getTestData(".deleteban 1");
+        String response = Bans.beginDeleteBan(data);
+        System.out.println(response);
+        assertTrue(response.contains("delete ban 1"));
+    }
+
+    @Test
+    public void canDeleteBan(){
+        CommandData data = CommandData.getTestData(".deleteBan 9999");
+        CommandData deletionData = CommandData.getTestData(".confirmDelete");
+        String response = Bans.beginDeleteBan(data);
+        System.out.println(response);
+        assertTrue(response.contains("delete ban 9999"));
+        String responseFromDelete = Bans.enactDeleteBan(deletionData.getSender());
+        System.out.println(responseFromDelete);
+        assertTrue(responseFromDelete.contains("Deleted all ban usernames, hostmasks, and entries for banid: 9999"));
     }
 }
