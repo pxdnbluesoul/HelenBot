@@ -258,7 +258,7 @@ public class Bans {
                         return "I didn't find any bans for BanId: " + id;
                     }else{
                         deletionConfirmations.put(data.getSender(),id);
-                        return "You are going to attempt to delete ban " + id + ". Please respond with .confirmDelete to enact this command.";
+                        return "You are going to attempt to delete ban " + id + ". Please respond with .confirmDelete to enact this command, or .cancelDelete to cancel this deletion.";
                     }
 
                 }else{
