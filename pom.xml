@@ -4,6 +4,10 @@
 	<groupId>helenbot</groupId>
 	<artifactId>helenbot</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<pastebin4j.version>1.1.0</pastebin4j.version>
+	</properties>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<resources>
@@ -51,11 +55,6 @@
 		</plugins>
 	</build>
 	<dependencies>
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.3.1</version>
-		</dependency>
 		<!-- https://mvnrepository.com/artifact/pircbot/pircbot -->
 		<dependency>
 			<groupId>pircbot</groupId>
